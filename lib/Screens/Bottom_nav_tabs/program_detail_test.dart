@@ -636,24 +636,6 @@ class Testimonial {
   });
 }
 
-Widget _buildTestimonial(
-    {required String customerName, required String quote}) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        'Customer Testimonial',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      SizedBox(height: 8.0),
-      Text(
-        '"$quote" - $customerName',
-        style: TextStyle(fontSize: 14.0),
-      ),
-      SizedBox(height: 16.0),
-    ],
-  );
-}
 
 Widget _buildFAQ({required String question, required String answer}) {
   return Padding(
