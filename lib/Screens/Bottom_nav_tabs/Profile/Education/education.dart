@@ -275,33 +275,75 @@ class EduCard extends StatelessWidget {
 
   deleteDialog(int eduId) {
     return Get.defaultDialog(
-      title: 'Delete Education',
+      title: 'Delete Education Details',
       titleStyle: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
         color: Colors.black87,
       ),
-      middleText: 'Are you sure you want to delete this education detail?',
-      middleTextStyle: TextStyle(
-        fontSize: 14,
-        color: Colors.grey[600],
+      contentPadding: EdgeInsets.all(24),
+      titlePadding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+      content: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red[50],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.delete_outline_rounded,
+              color: Colors.red,
+              size: 32,
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Are you sure you want to delete this education detail? This action cannot be undone.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey[700],
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
       radius: 16,
       confirm: ElevatedButton(
         onPressed: () => ProfileUtils.deleteEducation(eduId: eduId),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          'Delete',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      cancel: TextButton(
+        onPressed: () => Get.back(),
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        child: Text('Delete'),
-      ),
-      cancel: TextButton(
-        onPressed: () => Get.back(),
         child: Text(
           'Cancel',
-          style: TextStyle(color: Colors.grey[600]),
+          style: TextStyle(
+            color: Colors.grey[700],
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );

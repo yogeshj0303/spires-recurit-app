@@ -199,13 +199,14 @@ class CvCard extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.upload, size: 20),
+                Icon(Icons.upload, size: 20, color: Colors.white),
                 SizedBox(width: 8),
                 Text(
                   'Upload CV',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
               ],

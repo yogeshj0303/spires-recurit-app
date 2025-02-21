@@ -4,6 +4,7 @@ import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/map_jobs.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Profile/profile.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Jobs/jobs.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Internship/internship.dart';
+import 'package:spires_app/Screens/membership_drive_screen.dart';
 
 import '../../Constants/exports.dart';
 
@@ -18,32 +19,33 @@ class _MainScreenState extends State<MainScreen> {
   final PageStorageBucket bucket = PageStorageBucket();
   final MyController controller = Get.put(MyController());
 
-  static const List<NavigationDestination> _navigationDestinations = [
-    NavigationDestination(
-      icon: Icon(Icons.dashboard, color: Colors.black38, size: 24),
-      selectedIcon: Icon(Icons.dashboard, color: primaryColor, size: 26),
-      label: 'Dashboard',
+  static final List<BottomNavigationBarItem> _navigationItems = [
+    const BottomNavigationBarItem(
+      icon: Icon(CupertinoIcons.house_fill),
+      label: 'Home',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.school, color: Colors.black38, size: 24),
-      selectedIcon: Icon(Icons.school, color: primaryColor, size: 26),
+    const BottomNavigationBarItem(
+      icon: Icon(Icons.school),
       label: 'Programs',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.work_history, color: Colors.black38, size: 24),
-      selectedIcon: Icon(Icons.work_history, color: primaryColor, size: 26),
+    const BottomNavigationBarItem(
+      icon: Icon(Icons.card_membership),
+      label: 'Membership',
+    ),
+    const BottomNavigationBarItem(
+      icon: Icon(Icons.location_on),
       label: 'Nearby',
     ),
-    NavigationDestination(
-      icon: Icon(Icons.account_circle_outlined, color: Colors.black38, size: 24),
-      selectedIcon: Icon(Icons.account_circle_outlined, color: primaryColor, size: 26),
-      label: 'Account',
+    const BottomNavigationBarItem(
+      icon: Icon(Icons.account_circle_outlined),
+      label: 'Profile',
     ),
   ];
 
   static final List<Widget> _screens = [
     const Home(),
     const ProgramsScreen(fromBottomNav: true),
+    const MembershipDriveScreen(),
     NearMapJobs(),
     const ProfileScreen(),
   ];
@@ -63,42 +65,42 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: PageStorage(
-        bucket: bucket,
-        child: Obx(
-          () => IndexedStack(
-            index: controller.selectedIndex.value,
-            children: _screens,
+    return WillPopScope(
+      onWillPop: () async {
+        if (controller.selectedIndex.value != 0) {
+          controller.selectedIndex.value = 0;
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: PageStorage(
+          bucket: bucket,
+          child: Obx(
+            () => IndexedStack(
+              index: controller.selectedIndex.value,
+              children: _screens,
+            ),
           ),
         ),
+        bottomNavigationBar: _buildBottomNavigationBar(),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
   Widget _buildBottomNavigationBar() {
     return Obx(
-      () => NavigationBarTheme(
-        data: NavigationBarThemeData(
-          labelTextStyle: MaterialStateProperty.all(
-            xsmallLightText.copyWith(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        child: NavigationBar(
-          height: 60,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          elevation: 2,
-          indicatorColor: primaryColor.withOpacity(0.05),
-          backgroundColor: whiteColor,
-          selectedIndex: controller.selectedIndex.value,
-          onDestinationSelected: (index) => controller.selectedIndex.value = index,
-          destinations: _navigationDestinations,
-        ),
+      () => BottomNavigationBar(
+        backgroundColor: Colors.white,
+        items: _navigationItems,
+        currentIndex: controller.selectedIndex.value,
+        onTap: (index) => controller.selectedIndex.value = index,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: Colors.black54,
+        type: BottomNavigationBarType.fixed,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
       ),
     );
   }

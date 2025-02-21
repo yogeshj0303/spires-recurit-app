@@ -95,6 +95,16 @@ class MyController extends GetxController {
   RxBool isCompLoading = false.obs;
   RxList<CompanyModel> allCompanies = <CompanyModel>[].obs;
 
+  final appliedJobs = <JobsModel>[].obs;
+  final completedJobs = <JobsModel>[].obs;
+  final inProgressJobs = <JobsModel>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchJobStatistics();
+  }
+
   Future<void> fetchCompanies() async {
     const url = '${apiUrl}company-list';
     isCompLoading.value = true;
@@ -113,6 +123,20 @@ class MyController extends GetxController {
       }
     } else {
       isCompLoading.value = false;
+    }
+  }
+
+  Future<void> fetchJobStatistics() async {
+    try {
+      // Make API call to get job statistics
+      // Update the lists accordingly
+      // Example:
+      // final response = await ApiService.getJobStatistics();
+      // appliedJobs.value = response.applied;
+      // completedJobs.value = response.completed;
+      // inProgressJobs.value = response.inProgress;
+    } catch (e) {
+      print('Error fetching job statistics: $e');
     }
   }
 }

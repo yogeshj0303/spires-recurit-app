@@ -5,20 +5,44 @@ import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Model/nearby_job_model.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/google_map_jobs.dart';
 
-class NearMapJobs extends StatelessWidget {
-  NearMapJobs({super.key});
+class NearMapJobs extends StatefulWidget {
+  const NearMapJobs({super.key});
 
+  @override
+  State<NearMapJobs> createState() => _NearMapJobsState();
+}
+
+class _NearMapJobsState extends State<NearMapJobs> {
   final c = Get.put(NearbyJobController());
-
   final control = Get.put(MyController());
 
-  double lat = LocationServices.latitude;
+  bool isLoading = true;
 
-  double long = LocationServices.longitude;
+  @override
+  void initState() {
+    super.initState();
+    _initializeLocation();
+  }
+
+  Future<void> _initializeLocation() async {
+    setState(() => isLoading = true);
+    bool success = await LocationServices.getLocation();
+    if (mounted) {
+      setState(() => isLoading = false);
+      if (!success) {
+        Get.snackbar(
+          'Location Error',
+          'Unable to get your location. Please check your location settings.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    print("Current Location - Lat: ${LocationServices.latitude}, Long: ${LocationServices.longitude}");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -31,75 +55,68 @@ class NearMapJobs extends StatelessWidget {
           fontFamily: 'Poppins',
           color: Colors.black,
         ),),
-        // leading: IconButton(
-        //   onPressed: () => control.selectedIndex.value = 0,
-        //   icon: const Icon(Icons.arrow_back),
-        // ),
         leading: IconButton(
           onPressed: () => Get.back(),
           icon: const Icon(Icons.arrow_back, color: Colors.black,size: 20,),
         ),
       ),
-      body: Obx(
-        () => control.isLocationLoading.value
-            ? loading
-            : Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: FutureBuilder<NearbyJobModel>(
-                  future: JobsUtils.nearbyJobs(lat, long, c.radius.value.toInt()),
-                  builder: (context, snapshot) => snapshot.hasData
-                      ? snapshot.data!.data!.isEmpty
-                          ? emptyCard(size)
-                          : CustomScrollView(
-                              slivers: [
-                                SliverToBoxAdapter(
-                                  child: locationCard(size),
-                                ),
-                                SliverList(
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, index) => nearbyJobCard(
-                                        snapshot, index, size, false),
-                                    childCount: snapshot.data!.data!.length,
+      body: isLoading
+          ? loading
+          : Obx(
+              () => control.isLocationLoading.value 
+                  ? loading
+                  : !LocationServices.isInitialized()
+                      ? enableLocation(size)
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: FutureBuilder<NearbyJobModel>(
+                                  future: JobsUtils.nearbyJobs(
+                                    LocationServices.latitude,
+                                    LocationServices.longitude, 
+                                    c.radius.toInt()
                                   ),
-                                ),
-                              ],
-                            )
-                      : loading,
-                ),
-              ),
-      ),
-    );
-  }
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasError) {
+                                      return Center(
+                                        child: Text(
+                                          'Error loading jobs: ${snapshot.error}',
+                                          style: normalLightText,
+                                        ),
+                                      );
+                                    }
+                                    
+                                    if (!snapshot.hasData) {
+                                      return loading;
+                                    }
 
-  Column buildDistanceSlider() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(
-              left: defaultPadding * 2, right: defaultRadius * 2),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Radius (in km.)',
-                style: normalText,
-              ),
-              // Text('${rad.value.toString()} km', style: mediumBoldText),
-              Slider(
-                  min: 1,
-                  max: 6000,
-                  label: 'Radius(in km.)',
-                  thumbColor: primaryColor,
-                  activeColor: primaryColor,
-                  value: c.radius.value,
-                  onChanged: (double val) {
-                    c.radius.value = val;
-                    // rad.value = val.round();
-                  }),
-            ],
-          ),
-        ),
-      ],
+                                    if (snapshot.data!.data?.isEmpty ?? true) {
+                                      return emptyCard(size);
+                                    }
+
+                                    return CustomScrollView(
+                                      slivers: [
+                                        SliverToBoxAdapter(
+                                          child: locationCard(size),
+                                        ),
+                                        SliverList(
+                                          delegate: SliverChildBuilderDelegate(
+                                            (context, index) => nearbyJobCard(
+                                                snapshot, index, size, false),
+                                            childCount: snapshot.data!.data!.length,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+      ),
     );
   }
 
@@ -129,7 +146,10 @@ class NearMapJobs extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           myButton(
-            onPressed: () => LocationServices.getLocation(),
+            onPressed: () async {
+              await LocationServices.getLocation();
+              if (mounted) setState(() {});
+            },
             label: 'Enable Location',
             color: primaryColor,
             style: smallWhiteText,

@@ -26,14 +26,6 @@ class _MembershipDriveScreenState extends State<MembershipDriveScreen> {
         preferredSize: const Size.fromHeight(65),
         child: Container(
           child: AppBar(
-            leading: IconButton(
-              onPressed: () => Get.back(),
-              icon: const Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 18,
-              ),
-            ),
             flexibleSpace: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

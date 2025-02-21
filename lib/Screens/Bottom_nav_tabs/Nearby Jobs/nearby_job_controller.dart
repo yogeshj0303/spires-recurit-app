@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:http/http.dart' as http;
 import 'package:spires_app/Model/job_model.dart';
+import 'package:spires_app/Services/api_service.dart';
 
 class CityModel {
   final String cityName;
@@ -73,7 +74,8 @@ class NearbyJobController extends GetxController {
   RxList<CityModel> filteredCities = <CityModel>[].obs;
   RxList<JobsModel> jobs = <JobsModel>[].obs;
 
-  RxDouble radius = 350.0.obs;
+  // Set fixed radius of 50km
+  final double radius = 50.0;
 
   @override
   void onInit() {
@@ -85,23 +87,28 @@ class NearbyJobController extends GetxController {
   Future<void> getCities() async {
     isDataLoading.value = true;
     const url = '${apiUrl}showLocation';
-    final response = await http.post(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['error'] == false) {
-        List<CityModel> allCity = (data['data'] as List)
-            .map((e) => CityModel(cityName: e['location']))
-            .toList();
-        cities.value = allCity;
-        isDataLoading.value = false;
+    
+    try {
+      final response = await ApiService.makeRequest(url);
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['error'] == false) {
+          List<CityModel> allCity = (data['data'] as List)
+              .map((e) => CityModel(cityName: e['location']))
+              .toList();
+          cities.value = allCity;
+        } else {
+          Fluttertoast.showToast(msg: 'Something went wrong');
+        }
       } else {
-        isDataLoading.value = false;
-        Fluttertoast.showToast(msg: 'something went wrong');
+        Fluttertoast.showToast(
+            msg: '${response.statusCode} ${response.reasonPhrase}');
       }
-    } else {
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Error: $e');
+    } finally {
       isDataLoading.value = false;
-      Fluttertoast.showToast(
-          msg: '${response.statusCode} ${response.reasonPhrase}');
     }
   }
 
@@ -114,73 +121,77 @@ class NearbyJobController extends GetxController {
   }
 
   Future<JobModel> showNearbyJobs(String cityName) async {
-    final url =
-        '${apiUrl}getMatchingJobs?location=$cityName&user_id=${MyController.id}';
-    final response = await http.post(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['error'] == false) {
-        return JobModel.fromJson(data);
+    final url = '${apiUrl}getMatchingJobs?location=$cityName&user_id=${MyController.id}';
+      try {
+      final response = await ApiService.makeRequest(url);
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['error'] == false) {
+          return JobModel.fromJson(data);
+        } else {
+          throw Exception('Something went wrong');
+        }
       } else {
-        Fluttertoast.showToast(msg: 'Something went wrong');
+        throw Exception('Internal server error ${response.statusCode}');
       }
-    } else {
-      Fluttertoast.showToast(
-          msg:
-              'Internal server error ${response.statusCode} ${response.reasonPhrase}');
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Error: $e');
+      throw Exception('Unable to load data');
     }
-    throw Exception('Unable load data');
   }
 
   Future<void> getJobs() async {
-    final url =
-        '${apiUrl}job?user_id=${MyController.id}&latitude=0.0&longitude=0.0&radius=0';
-    final response = await http.post(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['error'] == false) {
-        List<JobsModel> allJobs = (data['data'] as List)
-            .map((e) => JobsModel(
-                lat: e['admin']['latitude'],
-                long: e['admin']['longitude'],
-                jobId: e['id'],
-                jobTitle: e['job_title'],
-                jobType: e['job_type'],
-                postDate: e['post_date'],
-                experience: e['experience'],
-                aboutJob: e['about_job'],
-                location: e['location'],
-                salary: e['salary'],
-                skill: e['skills'],
-                openings: e['openings'],
-                probSalary: e['probation_salary'],
-                probDuration: e['probation_duration'],
-                lastDate: e['last_date'],
-                isApplied: e['is_applied'],
-                isSaved: e['is_saved'],
-                companyName: e['admin']['username'] ?? 'Aditya Birla',
-                cEmail: e['admin']['email'],
-                website: e['admin']['website'],
-                logo: e['admin']['logo'],
-                industry: e['admin']['industry'],
-                cDescription: e['admin']['description'],
-                jobPosted: e['job_posted'] ?? '55',
-                hired: e['candidate_hired'] ?? '25',
-                hiringSince: e['date'] ?? '15 Aug 23'))
-            .toList();
-        jobs.value = allJobs;
+    isNLoading.value = true;
+    final url = '${apiUrl}job?user_id=${MyController.id}&latitude=${LocationServices.latitude}&longitude=${LocationServices.longitude}&radius=$radius';
+    
+    try {
+      final response = await ApiService.makeRequest(url);
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['error'] == false) {
+          List<JobsModel> allJobs = (data['data'] as List)
+              .map((e) => JobsModel(
+                  lat: e['admin']?['latitude'] ?? '0.0',
+                  long: e['admin']?['longitude'] ?? '0.0',
+                  jobId: e['id'] ?? 0,
+                  jobTitle: e['job_title'] ?? '',
+                  jobType: e['job_type'] ?? '',
+                  postDate: e['post_date'] ?? '',
+                  experience: e['experience'] ?? '',
+                  aboutJob: e['about_job'] ?? '',
+                  location: e['location'] ?? '',
+                  salary: e['salary'] ?? '',
+                  skill: e['skills'] ?? '',
+                  openings: e['openings'] ?? '',
+                  probSalary: e['probation_salary'] ?? '',
+                  probDuration: e['probation_duration'] ?? '',
+                  lastDate: e['last_date'] ?? '',
+                  isApplied: e['is_applied'] ?? false,
+                  isSaved: e['is_saved'] ?? false,
+                  companyName: e['admin']?['username'] ?? 'Unknown Company',
+                  cEmail: e['admin']?['email'] ?? '',
+                  website: e['admin']?['website'] ?? '',
+                  logo: e['admin']?['logo'] ?? '',
+                  industry: e['admin']?['industry'] ?? '',
+                  cDescription: e['admin']?['description'] ?? '',
+                  jobPosted: e['job_posted'] ?? '0',
+                  hired: e['candidate_hired'] ?? '0',
+                  hiringSince: e['date'] ?? ''))
+              .toList();
+          jobs.value = allJobs;
+        } else {
+          Fluttertoast.showToast(msg: data['message'] ?? 'Something went wrong');
+        }
       } else {
-        Fluttertoast.showToast(msg: 'something went wrong');
+        Fluttertoast.showToast(
+            msg: 'Server error: ${response.statusCode}');
       }
-    } else {
-      Fluttertoast.showToast(
-          msg: '${response.statusCode} ${response.reasonPhrase}');
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Error fetching jobs: $e');
+    } finally {
+      isNLoading.value = false;
     }
-  }
-
-  void updateRadius(double value) {
-    radius.value = value;
-    // You can add logic here to refresh jobs based on new radius
-    getJobs();
   }
 }

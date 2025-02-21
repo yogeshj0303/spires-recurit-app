@@ -3,12 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
-import 'package:spires_app/Screens/membership_drive_screen.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/share_utils.dart';
 import '../../Resumes/cv_two.dart';
 import 'help_centre.dart';
-import 'programs_screen.dart';
 
 class MyDrawer extends StatefulWidget {
   final Size size;
@@ -322,19 +320,6 @@ class _MyDrawerState extends State<MyDrawer> {
                           color: Colors.grey[600],
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.5,
-                          fontFamily: fontFamily,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      onTap: () => Get.to(() => const MembershipDriveScreen()),
-                      leading: const Icon(Icons.card_membership, color: primaryColor, size: 20),
-                      title: Text(
-                        'Membership',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
                           fontFamily: fontFamily,
                         ),
                       ),

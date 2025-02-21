@@ -13,7 +13,6 @@ class NearbyJobsScreen extends StatelessWidget {
           children: [
             _buildHeader(),
             _buildSearchBar(),
-            _buildRadiusSlider(),
             Expanded(child: _buildJobsList()),
           ],
         ),
@@ -75,30 +74,7 @@ class NearbyJobsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRadiusSlider() {
-    return Obx(() => Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Search Radius: ${controller.radius.value.toInt()} km',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Slider(
-                value: controller.radius.value,
-                min: 0,
-                max: 1000,
-                activeColor: Theme.of(Get.context!).primaryColor,
-                onChanged: (value) => controller.radius.value = value,
-              ),
-            ],
-          ),
-        ));
-  }
+
 
   Widget _buildJobsList() {
     return Obx(() {

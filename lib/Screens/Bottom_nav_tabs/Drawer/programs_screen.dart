@@ -221,14 +221,7 @@ class ProgramCard extends StatefulWidget {
 }
 
 class _ProgramCardState extends State<ProgramCard> {
-  bool isLiked = false;
   bool isSaved = false;
-
-  void toggleLike() {
-    setState(() {
-      isLiked = !isLiked;
-    });
-  }
 
   void toggleSave() {
     setState(() {
@@ -240,16 +233,6 @@ class _ProgramCardState extends State<ProgramCard> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => ProgramDetailScreen(
-        //       imageUrl: widget.imageUrl,
-        //       title: widget.title,
-        //       description: widget.description,
-        //     ),
-        //   ),
-        // );
         Navigator.push(
             context,
             MaterialPageRoute(
@@ -322,31 +305,10 @@ class _ProgramCardState extends State<ProgramCard> {
                 indent: 16,
                 endIndent: 16,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Padding(padding: EdgeInsets.symmetric(horizontal: defaultPadding),
+              child:      Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
-                    onPressed: toggleLike,
-                    child: Row(
-                      children: [
-                        Icon(
-                          isLiked
-                              ? Icons.thumb_up
-                              : Icons.thumb_up_alt_outlined,
-                          color: isLiked ? primaryColor : Colors.black,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          "Like",
-                          style: TextStyle(
-                            color: isLiked ? primaryColor : Colors.black,
-                            fontSize: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   TextButton(
                     onPressed: () {
                       widget.shareOnWhatsApp(
@@ -354,7 +316,6 @@ class _ProgramCardState extends State<ProgramCard> {
                     },
                     child: Row(
                       children: [
-                        // Image.asset('assets/icons/whatsapp.png',width: 18 , height: 18),
                         Icon(Icons.share, color: Colors.black, size: 16),
                         SizedBox(width: 5),
                         Text("Share",
@@ -385,6 +346,7 @@ class _ProgramCardState extends State<ProgramCard> {
                   ),
                 ],
               ),
+              )
             ],
           ),
         ),

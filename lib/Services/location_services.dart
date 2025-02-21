@@ -11,39 +11,69 @@ class LocationServices {
 
   static late StreamSubscription<Position> streamSubscription;
 
+  static bool _initialized = false;
+
   static Future<void> getAddressFromLatLang(Position position) async {
-    List<Placemark> placemark =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-    latitude = position.latitude;
-    longitude = position.longitude;
-    Placemark place = placemark[0];
-    address =
-        '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}';
-    c.location.value = address!;
-    c.city.value = place.locality!;
-    c.isLocationLoading.value = false;
+    try {
+      List<Placemark> placemark =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+      latitude = position.latitude;
+      longitude = position.longitude;
+      Placemark place = placemark[0];
+      address =
+          '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}';
+      c.location.value = address!;
+      c.city.value = place.locality!;
+      _initialized = true;
+      c.isLocationLoading.value = false;
+    } catch (e) {
+      print('Error getting address: $e');
+      c.isLocationLoading.value = false;
+    }
   }
 
-  static Future<void> getLocation() async {
-    c.isLocationLoading.value = true;
-    LocationPermission permission;
+  static Future<bool> getLocation() async {
+    try {
+      c.isLocationLoading.value = true;
+      LocationPermission permission;
 
-    permission = await Geolocator.checkPermission();
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        c.isLocationLoading.value = false;
+        return false;
+      }
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
+      permission = await Geolocator.checkPermission();
 
-    if (permission == LocationPermission.deniedForever) {
-      c.isLocationLoading.value = false;
-      _showPermissionDeniedDialog();
-    } else if (permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always) {
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          c.isLocationLoading.value = false;
+          return false;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        c.isLocationLoading.value = false;
+        _showPermissionDeniedDialog();
+        return false;
+      }
+
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-      getAddressFromLatLang(position);
+      await getAddressFromLatLang(position);
+      return true;
+    } catch (e) {
+      print('Error getting location: $e');
+      c.isLocationLoading.value = false;
+      return false;
     }
+  }
+
+  static bool isInitialized() {
+    return _initialized;
   }
 }
 

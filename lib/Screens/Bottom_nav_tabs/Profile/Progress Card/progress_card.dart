@@ -138,34 +138,34 @@ class ProgressCard extends StatelessWidget {
                 style: smallWhiteText,
               ),
             )
-                : InkWell(
-              onTap: () {
-                _showPhoneNumberDialog(Get.context!);
-              },
-              child: Obx(
-                    () => c.isotpLoading.value
-                    ? const SizedBox(
-                  height: 20,
-                  width: 25,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
+                : GestureDetector(
+                    onTap: () {
+                      _showPhoneNumberDialog(Get.context!);
+                    },
+                    child: Obx(
+                      () => c.isotpLoading.value
+                          ? const SizedBox(
+                              height: 20,
+                              width: 25,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Container(
+                              height: 20,
+                              width: size.width * 0.2,
+                              decoration: BoxDecoration(
+                                color: primaryColor.withOpacity(0.2),
+                                borderRadius: borderRadius,
+                              ),
+                              child: Text(
+                                'Verify',
+                                textAlign: TextAlign.center,
+                                style: smallColorText,
+                              ),
+                            ),
+                    ),
                   ),
-                )
-                    : Container(
-                  height: 20,
-                  width: size.width * 0.2,
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.2),
-                    borderRadius: borderRadius,
-                  ),
-                  child: Text(
-                    'Verify',
-                    textAlign: TextAlign.center,
-                    style: smallColorText,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -179,33 +179,86 @@ class ProgressCard extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Enter Phone Number'),
-          content: TextField(
-            controller: phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(hintText: 'Enter phone number'),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            'Verify Phone Number',
+            style: TextStyle(
+              color: primaryColor,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Enter your phone number to receive verification code',
+                style: xsmallText,
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: 'Enter phone number',
+                  prefixIcon: Icon(Icons.phone_android, color: primaryColor),
+                  filled: true,
+                  fillColor: primaryColor.withOpacity(0.1),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: primaryColor),
+                  ),
+                ),
+              ),
+            ],
           ),
           actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                final phoneNumber = phoneController.text.trim();
-                if (phoneNumber.isNotEmpty) {
-                  MyController.userPhone = phoneNumber;
-                  Navigator.of(context).pop();
-                  await ProfileUtils.getOtp(MyController.userPhone);
-                } else {
-                  Fluttertoast.showToast(msg: 'Please enter a phone number');
-                }
-              },
-              child: const Text('Send OTP'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    minimumSize: Size(100, 40),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final phoneNumber = phoneController.text.trim();
+                    if (phoneNumber.isNotEmpty) {
+                      MyController.userPhone = phoneNumber;
+                      Navigator.of(context).pop();
+                      await ProfileUtils.getOtp(MyController.userPhone);
+                    } else {
+                      Fluttertoast.showToast(msg: 'Please enter a phone number');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    minimumSize: Size(100, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text(
+                    'Send OTP',
+                    style: TextStyle(color: whiteColor),
+                  ),
+                ),
+              ],
             ),
           ],
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         );
       },
     );
