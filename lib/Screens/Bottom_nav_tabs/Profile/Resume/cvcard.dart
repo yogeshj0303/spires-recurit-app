@@ -10,8 +10,8 @@ class CvCard extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return Container(
       width: size.width,
-      margin: const EdgeInsets.all(defaultPadding),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(defaultPadding, defaultPadding, defaultPadding, 0),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -29,7 +29,7 @@ class CvCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                 decoration: BoxDecoration(
                   color: primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
@@ -51,9 +51,8 @@ class CvCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           Divider(color: Colors.grey[200], thickness: 1),
-          const SizedBox(height: 16),
           Obx(
             () => c.isCVLoading.value
                 ? profileLoading()
@@ -63,59 +62,57 @@ class CvCard extends StatelessWidget {
                         ? snapshot.data!.message!.cv == null
                             ? emptyCV()
                             : Container(
-                                padding: EdgeInsets.all(16),
+                                padding: EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: Colors.grey[50],
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8),
                                   border: Border.all(color: Colors.grey[200]!),
                                 ),
                                 child: Row(
                                   children: [
                                     Container(
-                                      padding: EdgeInsets.all(12),
+                                      padding: EdgeInsets.all(10),
                                       decoration: BoxDecoration(
                                         color: primaryColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Image.asset(
                                         pdfIcon,
-                                        height: 32,
+                                        height: 24,
                                         color: primaryColor,
                                       ),
                                     ),
-                                    const SizedBox(width: 16),
+                                    const SizedBox(width: 12),
                                     Expanded(
                                       child: InkWell(
                                         onTap: () => Get.to(() => ViewCV(
-                                            pdfUrl:
-                                                '$imgPath/${snapshot.data!.message!.cv}')),
+                                            pdfUrl: '$imgPath/${snapshot.data!.message!.cv}')),
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               "${snapshot.data!.message!.cv}",
                                               style: TextStyle(
-                                                fontSize: 14,
+                                                fontSize: 13,
                                                 color: Colors.black87,
                                                 fontWeight: FontWeight.w500,
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                            SizedBox(height: 4),
+                                            SizedBox(height: 2),
                                             Row(
                                               children: [
                                                 Icon(
                                                   Icons.access_time,
-                                                  size: 14,
+                                                  size: 12,
                                                   color: Colors.grey[600],
                                                 ),
                                                 SizedBox(width: 4),
                                                 Text(
                                                   snapshot.data!.message!.cvUpdatedAt!,
                                                   style: TextStyle(
-                                                    fontSize: 12,
+                                                    fontSize: 11,
                                                     color: Colors.grey[600],
                                                   ),
                                                 ),
@@ -125,18 +122,14 @@ class CvCard extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    InkWell(
-                                      onTap: () => ProfileUtils.deleteCV(),
-                                      child: Container(
-                                        padding: EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
+                                    Padding(
+                                      padding: EdgeInsets.all(3),
+                                      child: InkWell(
+                                        onTap: () => ProfileUtils.deleteCV(),
                                         child: Icon(
                                           Icons.delete_outline,
                                           color: Colors.red,
-                                          size: 16,
+                                          size: 13,
                                         ),
                                       ),
                                     ),
@@ -153,11 +146,14 @@ class CvCard extends StatelessWidget {
 
   Widget emptyCV() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 24),
+      padding: EdgeInsets.symmetric(vertical: 14),
+      width: double.infinity,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
@@ -168,43 +164,44 @@ class CvCard extends StatelessWidget {
               color: primaryColor,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 10),
           Text(
             'Upload your Resume',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           Text(
             'Upload your CV and boost your profile by 15%',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
             ),
-            textAlign: TextAlign.center,
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
           ElevatedButton(
             onPressed: () => Get.to(() => const AddResume()),
             style: ElevatedButton.styleFrom(
               backgroundColor: primaryColor,
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.upload, size: 20, color: Colors.white),
+                Icon(Icons.upload, size: 18, color: Colors.white),
                 SizedBox(width: 8),
                 Text(
                   'Upload CV',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),

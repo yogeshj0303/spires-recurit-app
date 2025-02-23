@@ -28,6 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> with AutomaticKeepAliveCl
               Education(),
               Skills(),
               CvCard(),
+              const SizedBox(height: defaultPadding),
             ],
           ),
         ),

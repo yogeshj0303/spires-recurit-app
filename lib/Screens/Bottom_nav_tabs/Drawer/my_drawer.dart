@@ -2,11 +2,15 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/nearby_jobs_screen.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/share_utils.dart';
 import '../../Resumes/cv_two.dart';
 import 'help_centre.dart';
+import '../../../Data/programs_data.dart';
+import '../../../Utils/program_utils.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MyDrawer extends StatefulWidget {
   final Size size;
@@ -33,23 +37,6 @@ class _MyDrawerState extends State<MyDrawer> {
 
   final c = Get.put(MyController());
 
-  void navigateToSkillUp() {
-    Get.to(() => ProgramDetailTest(
-      imageUrl: 'assets/icons/1.png',
-      title: 'SkillUp 1.0',
-      description: 'Description:SkillUp 1.0 is your comprehensive training program...',
-      benefits: "• Gain valuable skills through interactive modules...",
-      faqs: const [
-        {
-          'question': 'Is SkillUp 1.0 free?',
-          'answer': 'Yes, SkillUp 1.0 is completely free to access for all Spires Recruit users.'
-        },
-        // ... other existing FAQs ...
-      ],
-      howItWorks: '1. Download the Spires Recruit app...',
-    ));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -59,7 +46,10 @@ class _MyDrawerState extends State<MyDrawer> {
           child: Column(
             children: [
               GestureDetector(
-                onTap: () => Get.to(() => const ProfileScreen()),
+                onTap: () {
+                  Get.back(); // Close drawer first
+                  c.selectedIndex.value = 4; // Use the existing controller instance
+                },
                 child: Container(
                   padding: const EdgeInsets.all(defaultPadding),
                   height: 100,
@@ -69,20 +59,25 @@ class _MyDrawerState extends State<MyDrawer> {
                           image: AssetImage(profileBanner), fit: BoxFit.cover),
                       color: bannerBgColor),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Obx(
                         () => Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             profilePic(),
                             if (c.isSubscribed.value ||
                                 MyController.subscribed == '1')
-                              myButton(
-                                onPressed: () => Get.to(() => ResumeScreen()),
-                                label: 'Build Instant CV',
-                                color: Colors.white12,
-                                style: smallWhiteText,
+                              Container(
+                                height: 24,
+                                margin: const EdgeInsets.only(top: 4),
+                                child: myButton(
+                                  onPressed: () => Get.to(() => ResumeScreen()),
+                                  label: 'Build Instant CV',
+                                  color: Colors.white12,
+                                  style: smallWhiteText,
+                                ),
                               ),
                           ],
                         ),
@@ -91,27 +86,35 @@ class _MyDrawerState extends State<MyDrawer> {
                       Expanded(
                         child: Obx(
                           () => Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  Text(
-                                    '${MyController.userFirstName} ${MyController.userLastName}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: whiteColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: fontFamily,
+                                  Expanded(
+                                    child: Text(
+                                      '${MyController.userFirstName} ${MyController.userLastName}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: whiteColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: fontFamily,
+                                      ),
                                     ),
                                   ),
                                   if (c.isSubscribed.value ||
                                       MyController.subscribed == '1')
-                                    const Icon(
-                                      Icons.workspace_premium,
-                                      color: whiteColor,
+                                    const Padding(
+                                      padding: EdgeInsets.only(left: 4),
+                                      child: Icon(
+                                        Icons.workspace_premium,
+                                        color: whiteColor,
+                                        size: 18,
+                                      ),
                                     ),
                                 ],
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 MyController.userEmail,
                                 style: TextStyle(
@@ -120,6 +123,7 @@ class _MyDrawerState extends State<MyDrawer> {
                                   fontFamily: fontFamily,
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 MyController.userPhone,
                                 style: TextStyle(
@@ -132,12 +136,6 @@ class _MyDrawerState extends State<MyDrawer> {
                           ),
                         ),
                       ),
-                      // IconButton(
-                      //   padding: const EdgeInsets.symmetric(vertical: 20),
-                      //   onPressed: () => logoutfn(),
-                      //   icon: const Icon(Icons.logout,
-                      //       size: 25, color: whiteColor),
-                      // ),
                     ],
                   ),
                 ),
@@ -145,48 +143,34 @@ class _MyDrawerState extends State<MyDrawer> {
               const SizedBox(
                 height: 10,
               ),
-              // const Divider(),
-              // SizedBox(
-              //   height: 75,
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              //     children: [
-              //       buildItem('Applications', Icons.widgets,
-              //           () => Get.to(() => const AppliedData())),
-              //       buildItem('Saved', Icons.beenhere,
-              //           () => Get.to(() => const SavedData())),
-              //       buildItem('Preference', Icons.tune,
-              //           () => Get.to(() => Preferences(),
-              //           ),
-              //        ),
-              //     ],
-              //   ),
-              // ),
-              // const Divider(),
               Expanded(
                 child: ListView(
                   children: [
-                    ListTile(
-                      onTap: () => Get.to(() => const ProfileScreen()),
-                      leading: const Icon(
-                        CupertinoIcons.person_fill,
-                        color: primaryColor,
-                        size: 20,
-                      ),
+                    // ListTile(
+                    //   dense: true,
+                    //   onTap: () {
+                    //     Get.back();
+                    //     c.selectedIndex.value = 4;
+                    //   },
+                    //   leading: const Icon(
+                    //     CupertinoIcons.person_fill,
+                    //     color: primaryColor,
+                    //     size: 20,
+                    //   ),
+                    //   title: Text(
+                    //     'My Profile',
+                    //     style: TextStyle(
+                    //       fontSize: 14,
+                    //       color: Colors.black87,
+                    //       fontWeight: FontWeight.w500,
+                    //       fontFamily: fontFamily,
+                    //     ),
+                    //   ),
+                    // ),
+                    // const Divider(height: 1),
+                    ExpansionTile(
+                      initiallyExpanded: true,
                       title: Text(
-                        'My Profile',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
-                        ),
-                      ),
-                    ),
-                    const Divider(height: 1),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                      child: Text(
                         'LEARNING & DEVELOPMENT',
                         style: TextStyle(
                           fontSize: 12,
@@ -196,124 +180,99 @@ class _MyDrawerState extends State<MyDrawer> {
                           fontFamily: fontFamily,
                         ),
                       ),
-                    ),
-          
-           ListTile(
-                      onTap: () => navigateToSkillUp(),
-                      leading: Image.asset(
-                        'assets/icons/skills.png',
-                        color: primaryColor,
-                        height: 20,
-                        width: 20,
-                      ),
-                      title: Text(
-                        'Skill Up 1.0',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
-                        ),
-                      ),
-                    ),
-                    ListTile(
-                      onTap: () => Get.to(() => ProgramDetailTest(
-                        imageUrl: 'assets/icons/3.png',
-                        title: 'Resume Workshop',
-                        description: 'Master the art of resume writing with our interactive Resume Workshop! Get expert guidance on building a compelling resume that stands out to hiring managers and lands you interviews.',
-                        benefits: '• Learn proven resume writing strategies.\n• Optimize your resume for Applicant Tracking Systems (ATS).\n• Tailor your resume for specific job applications.\n• Gain confidence in your resume writing skills.\n• Get feedback from career experts.',
-                        faqs: const [
-                          {
-                            'question': 'Is the Resume Workshop free?',
-                            'answer': 'Yes, the Spires Recruit Resume Workshop is completely free to attend!'
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: ProgramsData.programs.length,
+                          itemBuilder: (context, index) {
+                            final program = ProgramsData.programs[index];
+                            final iconMap = {
+                              'SkillUp 1.0': 'skills',
+                              'Resume Workshop': 'curriculum-vitae',
+                              'Interview Preparation': 'question',
+                              'Coding Clubs': 'coding',
+                              'Basic Computer': 'computer_icon',
+                              'Digital Marketing': 'digitalocean',
+                              'Graphic Designing': 'graphic-eq',
+                              'Website Development': 'coding-website',
+                            };
+                            
+                            return ListTile(
+                              dense: true,
+                              onTap: () => Get.to(() => ProgramDetailTest(
+                                imageUrl: program.imageUrl,
+                                title: program.title,
+                                description: program.description,
+                                benefits: program.benefits,
+                                faqs: program.faqs,
+                                howItWorks: program.howItWorks,
+                              )),
+                              leading: Image.asset(
+                                'assets/icons/${iconMap[program.title]}.png',
+                                color: primaryColor,
+                                height: 20,
+                                width: 20,
+                              ),
+                              title: Text(
+                                program.title,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: fontFamily,
+                                ),
+                              ),
+                            );
                           },
-                          // ... other existing FAQs ...
-                        ],
-                        howItWorks: '• Sign up for the free workshop through the Spires Recruit app / website.\n• Join our live, interactive workshop led by career development professionals.',
-                      )),
-                      leading: Image.asset(
-                        'assets/icons/curriculum-vitae.png',
-                        color: primaryColor,
-                        height: 20,
-                        width: 20,
-                      ),
-                      title: Text(
-                        'Resume Builder',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
                         ),
-                      ),
-                    ),
-                   
-                    ListTile(
-                      onTap: () => Get.to(() => ProgramDetailTest(
-                        imageUrl: 'assets/icons/4.png',
-                        title: 'Interview Preparation',
-                        description: 'Prepare for your next job interview with our Interview Preparation program!...',
-                        benefits: '• Learn how to answer common interview questions...',
-                        faqs: const [
-                          {
-                            'question': 'Is the Interview Preparation program free?',
-                            'answer': 'Yes, the Spires Recruit Interview Preparation program is completely free to attend!'
-                          },
-                          // ... other existing FAQs ...
-                        ],
-                        howItWorks: '• Sign up for the free program through the Spires Recruit app...',
-                      )),
-                      leading: Image.asset(
-                        'assets/icons/question.png',
-                        color: primaryColor,
-                        height: 20,
-                        width: 20,
-                      ),
-                      title: Text(
-                        'Interview Preparation',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() => const Jobs()),
+                          leading: Icon(Icons.work_outlined, color: primaryColor, size: 20),
+                          title: Text(
+                            'Jobs',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    ListTile(
-                      onTap: () => Get.to(() => ProgramDetailTest(
-                        imageUrl: 'assets/icons/jsdh.png',
-                        title: 'Coding Clubs',
-                        description: 'The Spires Recruit Coding Club is a community for developers...',
-                        benefits: '• Work on real-world projects...',
-                        faqs: const [
-                          {
-                            'question': 'Is there a cost to join the Spires Recruit Coding Club?',
-                            'answer': 'No, the Spires Recruit Coding Club is completely free to join and participate in.'
-                          },
-                          // ... other existing FAQs ...
-                        ],
-                        howItWorks: '• Sign up for the Spires Recruit Coding Club...',
-                      )),
-                      leading: Image.asset(
-                        'assets/icons/coding.png',
-                        color: primaryColor,
-                        height: 20,
-                        width: 20,
-                      ),
-                      title: Text(
-                        'Coding Clubs',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() => const Internship()),
+                          leading: Icon(Icons.workspace_premium, color: primaryColor, size: 20),
+                          title: Text(
+                            'Internships',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
-                      ),
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() =>  NearbyJobsScreen()),
+                          leading: Icon(Icons.location_on, color: primaryColor, size: 20),
+                          title: Text(
+                            'Nearby Jobs',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const Divider(height: 1),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                      child: Text(
+                    ExpansionTile(
+                      initiallyExpanded: true,
+                      title: Text(
                         'ACCOUNT SETTINGS',
                         style: TextStyle(
                           fontSize: 12,
@@ -323,24 +282,26 @@ class _MyDrawerState extends State<MyDrawer> {
                           fontFamily: fontFamily,
                         ),
                       ),
-                    ),
-                    ListTile(
-                      onTap: () => Get.to(() => const UpdatePassword()),
-                      leading: const Icon(Icons.lock_outline, color: primaryColor, size: 20),
-                      title: Text(
-                        'Change Password',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
+                      children: [
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() => const UpdatePassword()),
+                          leading: const Icon(Icons.lock_outline, color: primaryColor, size: 20),
+                          title: Text(
+                            'Change Password',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    const Divider(height: 1),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 16, bottom: 8),
-                      child: Text(
+                    ExpansionTile(
+                      initiallyExpanded: true,
+                      title: Text(
                         'SUPPORT & LEGAL',
                         style: TextStyle(
                           fontSize: 12,
@@ -350,61 +311,67 @@ class _MyDrawerState extends State<MyDrawer> {
                           fontFamily: fontFamily,
                         ),
                       ),
-                    ),
-                    ListTile(
-                      onTap: () => Get.to(() => const HelpCentre()),
-                      leading: const Icon(Icons.help_outline, color: primaryColor, size: 20),
-                      title: Text(
-                        'Help Center',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
+                      children: [
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() => const HelpCentre()),
+                          leading: const Icon(Icons.help_outline, color: primaryColor, size: 20),
+                          title: Text(
+                            'Help Center',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    ListTile(
-                      onTap: () => openPrivacyPolicy(),
-                      leading: const Icon(Icons.privacy_tip_outlined, color: primaryColor, size: 20),
-                      title: Text(
-                        'Privacy Policy',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
+                        ListTile(
+                          dense: true,
+                          onTap: () => openPrivacyPolicy(),
+                          leading: const Icon(Icons.privacy_tip_outlined, color: primaryColor, size: 20),
+                          title: Text(
+                            'Privacy Policy',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    ListTile(
-                      onTap: () => openTermOfUse(),
-                      leading: const Icon(Icons.description_outlined, color: primaryColor, size: 20),
-                      title: Text(
-                        'Terms & Conditions',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
+                        ListTile(
+                          dense: true,
+                          onTap: () => openTermOfUse(),
+                          leading: const Icon(Icons.description_outlined, color: primaryColor, size: 20),
+                          title: Text(
+                            'Terms & Conditions',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    ListTile(
-                      onTap: () => openRefundPolicy(),
-                      leading: const Icon(Icons.currency_exchange, color: primaryColor, size: 20),
-                      title: Text(
-                        'Refund Policy',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
+                        ListTile(
+                          dense: true,
+                          onTap: () => openRefundPolicy(),
+                          leading: const Icon(Icons.currency_exchange, color: primaryColor, size: 20),
+                          title: Text(
+                            'Refund Policy',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                    const Divider(height: 1),
                     ListTile(
+                      dense: true,
                       onTap: () => ShareUtils.shareAppLink(
                         context,
                         'https://play.google.com/store/apps/details?id=com.atc.spires_app&hl=en-IN'
@@ -421,6 +388,7 @@ class _MyDrawerState extends State<MyDrawer> {
                       ),
                     ),
                     ListTile(
+                      dense: true,
                       onTap: () => logoutfn(),
                       leading: const Icon(Icons.logout, color: primaryColor, size: 20),
                       title: Text(
@@ -436,64 +404,6 @@ class _MyDrawerState extends State<MyDrawer> {
                   ],
                 ),
               ),
-              // Expanded(
-              //   child: SingleChildScrollView(
-              //     child: ListView.builder(
-              //       itemCount: myProfileList.length,
-              //       physics: const NeverScrollableScrollPhysics(),
-              //       shrinkWrap: true,
-              //       itemBuilder: (context, index) {
-              //         if (myProfileList[index].label == 'Policies') {
-              //           return Padding(
-              //             padding: const EdgeInsets.symmetric(vertical: 0),
-              //             child: Theme(
-              //               data: ThemeData(
-              //                 dividerColor: whiteColor,
-              //                 hintColor: primaryColor,
-              //               ),
-              //               child: ExpansionTile(
-              //                 title: Text(
-              //                   myProfileList[index].label,
-              //                   style: TextStyle(
-              //                     fontSize: 16,
-              //                     color: Colors.black,
-              //                     fontWeight: FontWeight.w500,
-              //                     fontFamily: fontFamily,
-              //                   ),
-              //                 ),
-              //                 childrenPadding: const EdgeInsets.only(left: 20),
-              //                 collapsedIconColor: Colors.grey,
-              //                 iconColor: primaryColor,
-              //                 leading: Icon(
-              //                   myProfileList[index].image,
-              //                   color: primaryColor,
-              //                 ),
-              //                 children: policyDropdownItems.map((item) {
-              //                   return ListTile(
-              //                     dense: true,
-              //                     title: Text(item.label, style: normalText),
-              //                     leading:
-              //                         Icon(item.image, color: primaryColor),
-              //                     onTap: item.onTap,
-              //                   );
-              //                 }).toList(),
-              //               ),
-              //             ),
-              //           );
-              //         } else {
-              //           return Padding(
-              //             padding: const EdgeInsets.symmetric(vertical: 3),
-              //             child: buildTile(
-              //               onTap: myProfileList[index].onTap,
-              //               title: myProfileList[index].label,
-              //               iconData: myProfileList[index].image,
-              //             ),
-              //           );
-              //         }
-              //       },
-              //     ),
-              //   ),
-              // ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
@@ -578,28 +488,34 @@ class _MyDrawerState extends State<MyDrawer> {
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                     ),
-                    child: Obx(
-                      () => c.isDpLoading.value
-                          ? loadingProfileDP()
-                          : ClipRRect(
-                              borderRadius: BorderRadius.circular(120),
-                              child: Image.asset(
-                                profileImage,
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                              )),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: Image.asset(
+                        profileImage,
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: InkWell(
-                      onTap: () => showImagePickerDialog(),
-                      child: const CircleAvatar(
-                        radius: 16,
-                        backgroundColor: primaryColor,
-                        child: Icon(Icons.edit, size: 18, color: whiteColor),
+                    child: Container(
+                      height: 20,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: whiteColor, width: 1),
+                      ),
+                      child: InkWell(
+                        onTap: () => showImagePickerDialog(),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 12,
+                          color: whiteColor,
+                        ),
                       ),
                     ),
                   ),
@@ -613,30 +529,36 @@ class _MyDrawerState extends State<MyDrawer> {
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                     ),
-                    child: Obx(
-                      () => c.isDpLoading.value
-                          ? loadingProfileDP()
-                          : ClipRRect(
-                              borderRadius: BorderRadius.circular(120),
-                              child: CachedNetworkImage(
-                                imageUrl: c.profileImg.value.isURL
-                                    ? c.profileImg.value
-                                    : '$imgPath/${c.profileImg.value}',
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                              )),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(30),
+                      child: CachedNetworkImage(
+                        imageUrl: c.profileImg.value.isURL
+                            ? c.profileImg.value
+                            : '$imgPath/${c.profileImg.value}',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: InkWell(
-                      onTap: () => showImagePickerDialog(),
-                      child: const CircleAvatar(
-                        radius: 12,
-                        backgroundColor: primaryColor,
-                        child: Icon(Icons.edit, size: 14, color: whiteColor),
+                    child: Container(
+                      height: 26,
+                      width: 26,
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: whiteColor, width: 1),
+                      ),
+                      child: InkWell(
+                        onTap: () => showImagePickerDialog(),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 14,
+                          color: whiteColor,
+                        ),
                       ),
                     ),
                   ),
@@ -663,32 +585,78 @@ class _MyDrawerState extends State<MyDrawer> {
   }
 
   showImagePickerDialog() {
-    return Get.defaultDialog(
-      radius: 4,
-      title: 'Choose Source',
-      titleStyle: mediumBoldText,
-      content: Column(
-        children: [
-          // ListTile(
-          //   dense: true,
-          //   onTap: () => pickImageFrom(ImageSource.camera),
-          //   title: Text('Camera', style: normalText),
-          //   leading: const Icon(
-          //     Icons.add_a_photo,
-          //     color: primaryColor,
-          //   ),
-          // ),
-          ListTile(
-            dense: true,
-            onTap: () => pickImageFrom(ImageSource.gallery),
-            title: Text('Gallery', style: normalText),
-            leading: const Icon(
-              Icons.image,
-              color: primaryColor,
-            ),
+    return Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Change Profile Photo',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                  fontFamily: fontFamily,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ListTile(
+                onTap: () => pickImageFrom(ImageSource.gallery),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.photo_library_rounded,
+                    color: primaryColor,
+                    size: 24,
+                  ),
+                ),
+                title: Text(
+                  'Choose from Gallery',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: fontFamily,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                onTap: () => pickImageFrom(ImageSource.camera),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: primaryColor,
+                    size: 24,
+                  ),
+                ),
+                title: Text(
+                  'Take a Photo',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: fontFamily,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
+      barrierDismissible: true,
     );
   }
 }

@@ -1,7 +1,11 @@
+import 'package:spires_app/Data/programs_data.dart';
 import 'package:spires_app/Model/logo_model.dart';
+import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/banner.dart';
 import '../Drawer/programs_screen.dart';
+import '../../live_openings_screen.dart';
+
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -99,266 +103,324 @@ class _HomeState extends State<Home> {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                   
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Our Programs",
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Our Programs",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800],
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => Get.to(() => const ProgramsScreen()),
+                                child: Text(
+                                  "View All",
                                   style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[800],
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                TextButton(
-                                  onPressed: () =>
-                                      Get.to(() => const ProgramsScreen()),
-                                  child: Text(
-                                    "View All",
-                                    style: TextStyle(
-                                      color: primaryColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        CarouselSlider(
+                          items: ProgramsData.programs.map((program) => 
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: InkWell(
+                                onTap: () => Get.to(() => ProgramDetailTest(
+                                  imageUrl: program.imageUrl,
+                                  title: program.title,
+                                  description: program.description,
+                                  benefits: program.benefits,
+                                  howItWorks: program.howItWorks,
+                                  faqs: program.faqs,
+                                )),
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.06),
+                                        blurRadius: 20,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
                                   ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                                            child: Stack(
+                                              children: [
+                                                Image.asset(
+                                                  program.imageUrl,
+                                                  height: 160,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                                Positioned.fill(
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      gradient: LinearGradient(
+                                                        begin: Alignment.topCenter,
+                                                        end: Alignment.bottomCenter,
+                                                        colors: [
+                                                          Colors.transparent,
+                                                          Colors.black.withOpacity(0.3),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 12,
+                                            right: 12,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.circular(20),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.1),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                                                  const SizedBox(width: 3),
+                                                  Text(
+                                                    "4.8",
+                                                    style: TextStyle(
+                                                      color: Colors.black87,
+                                                      fontWeight: FontWeight.w700,
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                                  decoration: BoxDecoration(
+                                                    color: primaryColor.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(20),
+                                                  ),
+                                                  child: Text(
+                                                    "Featured",
+                                                    style: TextStyle(
+                                                      color: primaryColor,
+                                                      fontSize: 12,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const Spacer(),
+                                                Text(
+                                                  "2 Months",
+                                                  style: TextStyle(
+                                                    color: Colors.grey[600],
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              program.title,
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.black87,
+                                                height: 1.2,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              program.description,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.grey[600],
+                                                height: 1.4,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: ElevatedButton(
+                                                    onPressed: () => Get.to(() => ProgramDetailTest(
+                                                      imageUrl: program.imageUrl,
+                                                      title: program.title,
+                                                      description: program.description,
+                                                      benefits: program.benefits,
+                                                      howItWorks: program.howItWorks,
+                                                      faqs: program.faqs,
+                                                    )),
+                                                    style: ElevatedButton.styleFrom(
+                                                      backgroundColor: primaryColor,
+                                                      foregroundColor: Colors.white,
+                                                      elevation: 0,
+                                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(12),
+                                                      ),
+                                                    ),
+                                                    child: const Text(
+                                                      'View Details',
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.w600,
+                                                        fontSize: 13,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey[50],
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    border: Border.all(
+                                                      color: Colors.grey[200]!,
+                                                    ),
+                                                  ),
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      Share.share('Check out this program: ${program.title}');
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.share_rounded,
+                                                      color: primaryColor,
+                                                      size: 20,
+                                                    ),
+                                                    constraints: const BoxConstraints(
+                                                      minWidth: 40,
+                                                      minHeight: 40,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ).toList(),
+                          options: CarouselOptions(
+                            height: 340,
+                            autoPlay: true,
+                            viewportFraction: 0.85,
+                            autoPlayInterval: const Duration(seconds: 6),
+                            autoPlayAnimationDuration: const Duration(milliseconds: 1000),
+                            autoPlayCurve: Curves.easeInOutCubic,
+                            pauseAutoPlayOnTouch: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const FeaturedCategory(),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Live Openings",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800],
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => Get.to(() => LiveOpeningsScreen(showLeading: true)),
+                                child: Text(
+                                  "View All",
+                                  style: TextStyle(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 180,
+                            child: ListView(
+                              clipBehavior: Clip.none,
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                _buildOpeningCard(
+                                  title: 'Accountant',
+                                  description: 'Manage financial records and assist in audits.',
+                                  icon: Icons.account_balance,
+                                  color: Colors.blue,
+                                ),
+                                _buildOpeningCard(
+                                  title: 'Graphic Design',
+                                  description: 'Create visual content for marketing campaigns.',
+                                  icon: Icons.palette,
+                                  color: Colors.purple,
+                                ),
+                                _buildOpeningCard(
+                                  title: 'Web Design',
+                                  description: 'Develop and maintain website layouts.',
+                                  icon: Icons.computer,
+                                  color: Colors.teal,
                                 ),
                               ],
                             ),
                           ),
-                          CarouselSlider(
-                            items: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: defaultPadding),
-                                child: ProgramCard(
-                                  imageUrl: 'assets/icons/1.png',
-                                  title: 'SkillUp 1.0',
-                                  description:
-                                      'Description:SkillUp 1.0 is your comprehensive training program designed to equip you with the essential skills and knowledge needed to land your dream internship or entry-level job. Through interactive modules, practical exercises, and industry expert insights, you\'ll gain the confidence and competence to impress employers.',
-                                  benefits:
-                                      "• Gain valuable skills through interactive modules & practical exercises.\n• Build confidence with mock interviews, interview tips, & resume workshops.\n• Connect with industry professionals & gain insights into your dream career.\n• Get access to exclusive internship listings with top companies.\n• Receive personalized guidance & support from our career coaches.",
-                                  onShare: () {
-                                    // Handle share action
-                                  },
-                                  faqs: [
-                                    {
-                                      'question': 'Is SkillUp 1.0 free?',
-                                      'answer':
-                                          'Yes, SkillUp 1.0 is completely free to access for all Spires Recruit users.'
-                                    },
-                                    {
-                                      'question':
-                                          'What skills can I learn through SkillUp 1.0?',
-                                      'answer':
-                                          'SkillUp 1.0 offers a variety of modules covering in-demand skills such as communication, problem-solving, teamwork, digital marketing, social media marketing, data analysis, and more.'
-                                    },
-                                    {
-                                      'question':
-                                          'How do I get access to exclusive internship listings?',
-                                      'answer':
-                                          'By completing relevant SkillUp 1.0 modules and demonstrating your skills, you\'ll gain access to a curated list of internship opportunities from top companies.'
-                                    },
-                                    {
-                                      'question':
-                                          'Will I receive a certificate upon completion?',
-                                      'answer':
-                                          'Yes, upon successful completion of a SkillUp 1.0 learning path, you\'ll receive a digital certificate to showcase your acquired skills to potential employers.'
-                                    },
-                                  ],
-                                  howItWorks:
-                                      '1. Download the Spires Recruit app / website & create a free account.\n2. Select a learning path based on your career interests & desired skills.\n3. Work through interactive modules at your own pace, anytime, anywhere.\n4. Sharpen your skills with mock interviews & resume feedback.\n5. Network with companies and apply for exclusive internship opportunities.',
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: defaultPadding),
-                                child: ProgramCard(
-                                  imageUrl: 'assets/icons/3.png',
-                                  title: 'Resume Workshop',
-                                  description:
-                                      'Master the art of resume writing with our interactive Resume Workshop! Get expert guidance on building a compelling resume that stands out to hiring managers and lands you interviews.',
-                                  benefits:
-                                      '• Learn proven resume writing strategies.\n• Optimize your resume for Applicant Tracking Systems (ATS).\n• Tailor your resume for specific job applications.\n• Gain confidence in your resume writing skills.\n• Get feedback from career experts.\n• Network with other job seekers.',
-                                  faqs: [
-                                    {
-                                      'question':
-                                          'Is the Resume Workshop free?',
-                                      'answer':
-                                          'Yes, the Spires Recruit Resume Workshop is completely free to attend!'
-                                    },
-                                    {
-                                      'question':
-                                          'Who should attend the Resume Workshop?',
-                                      'answer':
-                                          'This workshop is beneficial for anyone seeking to improve their resume writing skills, from recent graduates to experienced professionals looking to make a career change.'
-                                    },
-                                    {
-                                      'question':
-                                          'What will I learn in the workshop?',
-                                      'answer':
-                                          'The workshop will cover a variety of topics, including resume structure, formatting, keyword optimization, crafting impactful achievements statements, and tailoring your resume for specific job applications.'
-                                    },
-                                    {
-                                      'question':
-                                          'How do I register for the workshop?',
-                                      'answer':
-                                          'Download the Spires Recruit app or visit our website (link) to find upcoming workshop dates and register.'
-                                    },
-                                  ],
-                                  onShare: () {
-                                    // Handle share action
-                                  },
-                                  howItWorks:
-                                      '• Sign up for the free workshop through the Spires Recruit app / website.\n• Join our live, interactive workshop led by career development professionals.\n• Engage in interactive exercises and discussions to learn resume best practices.\n• Have the opportunity to receive personalized feedback on your resume during the workshop or through follow-up resources.',
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: defaultPadding),
-                                child: ProgramCard(
-                                  imageUrl: 'assets/icons/2.png',
-                                  title: 'Interview Preparation',
-                                  description:
-                                      'Nail your next interview with Spires Recruit\'s comprehensive Interview Preparation section! This interactive tool equips you with the knowledge and confidence to shine in any interview setting.',
-                                  benefits:
-                                      '• Boost confidence and reduce interview anxiety.\n• Learn effective strategies for answering common interview questions.\n• Practice your responses with interactive mock interview tools.\n• Receive personalized feedback to identify areas for improvement.\n• Gain insights into different interview formats and company cultures',
-                                  faqs: [
-                                    {
-                                      'question':
-                                          'What types of interview formats are covered?',
-                                      'answer':
-                                          'Spires Recruit covers various interview formats, including phone interviews, video interviews, and traditional in-person interviews.'
-                                    },
-                                    {
-                                      'question':
-                                          'How does the mock interview simulator work?',
-                                      'answer':
-                                          'The simulator provides a virtual interviewer and presents you with common interview questions. You can record your response and receive automated feedback on your body language, verbal delivery, and answer content.'
-                                    },
-                                    {
-                                      'question':
-                                          'Are there interview tips for different industries?',
-                                      'answer':
-                                          'Yes, we offer tailored interview prep resources for various industries, helping you understand industry-specific questions and expectations.'
-                                    },
-                                    {
-                                      'question':
-                                          'How can I access the Interview Preparation section?',
-                                      'answer':
-                                          'The Interview Preparation section is available within the Spires Recruit app. Download the app for free and explore all our resources designed to help you land your dream job!'
-                                    },
-                                  ],
-                                  onShare: () {
-                                    // Handle share action
-                                  },
-                                  howItWorks:
-                                      '• Access a vast library of interview questions categorized by industry, job title & difficulty level.\n• Utilize our AI-powered mock interview simulator to practice your responses in a realistic setting.\n• Review detailed feedback reports on your mock interviews, highlighting strengths & areas for development./n• Watch informative video tutorials & read articles from industry professionals on interview best practices.',
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: defaultPadding),
-                                child: ProgramCard(
-                                  imageUrl: 'assets/icons/jsdh.png',
-                                  title: 'Coding Clubs',
-                                  description:
-                                      'The Spires Recruit Coding Club is a community for developers who are passionate about building and improving the Spires Recruit platform. We welcome coders of all experience levels, from beginners to seasoned professionals.',
-                                  benefits:
-                                      '• Work on real-world projects that utilize various coding skills and technologies.\n• Approach challenges creatively and find innovative solutions.\n• Get guidance and feedback from industry professionals.\n• Showcase your coding projects to potential employers.\n• Connect with other programmers who share your passion for coding.',
-                                  faqs: [
-                                    {
-                                      'question':
-                                          'Is there a cost to join the Spires Recruit Coding Club?',
-                                      'answer':
-                                          'No, the Spires Recruit Coding Club is completely free to join and participate in.'
-                                    },
-                                    {
-                                      'question':
-                                          'What coding experience level is required?',
-                                      'answer':
-                                          'The Spires Recruit Coding Club welcomes coders of all skill levels, from beginners to experienced programmers.'
-                                    },
-                                    {
-                                      'question':
-                                          'What programming languages are covered in the club?',
-                                      'answer':
-                                          'The Spires Recruit Coding Club covers a variety of popular programming languages, with the specific languages addressed depending on member interests and industry trends.'
-                                    },
-                                    {
-                                      'question':
-                                          'How do I find out about upcoming workshops and events?',
-                                      'answer':
-                                          'Announcements for upcoming workshops, challenges, and events will be posted within the Spires Recruit Coding Club forum and communicated through the Spires Recruit app.'
-                                    },
-                                  ],
-                                  onShare: () {
-                                    // Handle share action
-                                  },
-                                  fit: BoxFit.fill,
-                                  howItWorks:
-                                      '• Sign up for the Spires Recruit Coding Club through the Spires Recruit app / website.\n• Participate in weekly coding challenges designed to test and enhance your skills.\n• Attend regular online workshops and Q&A sessions hosted by industry experts.\n• Join discussions, share solutions, and get help from fellow club members.\n• Connect with other coders through the forum and participate in virtual coding meetups.',
-                                ),
-                              ),
-                            ],
-                            options: CarouselOptions(
-                              height: 278,
-                              autoPlay: true,
-                              viewportFraction: 1,
-                              autoPlayInterval: const Duration(seconds: 8),
-                            ),
-                          ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: const FeaturedCategory(),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        gradient: LinearGradient(
-                          colors: [
-                            primaryColor.withOpacity(0.1),
-                            Colors.white,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: buildTopCompanies(),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                          ),
-                        ],
-                      ),
-                      child: const Reviews(),
                     ),
                   ],
                 ),
@@ -434,7 +496,7 @@ class _HomeState extends State<Home> {
       ),
       child: IconButton(
         onPressed: onTap,
-        icon: Icon(icon, color: Colors.black87),
+        icon: Icon(icon, color: primaryColor),
         constraints: const BoxConstraints(
           minWidth: 40,
           minHeight: 40,
@@ -586,6 +648,68 @@ class _HomeState extends State<Home> {
         ),
         const SizedBox(height: 8),
       ],
+    );
+  }
+
+  Widget _buildOpeningCard({
+    required String title,
+    required String description,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      width: 200,
+      child: Card(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.grey.shade200),
+        ),
+        child: InkWell(
+          onTap: () => Get.to(() =>  LiveOpeningsScreen(showLeading: true)),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    height: 1.3,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

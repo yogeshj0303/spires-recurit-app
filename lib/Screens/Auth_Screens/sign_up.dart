@@ -97,7 +97,90 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   email: emailController.text,
                                   pass: passController.text,
                                   phone: mobileController.text,
-                                );
+                                ).then((_) {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(15),
+                                        ),
+                                        title: Row(
+                                          children: [
+                                            Icon(Icons.person_outline, color: primaryColor),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              'Complete Profile',
+                                              style: TextStyle(
+                                                color: primaryColor,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Your profile is your ticket to job opportunities!',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            SizedBox(height: 8),
+                                            Text(
+                                              'Add your experience, skills, and education to start applying for jobs.',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.grey[700],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              Get.offAll(() => MainScreen());
+                                            },
+                                            child: Text(
+                                              'Skip for now',
+                                              style: TextStyle(color: Colors.grey[600]),
+                                            ),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              final controller = Get.find<MyController>();
+                                              Get.offAll(() => MainScreen(), arguments: 4);
+                                              Future.delayed(Duration(milliseconds: 100), () {
+                                                controller.selectedIndex.value = 4;
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: primaryColor,
+                                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              'Complete Profile',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                });
                               }
                             },
                             style: ElevatedButton.styleFrom(

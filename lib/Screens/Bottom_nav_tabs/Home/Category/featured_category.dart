@@ -35,6 +35,7 @@ class FeaturedCategory extends StatelessWidget {
                 return CarouselSlider.builder(
                   itemCount: snapshot.data!.data!.length,
                   options: CarouselOptions(
+                    clipBehavior: Clip.none,
                     height: 132,
                     viewportFraction: 0.35, // Adjust as needed
                     autoPlay: true, // Enable autoplay

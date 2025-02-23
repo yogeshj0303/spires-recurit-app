@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../Constants/exports.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class MembershipDriveScreen extends StatefulWidget {
   const MembershipDriveScreen({super.key});
@@ -11,14 +12,6 @@ class MembershipDriveScreen extends StatefulWidget {
 }
 
 class _MembershipDriveScreenState extends State<MembershipDriveScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _collegeController = TextEditingController();
-  final TextEditingController _mobileController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  File? _selectedImage;
-  final ImagePicker _picker = ImagePicker();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,8 +65,6 @@ class _MembershipDriveScreenState extends State<MembershipDriveScreen> {
                 ),
                 onPressed: () {
                   showDialog(
-                  //background color white
-
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
@@ -195,324 +186,19 @@ class _MembershipDriveScreenState extends State<MembershipDriveScreen> {
                 ],
               ),
             ),
-            
+
             Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Price Card with shadow
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 10,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(Icons.star, color: primaryColor),
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Registration Fee',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '₹199/- only',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: primaryColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Benefits Section
-                  const Text(
-                    'Membership Benefits',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildBenefitsList(),
-                  const SizedBox(height: 32),
-
+                children: [                
                   // After Benefits Section and before Registration Form
+                  _buildPricingTable(),
                   _buildFooter(),
-                  const SizedBox(height: 32),
-
-                  // Registration Form
-                  const Text(
-                    'Registration Details',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        _buildTextField(
-                          controller: _nameController,
-                          label: 'Full Name',
-                          icon: Icons.person_outline,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _collegeController,
-                          label: 'College Name',
-                          icon: Icons.school_outlined,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _mobileController,
-                          label: 'Mobile Number',
-                          icon: Icons.phone_outlined,
-                          keyboardType: TextInputType.phone,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _emailController,
-                          label: 'Email Address',
-                          icon: Icons.email_outlined,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 24),
-                        Container(
-                          width: double.infinity,
-                          child: _buildImageUploadSection(),
-                        ),
-                        const SizedBox(height: 32),
-                        
-                        // Pay Now Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 54,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                // TODO: Implement payment integration
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: const Text(
-                              'PAY NOW',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType? keyboardType,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon, color: Colors.grey[600]),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: primaryColor, width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.grey[50],
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'This field is required';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildBenefitsList() {
-    final benefits = [
-      'Premium Membership Card',
-      'Free Entry for Certified Workshop',
-      'Direct Interview Calls from Spires Recruit Hiring Partners',
-      'Priority Access to All Events',
-      'Exclusive Discount in Govt. Certified Programs',
-    ];
-
-    return Column(
-      children: benefits.map((benefit) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.check, color: primaryColor, size: 20),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Text(
-                  benefit,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 1200,
-        maxHeight: 1200,
-        imageQuality: 85,
-      );
-      
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to pick image'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Widget _buildImageUploadSection() {
-    return GestureDetector(
-      onTap: _pickImage,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: Column(
-          children: [
-            if (_selectedImage != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  _selectedImage!,
-                  height: 150,
-                  width: 150,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextButton.icon(
-                onPressed: _pickImage,
-                icon: const Icon(Icons.refresh),
-                label: const Text('Change Picture'),
-                style: TextButton.styleFrom(
-                  foregroundColor: primaryColor,
-                ),
-              ),
-            ] else ...[
-              Icon(
-                Icons.cloud_upload_outlined,
-                size: 48,
-                color: primaryColor,
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Upload Profile Picture',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tap to choose a file',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -639,12 +325,291 @@ class _MembershipDriveScreenState extends State<MembershipDriveScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _collegeController.dispose();
-    _mobileController.dispose();
-    _emailController.dispose();
-    super.dispose();
+  Widget _buildPricingTable() {
+    final plans = [
+      {
+        'title': 'Free Plan',
+        'subtitle': 'Start your journey',
+        'price': '0',
+        'period': 'Forever free',
+        'features': {
+          'Search and Apply Jobs': true,
+          'Premium Job Access': false,
+          'Direct Company Calls': false,
+          'Premium ID Card': false,
+          'Workshop Access': false,
+          'Priority Support': false,
+        },
+        'buttonText': 'Current Plan',
+        'isPopular': false,
+      },
+      {
+        'title': 'Premium',
+        'subtitle': 'Most recommended',
+        'price': '999',
+        'period': 'per year',
+        'features': {
+          'Search and Apply Jobs': true,
+          'Premium Job Access': true,
+          'Direct Company Calls': true,
+          'Premium ID Card': true,
+          'Workshop Access': true,
+          'Priority Support': true,
+        },
+        'buttonText': 'Choose Premium',
+        'isPopular': true,
+      },
+      {
+        'title': 'Basic',
+        'subtitle': 'Essential features',
+        'price': '699',
+        'period': 'per year',
+        'features': {
+          'Search and Apply Jobs': true,
+          'Premium Job Access': true,
+          'Direct Company Calls': false,
+          'Premium ID Card': true,
+          'Workshop Access': false,
+          'Priority Support': true,
+        },
+        'buttonText': 'Choose Basic',
+        'isPopular': false,
+      },
+    ];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 24),
+      child: CarouselSlider.builder(
+        itemCount: plans.length,
+        options: CarouselOptions(
+          clipBehavior: Clip.none,
+          height: 480,
+          viewportFraction: 0.9,
+          enableInfiniteScroll: false,
+          initialPage: 1,
+        ),
+        itemBuilder: (context, index, realIndex) {
+          final plan = plans[index];
+          return _buildPlanCard(
+            title: plan['title'] as String,
+            subtitle: plan['subtitle'] as String,
+            price: plan['price'] as String,
+            period: plan['period'] as String,
+            features: plan['features'] as Map<String, bool>,
+            buttonText: plan['buttonText'] as String,
+            isPopular: plan['isPopular'] as bool,
+          );
+        },
+      ),
+    );
   }
-} 
+
+  Widget _buildPlanCard({
+    required String title,
+    required String subtitle,
+    required String price,
+    required String period,
+    required Map<String, bool> features,
+    required String buttonText,
+    required bool isPopular,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isPopular ? primaryColor.withOpacity(0.3) : Colors.grey.shade200,
+          width: isPopular ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isPopular 
+                ? primaryColor.withOpacity(0.15)
+                : Colors.grey.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Container(
+            height: 140,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+            decoration: BoxDecoration(
+              color: isPopular ? primaryColor : Colors.grey.shade50,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: isPopular ? Colors.white : Colors.black87,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isPopular ? Colors.white70 : Colors.grey.shade600,
+                  ),
+                ),
+                if (price != '0') ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '₹',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isPopular ? Colors.white70 : primaryColor,
+                        ),
+                      ),
+                      Text(
+                        price,
+                        style: TextStyle(
+                          fontSize: 34,
+                          fontWeight: FontWeight.w800,
+                          color: isPopular ? Colors.white : primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    period,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isPopular ? Colors.white70 : Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          // Features and Button Container
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  if (isPopular)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.star_rounded,
+                            color: Colors.deepOrange,
+                            size: 16,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'RECOMMENDED',
+                            style: TextStyle(
+                              color: Colors.deepOrange,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Features List
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: features.entries.map((feature) => Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: feature.value 
+                                  ? Colors.green.shade50 
+                                  : Colors.grey.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              feature.value 
+                                  ? Icons.check_rounded
+                                  : Icons.remove_rounded,
+                              color: feature.value 
+                                  ? Colors.green.shade500 
+                                  : Colors.grey.shade400,
+                              size: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              feature.key,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )).toList(),
+                    ),
+                  ),
+                  // Button
+                  Container(
+                    width: double.infinity,
+                    height: 46,
+                    margin: const EdgeInsets.only(top: 20),
+                    child: ElevatedButton(
+                      onPressed: buttonText == 'Current Plan' ? null : () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isPopular ? primaryColor : Colors.white,
+                        foregroundColor: isPopular ? Colors.white : primaryColor,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: buttonText == 'Current Plan' 
+                                ? Colors.grey.shade300
+                                : isPopular 
+                                    ? Colors.transparent 
+                                    : primaryColor,
+                          ),
+                        ),
+                        disabledBackgroundColor: Colors.grey.shade100,
+                        disabledForegroundColor: Colors.grey.shade500,
+                      ),
+                      child: Text(
+                        buttonText,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

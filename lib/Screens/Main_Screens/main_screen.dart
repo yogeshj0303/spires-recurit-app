@@ -4,6 +4,7 @@ import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/map_jobs.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Profile/profile.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Jobs/jobs.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Internship/internship.dart';
+import 'package:spires_app/Screens/live_openings_screen.dart';
 import 'package:spires_app/Screens/membership_drive_screen.dart';
 
 import '../../Constants/exports.dart';
@@ -33,8 +34,8 @@ class _MainScreenState extends State<MainScreen> {
       label: 'Membership',
     ),
     const BottomNavigationBarItem(
-      icon: Icon(Icons.location_on),
-      label: 'Nearby',
+      icon: Icon(Icons.work_outline),
+      label: 'LiveOpenings',
     ),
     const BottomNavigationBarItem(
       icon: Icon(Icons.account_circle_outlined),
@@ -46,14 +47,16 @@ class _MainScreenState extends State<MainScreen> {
     const Home(),
     const ProgramsScreen(fromBottomNav: true),
     const MembershipDriveScreen(),
-    NearMapJobs(),
+     LiveOpeningsScreen(showLeading: false),
     const ProfileScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
-    controller.selectedIndex.value = 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.selectedIndex.value = 0;
+    });
     _initializeServices();
   }
 
@@ -99,8 +102,14 @@ class _MainScreenState extends State<MainScreen> {
         selectedItemColor: primaryColor,
         unselectedItemColor: Colors.black54,
         type: BottomNavigationBarType.fixed,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
+        selectedFontSize: 10,
+        unselectedFontSize: 10,
+        selectedLabelStyle: const TextStyle(height: 1.8),
+        unselectedLabelStyle: const TextStyle(height: 1.8),
+        iconSize: 22,
+        showUnselectedLabels: true,
+        showSelectedLabels: true,
+        landscapeLayout: BottomNavigationBarLandscapeLayout.spread,
       ),
     );
   }

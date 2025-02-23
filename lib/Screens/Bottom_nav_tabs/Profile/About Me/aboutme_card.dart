@@ -14,10 +14,10 @@ class AboutMeCard extends StatelessWidget {
       width: size.width,
       margin: const EdgeInsets.fromLTRB(
           defaultPadding, defaultPadding, defaultPadding, 0),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -82,10 +82,10 @@ class AboutMeCard extends StatelessWidget {
                               ),
                               const SizedBox(height: 16),
                               Container(
-                                padding: EdgeInsets.all(16),
+                                padding: EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Colors.grey[50],
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: Colors.grey[200]!,
                                   ),
@@ -93,8 +93,8 @@ class AboutMeCard extends StatelessWidget {
                                 child: Text(
                                   snapshot.data!.message!.description!,
                                   style: TextStyle(
-                                    height: 1.5,
-                                    fontSize: 15,
+                                    height: 1.4,
+                                    fontSize: 14,
                                     color: Colors.black54,
                                   ),
                                 ),
@@ -110,7 +110,7 @@ class AboutMeCard extends StatelessWidget {
   Widget emptyAboutMe() {
     c.aboutMePoints.value = 0.00;
     return Container(
-      padding: EdgeInsets.all(24),
+      padding: EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

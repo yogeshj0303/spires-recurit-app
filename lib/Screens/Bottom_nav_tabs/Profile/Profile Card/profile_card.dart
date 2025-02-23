@@ -41,30 +41,29 @@ class _ProfileCardState extends State<ProfileCard> {
       ),
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 16, 20, 24),
+          padding: EdgeInsets.fromLTRB(24, 20, 24, 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
                     child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         profilePic(),
-                        SizedBox(width: 10),
+                        SizedBox(width: 16),
                         Expanded(
                           child: _buildUserInfo(),
                         ),
                       ],
                     ),
                   ),
-                  _buildPremiumBadge(),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 12),
               _buildStatisticsRow(),
             ],
           ),
@@ -73,51 +72,6 @@ class _ProfileCardState extends State<ProfileCard> {
     );
   }
 
-  Widget _buildPremiumBadge() {
-    return Obx(() {
-      if (!(c.isSubscribed.value || MyController.subscribed == '1')) {
-        return const SizedBox();
-      }
-      
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.workspace_premium,
-              color: Colors.amber[300],
-              size: 20,
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Premium',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                letterSpacing: 0.3,
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
 
   Widget _buildUserInfo() {
     return Column(
@@ -139,25 +93,23 @@ class _ProfileCardState extends State<ProfileCard> {
               ),
             ),
             Obx(() => c.isSubscribed.value || MyController.subscribed == '1' 
-              ? Row(
-                  children: [
-                    SizedBox(width: 8),
-                    Icon(
-                      Icons.verified,
-                      color: Colors.amber[300],
-                      size: 20,
-                    ),
-                  ],
+              ? Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: Icon(
+                    Icons.verified,
+                    color: Colors.amber[300],
+                    size: 20,
+                  ),
                 )
               : SizedBox()),
           ],
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 14),
         _buildInfoRow(
           Icons.email_outlined,
           MyController.userEmail,
         ),
-        SizedBox(height: 12),
+        SizedBox(height: 10),
         _buildInfoRow(
           Icons.phone_outlined,
           MyController.userPhone,
@@ -168,7 +120,7 @@ class _ProfileCardState extends State<ProfileCard> {
 
   Widget _buildStatisticsRow() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: _buildStatItem(
@@ -177,7 +129,10 @@ class _ProfileCardState extends State<ProfileCard> {
             value: c.appliedJobs.length.toString(),
           ),
         ),
-        _buildDivider(),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: _buildDivider(),
+        ),
         Expanded(
           child: _buildStatItem(
             icon: Icons.work_history_outlined,
@@ -185,7 +140,10 @@ class _ProfileCardState extends State<ProfileCard> {
             value: c.completedJobs.length.toString(),
           ),
         ),
-        _buildDivider(),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: _buildDivider(),
+        ),
         Expanded(
           child: _buildStatItem(
             icon: Icons.pending_outlined,
@@ -197,60 +155,20 @@ class _ProfileCardState extends State<ProfileCard> {
     );
   }
 
+  Widget _buildDivider() {
+    return Container(
+      height: 30,
+      width: 1,
+      color: Colors.white.withOpacity(0.15),
+    );
+  }
+
   Widget _buildStatItem({
     required IconData icon,
     required String label,
     required String value,
   }) {
     return Column(
-      children: [
-        Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 18,
-          ),
-        ),
-        SizedBox(height: 6),
-        Text(
-          value,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.85),
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDivider() {
-    return Container(
-      height: 35,
-      width: 1,
-      margin: EdgeInsets.symmetric(horizontal: 8),
-      color: Colors.white.withOpacity(0.15),
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           padding: EdgeInsets.all(6),
@@ -260,23 +178,65 @@ class _ProfileCardState extends State<ProfileCard> {
           ),
           child: Icon(
             icon,
-            color: Colors.white.withOpacity(0.95),
+            color: Colors.white,
             size: 16,
           ),
         ),
-        SizedBox(width: 10),
-        Flexible(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.95),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-            ),
-            overflow: TextOverflow.ellipsis,
+        SizedBox(height: 6),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
           ),
         ),
+        SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.85),
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ],
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Container(
+      margin: EdgeInsets.only(right: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white.withOpacity(0.95),
+              size: 16,
+            ),
+          ),
+          SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.95),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -417,9 +377,8 @@ class _ProfileCardState extends State<ProfileCard> {
       }
       
       return Container(
-        width: 90,
-        height: 90,
-        margin: EdgeInsets.only(right: 6,top: 10,bottom: 0),
+        width: 85,
+        height: 85,
         child: c.profileImg.value == ''
           ? _buildDefaultProfilePic()
           : _buildNetworkProfilePic()
@@ -431,8 +390,8 @@ class _ProfileCardState extends State<ProfileCard> {
     return Stack(
       children: [
         Container(
-          height: 100,
-          width: 100,
+          height: 85,
+          width: 85,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
@@ -448,11 +407,11 @@ class _ProfileCardState extends State<ProfileCard> {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(50),
+            borderRadius: BorderRadius.circular(42.5),
             child: Image.asset(
               profileImage,
-              width: 100,
-              height: 100,
+              width: 85,
+              height: 85,
               fit: BoxFit.cover,
             ),
           ),
@@ -466,8 +425,8 @@ class _ProfileCardState extends State<ProfileCard> {
     return Stack(
       children: [
         Container(
-          height: 100,
-          width: 100,
+          height: 85,
+          width: 85,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
@@ -483,13 +442,13 @@ class _ProfileCardState extends State<ProfileCard> {
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(50),
+            borderRadius: BorderRadius.circular(42.5),
             child: CachedNetworkImage(
               imageUrl: c.profileImg.value.isURL
                   ? c.profileImg.value
                   : '$imgPath/${c.profileImg.value}',
-              width: 100,
-              height: 100,
+              width: 85,
+              height: 85,
               fit: BoxFit.cover,
             ),
           ),

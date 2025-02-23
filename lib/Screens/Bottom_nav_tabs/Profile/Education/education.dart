@@ -33,7 +33,8 @@ class Education extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(8),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 0),
                         decoration: BoxDecoration(
                           color: primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
@@ -71,9 +72,8 @@ class Education extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 4),
                   Divider(color: Colors.grey[200], thickness: 1),
-                  const SizedBox(height: 16),
                   FutureBuilder<EduModel>(
                     future: ProfileUtils.showEducation(),
                     builder: (context, snapshot) => snapshot.hasData
@@ -90,11 +90,14 @@ class Education extends StatelessWidget {
 
   Widget emptyEdu() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 24),
+      padding: EdgeInsets.symmetric(vertical: 14),
+      width: double.infinity,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
@@ -105,23 +108,24 @@ class Education extends StatelessWidget {
               color: primaryColor,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 10),
           Text(
             'Add your education',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           Text(
             'Add Education & boost your profile by 10%',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -141,135 +145,119 @@ class EduCard extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: snapshot.data!.data!.length,
-      separatorBuilder: (context, index) => Divider(
+      separatorBuilder: (_, __) => Divider(
         color: Colors.grey[100],
-        height: 24,
+        height: 10,
       ),
       itemBuilder: (context, index) => Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey[200]!),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item[index].degree!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: primaryColor,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    InkWell(
-                      onTap: () => Get.to(() => EditEducation(
-                            collegeName: item[index].name!,
-                            stream: item[index].stream!,
-                            degree: item[index].degree!,
-                            start: item[index].startDate!,
-                            end: item[index].endDate!,
-                            percent: item[index].percentage!,
-                            eduId: item[index].id!.toInt(),
-                          )),
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.edit_outlined,
-                          color: primaryColor,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    InkWell(
-                      onTap: () => deleteDialog(item[index].id!.toInt()),
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 12),
-            Row(
-              children: [
-                Icon(
-                  Icons.school,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
-                SizedBox(width: 8),
-                Text(
-                  item[index].stream!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.business,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
-                SizedBox(width: 8),
-                Text(
-                  item[index].name!,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
-                SizedBox(width: 8),
-                Text(
-                  '${item[index].startDate} - ${item[index].endDate}',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
+            _buildHeader(item[index]),
+            const SizedBox(height: 12),
+            _buildDetails(item[index]),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader(Data item) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            item.degree!,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: primaryColor,
+            ),
+          ),
+        ),
+        _buildActionButtons(item),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(Data item) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildIconButton(
+          onTap: () => Get.to(() => EditEducation(
+                collegeName: item.name!,
+                stream: item.stream!,
+                degree: item.degree!,
+                start: item.startDate!,
+                end: item.endDate!,
+                percent: item.percentage!,
+                eduId: item.id!.toInt(),
+              )),
+          icon: Icons.edit_outlined,
+          color: primaryColor,
+        ),
+        const SizedBox(width: 8),
+        _buildIconButton(
+          onTap: () => deleteDialog(item.id!.toInt()),
+          icon: Icons.delete_outline,
+          color: Colors.red,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIconButton({
+    required VoidCallback onTap,
+    required IconData icon,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: color, size: 16),
+      ),
+    );
+  }
+
+  Widget _buildDetails(Data item) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildDetailRow(Icons.business, item.name!),
+        const SizedBox(height: 6),
+        _buildDetailRow(Icons.school, item.stream!),
+        const SizedBox(height: 6),
+        _buildDetailRow(
+          Icons.calendar_today_outlined,
+          '${item.startDate} - ${item.endDate}',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        Text(
+          text,
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+        ),
+      ],
     );
   }
 

@@ -13,7 +13,7 @@ class Skills extends StatelessWidget {
       width: size.width,
       margin: const EdgeInsets.fromLTRB(
           defaultPadding, defaultPadding, defaultPadding, 0),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -31,7 +31,7 @@ class Skills extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                 decoration: BoxDecoration(
                   color: primaryColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
@@ -69,9 +69,8 @@ class Skills extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
           Divider(color: Colors.grey[200], thickness: 1),
-          const SizedBox(height: 16),
           Obx(
             () => c.isLoading.value
                 ? skillLoading()
@@ -86,7 +85,7 @@ class Skills extends StatelessWidget {
                                 shrinkWrap: true,
                                 separatorBuilder: (context, index) => Divider(
                                   color: Colors.grey[100],
-                                  height: 24,
+                                  height: 10,
                                 ),
                                 itemBuilder: (context, index) =>
                                     skillCard(snapshot, index),
@@ -101,11 +100,14 @@ class Skills extends StatelessWidget {
 
   Widget emptySkill() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 24),
+      padding: EdgeInsets.symmetric(vertical: 14),
+      width: double.infinity,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: primaryColor.withOpacity(0.1),
               shape: BoxShape.circle,
@@ -116,23 +118,24 @@ class Skills extends StatelessWidget {
               color: primaryColor,
             ),
           ),
-          SizedBox(height: 16),
+          SizedBox(height: 10),
           Text(
             'Add your skills',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           Text(
             'Add your skills to boost your profile by 10%',
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -142,10 +145,10 @@ class Skills extends StatelessWidget {
   Widget skillCard(AsyncSnapshot<SkillModel> snapshot, int index) {
     final item = snapshot.data!.data![index];
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: Row(
@@ -157,17 +160,17 @@ class Skills extends StatelessWidget {
                 Text(
                   item.skill!,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: primaryColor,
                   ),
                 ),
                 SizedBox(height: 4),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     item.skillLevel!,
@@ -184,43 +187,38 @@ class Skills extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              InkWell(
+              _buildActionButton(
                 onTap: () => Get.to(() => SkillLevel(
                     skill: item.skill!,
                     isEditSkill: true,
                     skillID: item.id!.toInt())),
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.edit_outlined,
-                    color: primaryColor,
-                    size: 16,
-                  ),
-                ),
+                icon: Icons.edit_outlined,
+
+                color: primaryColor,
               ),
-              SizedBox(width: 8),
-              InkWell(
+              SizedBox(width: 6),
+              _buildActionButton(
                 onTap: () => c.deleteSkills(item.id!.toInt(), item.skill!),
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.delete_outline,
-                    color: Colors.red,
-                    size: 16,
-                  ),
-                ),
+                icon: Icons.delete_outline,
+                color: Colors.red,
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required VoidCallback onTap,
+    required IconData icon,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.all(3),
+        child: Icon(icon, color: color, size: 18),
       ),
     );
   }
@@ -232,22 +230,22 @@ class Skills extends StatelessWidget {
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
           child: Container(
-            height: 60,
+            height: 50,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 10),
         Shimmer.fromColors(
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
           child: Container(
-            height: 60,
+            height: 50,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         ),
