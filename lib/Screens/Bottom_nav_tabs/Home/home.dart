@@ -6,7 +6,6 @@ import '../../../Utils/banner.dart';
 import '../Drawer/programs_screen.dart';
 import '../../live_openings_screen.dart';
 
-
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -121,7 +120,8 @@ class _HomeState extends State<Home> {
                                 ),
                               ),
                               TextButton(
-                                onPressed: () => Get.to(() => const ProgramsScreen()),
+                                onPressed: () =>
+                                    Get.to(() => const ProgramsScreen()),
                                 child: Text(
                                   "View All",
                                   style: TextStyle(
@@ -135,226 +135,290 @@ class _HomeState extends State<Home> {
                         ),
                         const SizedBox(height: 8),
                         CarouselSlider(
-                          items: ProgramsData.programs.map((program) => 
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10),
-                              child: InkWell(
-                                onTap: () => Get.to(() => ProgramDetailTest(
-                                  imageUrl: program.imageUrl,
-                                  title: program.title,
-                                  description: program.description,
-                                  benefits: program.benefits,
-                                  howItWorks: program.howItWorks,
-                                  faqs: program.faqs,
-                                )),
-                                borderRadius: BorderRadius.circular(24),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
+                          items: ProgramsData.programs
+                              .map(
+                                (program) => Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  child: InkWell(
+                                    onTap: () => Get.to(() => ProgramDetailTest(
+                                          imageUrl: program.imageUrl,
+                                          title: program.title,
+                                          description: program.description,
+                                          benefits: program.benefits,
+                                          howItWorks: program.howItWorks,
+                                          faqs: program.faqs,
+                                        )),
                                     borderRadius: BorderRadius.circular(24),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.06),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 8),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(24),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.06),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 8),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Stack(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          ClipRRect(
-                                            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                                            child: Stack(
-                                              children: [
-                                                Image.asset(
-                                                  program.imageUrl,
-                                                  height: 160,
-                                                  width: double.infinity,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                                Positioned.fill(
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                      gradient: LinearGradient(
-                                                        begin: Alignment.topCenter,
-                                                        end: Alignment.bottomCenter,
-                                                        colors: [
-                                                          Colors.transparent,
-                                                          Colors.black.withOpacity(0.3),
-                                                        ],
+                                          Stack(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius: const BorderRadius
+                                                    .vertical(
+                                                    top: Radius.circular(24)),
+                                                child: Stack(
+                                                  children: [
+                                                    Image.asset(
+                                                      program.imageUrl,
+                                                      height: 160,
+                                                      width: double.infinity,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                    Positioned.fill(
+                                                      child: Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          gradient:
+                                                              LinearGradient(
+                                                            begin: Alignment
+                                                                .topCenter,
+                                                            end: Alignment
+                                                                .bottomCenter,
+                                                            colors: [
+                                                              Colors
+                                                                  .transparent,
+                                                              Colors.black
+                                                                  .withOpacity(
+                                                                      0.3),
+                                                            ],
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Positioned(
+                                                top: 12,
+                                                right: 12,
+                                                child: Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black
+                                                            .withOpacity(0.1),
+                                                        blurRadius: 8,
+                                                        offset:
+                                                            const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(Icons.star_rounded,
+                                                          color: Colors.amber,
+                                                          size: 16),
+                                                      const SizedBox(width: 3),
+                                                      Text(
+                                                        "4.8",
+                                                        style: TextStyle(
+                                                          color: Colors.black87,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          fontSize: 13,
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
-                                          Positioned(
-                                            top: 12,
-                                            right: 12,
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(20),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withOpacity(0.1),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-                                                  const SizedBox(width: 3),
-                                                  Text(
-                                                    "4.8",
-                                                    style: TextStyle(
-                                                      color: Colors.black87,
-                                                      fontWeight: FontWeight.w700,
-                                                      fontSize: 13,
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 4),
+                                                      decoration: BoxDecoration(
+                                                        color: primaryColor
+                                                            .withOpacity(0.1),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                      ),
+                                                      child: Text(
+                                                        "Featured",
+                                                        style: TextStyle(
+                                                          color: primaryColor,
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                      ),
                                                     ),
+                                                    const Spacer(),
+                                                    Text(
+                                                      "2 Months",
+                                                      style: TextStyle(
+                                                        color: Colors.grey[600],
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 12),
+                                                Text(
+                                                  program.title,
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Colors.black87,
+                                                    height: 1.2,
                                                   ),
-                                                ],
-                                              ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  program.description,
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.grey[600],
+                                                    height: 1.4,
+                                                  ),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: ElevatedButton(
+                                                        onPressed: () => Get.to(
+                                                            () =>
+                                                                ProgramDetailTest(
+                                                                  imageUrl: program
+                                                                      .imageUrl,
+                                                                  title: program
+                                                                      .title,
+                                                                  description:
+                                                                      program
+                                                                          .description,
+                                                                  benefits: program
+                                                                      .benefits,
+                                                                  howItWorks:
+                                                                      program
+                                                                          .howItWorks,
+                                                                  faqs: program
+                                                                      .faqs,
+                                                                )),
+                                                        style: ElevatedButton
+                                                            .styleFrom(
+                                                          backgroundColor:
+                                                              primaryColor,
+                                                          foregroundColor:
+                                                              Colors.white,
+                                                          elevation: 0,
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  vertical: 12),
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12),
+                                                          ),
+                                                        ),
+                                                        child: const Text(
+                                                          'View Details',
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 13,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Container(
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.grey[50],
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(12),
+                                                        border: Border.all(
+                                                          color:
+                                                              Colors.grey[200]!,
+                                                        ),
+                                                      ),
+                                                      child: IconButton(
+                                                        onPressed: () {
+                                                          Share.share(
+                                                              'Check out this program: ${program.title}');
+                                                        },
+                                                        icon: Icon(
+                                                          Icons.share_rounded,
+                                                          color: primaryColor,
+                                                          size: 20,
+                                                        ),
+                                                        constraints:
+                                                            const BoxConstraints(
+                                                          minWidth: 40,
+                                                          minHeight: 40,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                  decoration: BoxDecoration(
-                                                    color: primaryColor.withOpacity(0.1),
-                                                    borderRadius: BorderRadius.circular(20),
-                                                  ),
-                                                  child: Text(
-                                                    "Featured",
-                                                    style: TextStyle(
-                                                      color: primaryColor,
-                                                      fontSize: 12,
-                                                      fontWeight: FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const Spacer(),
-                                                Text(
-                                                  "2 Months",
-                                                  style: TextStyle(
-                                                    color: Colors.grey[600],
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 12),
-                                            Text(
-                                              program.title,
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.black87,
-                                                height: 1.2,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              program.description,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey[600],
-                                                height: 1.4,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: ElevatedButton(
-                                                    onPressed: () => Get.to(() => ProgramDetailTest(
-                                                      imageUrl: program.imageUrl,
-                                                      title: program.title,
-                                                      description: program.description,
-                                                      benefits: program.benefits,
-                                                      howItWorks: program.howItWorks,
-                                                      faqs: program.faqs,
-                                                    )),
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: primaryColor,
-                                                      foregroundColor: Colors.white,
-                                                      elevation: 0,
-                                                      padding: const EdgeInsets.symmetric(vertical: 12),
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(12),
-                                                      ),
-                                                    ),
-                                                    child: const Text(
-                                                      'View Details',
-                                                      style: TextStyle(
-                                                        fontWeight: FontWeight.w600,
-                                                        fontSize: 13,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 8),
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey[50],
-                                                    borderRadius: BorderRadius.circular(12),
-                                                    border: Border.all(
-                                                      color: Colors.grey[200]!,
-                                                    ),
-                                                  ),
-                                                  child: IconButton(
-                                                    onPressed: () {
-                                                      Share.share('Check out this program: ${program.title}');
-                                                    },
-                                                    icon: Icon(
-                                                      Icons.share_rounded,
-                                                      color: primaryColor,
-                                                      size: 20,
-                                                    ),
-                                                    constraints: const BoxConstraints(
-                                                      minWidth: 40,
-                                                      minHeight: 40,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                          ).toList(),
+                              )
+                              .toList(),
                           options: CarouselOptions(
                             height: 340,
                             autoPlay: true,
                             viewportFraction: 0.85,
                             autoPlayInterval: const Duration(seconds: 6),
-                            autoPlayAnimationDuration: const Duration(milliseconds: 1000),
+                            autoPlayAnimationDuration:
+                                const Duration(milliseconds: 1000),
                             autoPlayCurve: Curves.easeInOutCubic,
                             pauseAutoPlayOnTouch: true,
                           ),
@@ -363,7 +427,8 @@ class _HomeState extends State<Home> {
                     ),
                     const FeaturedCategory(),
                     Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -381,7 +446,8 @@ class _HomeState extends State<Home> {
                                 ),
                               ),
                               TextButton(
-                                onPressed: () => Get.to(() => LiveOpeningsScreen(showLeading: true)),
+                                onPressed: () => Get.to(() =>
+                                    LiveOpeningsScreen(showLeading: true)),
                                 child: Text(
                                   "View All",
                                   style: TextStyle(
@@ -400,19 +466,22 @@ class _HomeState extends State<Home> {
                               children: [
                                 _buildOpeningCard(
                                   title: 'Accountant',
-                                  description: 'Manage financial records and assist in audits.',
+                                  description:
+                                      'Manage financial records and assist in audits.',
                                   icon: Icons.account_balance,
                                   color: Colors.blue,
                                 ),
                                 _buildOpeningCard(
                                   title: 'Graphic Design',
-                                  description: 'Create visual content for marketing campaigns.',
+                                  description:
+                                      'Create visual content for marketing campaigns.',
                                   icon: Icons.palette,
                                   color: Colors.purple,
                                 ),
                                 _buildOpeningCard(
                                   title: 'Web Design',
-                                  description: 'Develop and maintain website layouts.',
+                                  description:
+                                      'Develop and maintain website layouts.',
                                   icon: Icons.computer,
                                   color: Colors.teal,
                                 ),
@@ -667,7 +736,7 @@ class _HomeState extends State<Home> {
           side: BorderSide(color: Colors.grey.shade200),
         ),
         child: InkWell(
-          onTap: () => Get.to(() =>  LiveOpeningsScreen(showLeading: true)),
+          onTap: () => Get.to(() => LiveOpeningsScreen(showLeading: true)),
           borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),

@@ -4,13 +4,12 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/nearby_jobs_screen.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
+import 'package:spires_app/Screens/quiz_listing.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/share_utils.dart';
 import '../../Resumes/cv_two.dart';
 import 'help_centre.dart';
 import '../../../Data/programs_data.dart';
-import '../../../Utils/program_utils.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class MyDrawer extends StatefulWidget {
   final Size size;
@@ -48,7 +47,8 @@ class _MyDrawerState extends State<MyDrawer> {
               GestureDetector(
                 onTap: () {
                   Get.back(); // Close drawer first
-                  c.selectedIndex.value = 4; // Use the existing controller instance
+                  c.selectedIndex.value =
+                      4; // Use the existing controller instance
                 },
                 child: Container(
                   padding: const EdgeInsets.all(defaultPadding),
@@ -196,18 +196,19 @@ class _MyDrawerState extends State<MyDrawer> {
                               'Digital Marketing': 'digitalocean',
                               'Graphic Designing': 'graphic-eq',
                               'Website Development': 'coding-website',
+                              'Quiz': 'Quiz',
                             };
-                            
+
                             return ListTile(
                               dense: true,
                               onTap: () => Get.to(() => ProgramDetailTest(
-                                imageUrl: program.imageUrl,
-                                title: program.title,
-                                description: program.description,
-                                benefits: program.benefits,
-                                faqs: program.faqs,
-                                howItWorks: program.howItWorks,
-                              )),
+                                    imageUrl: program.imageUrl,
+                                    title: program.title,
+                                    description: program.description,
+                                    benefits: program.benefits,
+                                    faqs: program.faqs,
+                                    howItWorks: program.howItWorks,
+                                  )),
                               leading: Image.asset(
                                 'assets/icons/${iconMap[program.title]}.png',
                                 color: primaryColor,
@@ -229,7 +230,8 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () => Get.to(() => const Jobs()),
-                          leading: Icon(Icons.work_outlined, color: primaryColor, size: 20),
+                          leading: Icon(Icons.work_outlined,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Jobs',
                             style: TextStyle(
@@ -243,7 +245,8 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () => Get.to(() => const Internship()),
-                          leading: Icon(Icons.workspace_premium, color: primaryColor, size: 20),
+                          leading: Icon(Icons.workspace_premium,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Internships',
                             style: TextStyle(
@@ -256,10 +259,26 @@ class _MyDrawerState extends State<MyDrawer> {
                         ),
                         ListTile(
                           dense: true,
-                          onTap: () => Get.to(() =>  NearbyJobsScreen()),
-                          leading: Icon(Icons.location_on, color: primaryColor, size: 20),
+                          onTap: () => Get.to(() => NearbyJobsScreen()),
+                          leading: Icon(Icons.location_on,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Nearby Jobs',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
+                        ),
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() => QuizListScreen()),
+                          leading: Icon(Icons.quiz_outlined,
+                              color: primaryColor, size: 20),
+                          title: Text(
+                            'Quiz',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.black87,
@@ -286,7 +305,8 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () => Get.to(() => const UpdatePassword()),
-                          leading: const Icon(Icons.lock_outline, color: primaryColor, size: 20),
+                          leading: const Icon(Icons.lock_outline,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Change Password',
                             style: TextStyle(
@@ -315,7 +335,8 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () => Get.to(() => const HelpCentre()),
-                          leading: const Icon(Icons.help_outline, color: primaryColor, size: 20),
+                          leading: const Icon(Icons.help_outline,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Help Center',
                             style: TextStyle(
@@ -329,7 +350,8 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () => openPrivacyPolicy(),
-                          leading: const Icon(Icons.privacy_tip_outlined, color: primaryColor, size: 20),
+                          leading: const Icon(Icons.privacy_tip_outlined,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Privacy Policy',
                             style: TextStyle(
@@ -343,7 +365,8 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () => openTermOfUse(),
-                          leading: const Icon(Icons.description_outlined, color: primaryColor, size: 20),
+                          leading: const Icon(Icons.description_outlined,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Terms & Conditions',
                             style: TextStyle(
@@ -357,7 +380,8 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () => openRefundPolicy(),
-                          leading: const Icon(Icons.currency_exchange, color: primaryColor, size: 20),
+                          leading: const Icon(Icons.currency_exchange,
+                              color: primaryColor, size: 20),
                           title: Text(
                             'Refund Policy',
                             style: TextStyle(
@@ -372,11 +396,10 @@ class _MyDrawerState extends State<MyDrawer> {
                     ),
                     ListTile(
                       dense: true,
-                      onTap: () => ShareUtils.shareAppLink(
-                        context,
-                        'https://play.google.com/store/apps/details?id=com.atc.spires_app&hl=en-IN'
-                      ),
-                      leading: const Icon(Icons.share_outlined, color: primaryColor, size: 20),
+                      onTap: () => ShareUtils.shareAppLink(context,
+                          'https://play.google.com/store/apps/details?id=com.atc.spires_app&hl=en-IN'),
+                      leading: const Icon(Icons.share_outlined,
+                          color: primaryColor, size: 20),
                       title: Text(
                         'Share App',
                         style: TextStyle(
@@ -390,7 +413,8 @@ class _MyDrawerState extends State<MyDrawer> {
                     ListTile(
                       dense: true,
                       onTap: () => logoutfn(),
-                      leading: const Icon(Icons.logout, color: primaryColor, size: 20),
+                      leading: const Icon(Icons.logout,
+                          color: primaryColor, size: 20),
                       title: Text(
                         'Logout',
                         style: TextStyle(
