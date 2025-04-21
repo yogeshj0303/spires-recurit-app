@@ -30,4 +30,13 @@ class SharedPrefs {
     c.isPhoneVerified.value = false;
     Get.offAll(() => LoginScreen(), transition: Transition.leftToRightWithFade);
   }
+
+  //get user data from shared preferences
+  static Future<void> getUserData() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    c.isSubscribed.value = preferences.getBool('is_subscribed') ?? false;
+    c.isEmailVerified.value = preferences.getBool('is_email_verified') ?? false;
+    c.isPhoneVerified.value = preferences.getBool('is_phone_verified') ?? false;
+  }
 }

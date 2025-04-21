@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:spires_app/Constants/exports.dart';
+import 'package:spires_app/Models/quiz_result_model.dart';
 import 'package:spires_app/Screens/games.dart';
 import 'package:intl/intl.dart';
+import 'package:spires_app/Models/quiz_model.dart';
+import 'package:spires_app/Services/api_service.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 class QuizListScreen extends StatefulWidget {
   const QuizListScreen({Key? key}) : super(key: key);
@@ -11,20 +16,39 @@ class QuizListScreen extends StatefulWidget {
 
 class _QuizListScreenState extends State<QuizListScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<Quiz> _filteredQuizzes = _quizList; // Start with all quizzes
+  List<Quiz> _quizList = []; // This now uses Quiz from quiz_model.dart
+  List<Quiz> _filteredQuizzes = [];
   final Color _primaryOrange = Colors.orange.shade400;
   final Color _accentOrange = Colors.orange.shade600;
+  bool _isLoading = true;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    _fetchQuizzes();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
+  Future<void> _fetchQuizzes() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final response = await ApiService.fetchQuizzes();
+      setState(() {
+        _quizList = response.data.quizzes;
+        _filteredQuizzes = _quizList;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
   void _onSearchChanged() {
@@ -33,7 +57,7 @@ class _QuizListScreenState extends State<QuizListScreen> {
       _filteredQuizzes = _quizList.where((quiz) {
         final titleMatch = quiz.title.toLowerCase().contains(query);
         final subtitleMatch =
-            quiz.subtitle?.toLowerCase().contains(query) ?? false;
+            false; // Removed subtitle check as it doesn't exist in Quiz
         final descriptionMatch =
             quiz.description?.toLowerCase().contains(query) ?? false;
         return titleMatch || subtitleMatch || descriptionMatch;
@@ -74,98 +98,48 @@ class _QuizListScreenState extends State<QuizListScreen> {
           ),
         ),
       ),
-      body: _filteredQuizzes.isEmpty
-          ? const Center(
-              child: Text('No quizzes found.', style: TextStyle(fontSize: 16)),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: _filteredQuizzes.length,
-              separatorBuilder: (BuildContext context, int index) =>
-                  const SizedBox(height: 12),
-              itemBuilder: (BuildContext context, int index) {
-                return QuizCard(
-                    quiz: _filteredQuizzes[index],
-                    primaryColor: _primaryOrange,
-                    accentColor: _accentOrange);
-              },
-            ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(_error!, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _fetchQuizzes,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _fetchQuizzes,
+                  child: _filteredQuizzes.isEmpty
+                      ? const Center(
+                          child: Text('No quizzes found.',
+                              style: TextStyle(fontSize: 16)),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _filteredQuizzes.length,
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (BuildContext context, int index) {
+                            return QuizCard(
+                                quiz: _filteredQuizzes[index],
+                                primaryColor: _primaryOrange,
+                                accentColor: _accentOrange);
+                          },
+                        ),
+                ),
       backgroundColor: Colors.white,
     );
   }
 }
 
-class Quiz {
-  final String title;
-  final String? subtitle;
-  final DateTime fromDate;
-  final DateTime toDate;
-  final int questions;
-  final int duration;
-  final String reward;
-  final String? description;
-
-  Quiz({
-    required this.title,
-    this.subtitle,
-    required this.fromDate,
-    required this.toDate,
-    required this.questions,
-    required this.duration,
-    required this.reward,
-    this.description,
-  });
-}
-
-final List<Quiz> _quizList = [
-  Quiz(
-    title: 'Eat Right Quiz on Obesity',
-    subtitle: 'Obesity Awareness',
-    fromDate: DateTime(2025, 4, 5),
-    toDate: DateTime(2025, 5, 5),
-    questions: 10,
-    duration: 300,
-    reward: 'E-Certificate',
-    description:
-        'The Eat Right Quiz on Obesity emerges from the nationwide conversation on obesity sparked by Honourable Prime Minister Shri Narendra Modi 3P\'s Mann Ki Bast address (episode 119), where he highlighted the growing concern and encouraged people to reduce their oil consumption by 10%.',
-  ),
-  Quiz(
-    title: 'Play True Quiz',
-    fromDate: DateTime(2025, 4, 1),
-    toDate: DateTime(2025, 4, 30),
-    questions: 10,
-    duration: 300,
-    reward: 'Exciting Prize',
-  ),
-  Quiz(
-    title: 'Play Cum (Uamors Celebrating Stress-Free Exams)',
-    fromDate: DateTime(2025, 3, 20),
-    toDate: DateTime(2025, 4, 30),
-    questions: 10,
-    duration: 300,
-    reward: 'E-Certificate',
-  ),
-  Quiz(
-    title: 'Quiz on Know about Crafts of India through the cottage',
-    fromDate: DateTime(2025, 3, 11),
-    toDate: DateTime(2025, 4, 30),
-    questions: 5,
-    duration: 300,
-    reward: 'Exciting Prize',
-  ),
-  Quiz(
-    title: 'Another Long Quiz Title to Test Overflow',
-    fromDate: DateTime(2025, 5, 1),
-    toDate: DateTime(2025, 5, 15),
-    questions: 15,
-    duration: 450,
-    reward: 'Special Badge',
-    description:
-        'This is a quiz with a longer title and a more detailed description to check how the layout handles longer text content.',
-  ),
-];
-
-class QuizCard extends StatelessWidget {
+class QuizCard extends StatefulWidget {
   final Quiz quiz;
   final Color primaryColor;
   final Color accentColor;
@@ -178,187 +152,330 @@ class QuizCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final formattedFromDate = DateFormat('MMM d, yyyy').format(quiz.fromDate);
-    final formattedToDate = DateFormat('MMM d, yyyy').format(quiz.toDate);
-    final durationInMinutes = quiz.duration ~/ 60;
+  State<QuizCard> createState() => _QuizCardState();
+}
 
-    return Card(
-      color: Colors.white,
-      shadowColor: Colors.grey.shade200,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+class _QuizCardState extends State<QuizCard> {
+  QuizResultDetail? _attempt;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAttempt();
+  }
+
+  Future<void> _loadAttempt() async {
+    try {
+      final results = await ApiService.fetchUserQuizResults(MyController.id);
+      if (!mounted) return;
+
+      setState(() {
+        try {
+          _attempt = results.quizzes.firstWhere(
+            (quiz) => quiz.quizId == widget.quiz.id,
+          );
+        } catch (e) {
+          _attempt = null;
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _attempt = null;
+      });
+    }
+  }
+
+  void _showResultDialog() {
+    if (_attempt == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.emoji_events_rounded, color: Colors.amber.shade400),
+            const SizedBox(width: 8),
+            const Text('Quiz Result'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (quiz.subtitle != null) ...[
-              Text(
-                quiz.subtitle!,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: accentColor,
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
             Text(
-              quiz.title,
+              'Score: ${_attempt!.calculateScore()}%',
               style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Starts: ',
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 14,
-                        ),
-                      ),
-                      TextSpan(
-                        text: formattedFromDate,
-                        style: TextStyle(
-                          color: Colors.green.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                RichText(
-                    text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Ends: ',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    TextSpan(
-                      text: formattedToDate,
-                      style: TextStyle(
-                        color: Colors.red.shade600,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                )),
-                // Text('Starts: $formattedFromDate',
-                //     style: TextStyle(color: Colors.green.shade600)),
-                // Text('Ends: $formattedToDate',
-                //     style: TextStyle(color: Colors.red.shade600)),
-              ],
+            const SizedBox(height: 8),
+            Text(
+              'Attempted: ${_attempt!.attemptedQuestions} of ${_attempt!.totalQuestions}',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+              ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInfoColumn(quiz.questions.toString(), 'Questions',
-                    Icons.question_mark_outlined, primaryColor),
-                _buildInfoColumn('$durationInMinutes min', 'Duration',
-                    Icons.timer_outlined, primaryColor),
-                Expanded(
-                  // Make reward text take available space
-                  child: Text(
-                    quiz.reward,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade700),
-                    overflow:
-                        TextOverflow.ellipsis, // Handle potential overflow
-                  ),
-                ),
-              ],
+            const SizedBox(height: 8),
+            Text(
+              'Completed on: ${DateFormat('MMM d, yyyy').format(_attempt!.participatedOn)}',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 14,
+              ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const QuizScreen()),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text('Play Now'),
-                  ),
+            if (_attempt!.certificateUrl != null) ...[
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () =>
+                    launchUrl(Uri.parse(_attempt!.certificateUrl!)),
+                icon: const Icon(Icons.download),
+                label: const Text('Download Certificate',
+                    style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade600,
                 ),
-                const SizedBox(width: 10),
-                OutlinedButton(
-                  onPressed: () {
-                    // Implement view T&C functionality
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: accentColor,
-                    side: BorderSide(color: accentColor),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('View T&C'),
-                ),
-              ],
-            ),
-            if (quiz.description != null) ...[
-              const SizedBox(height: 12),
-              Divider(thickness: 1, color: Colors.grey.shade200),
-              const SizedBox(height: 12),
-              Text(
-                quiz.description!,
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
               ),
             ],
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildInfoColumn(
-      String value, String label, IconData icon, Color color) {
-    return Expanded(
-      // Distribute space evenly
+  @override
+  Widget build(BuildContext context) {
+    final formattedFromDate = DateFormat('MMM d').format(widget.quiz.fromDate);
+    final formattedToDate = DateFormat('MMM d').format(widget.quiz.toDate);
+    final durationInMinutes = widget.quiz.duration;
+
+    return Card(
+      color: Colors.white,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title and Dates
+                Text(
+                  widget.quiz.title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildDetailChip(
+                        Icons.calendar_today_rounded,
+                        'Starts: $formattedFromDate',
+                        Colors.green.shade700,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _buildDetailChip(
+                        Icons.event_busy_rounded,
+                        'Ends: $formattedToDate',
+                        Colors.red.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Quiz Stats
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatItem(
+                        Icons.quiz_rounded,
+                        '${widget.quiz.questionsCount}',
+                        'Questions',
+                        widget.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildStatItem(
+                        Icons.timer_rounded,
+                        '$durationInMinutes',
+                        'Minutes',
+                        widget.primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Description
+                if (widget.quiz.description != null) ...[
+                  const SizedBox(height: 12),
+                  Html(
+                    data: widget.quiz.description!,
+                    style: {
+                      "p": Style(
+                        color: Colors.grey.shade800,
+                        fontSize: FontSize(13),
+                        lineHeight: LineHeight(1.4),
+                        margin: Margins.zero,
+                      ),
+                      "strong": Style(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    },
+                  ),
+                ],
+
+                // Buttons
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          if (_attempt == null) {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => QuizScreen(
+                                  quizId: widget.quiz.id,
+                                  onQuizComplete: (score) async {
+                                    // After quiz completion, refresh the attempt data
+                                    await _loadAttempt();
+                                  },
+                                ),
+                              ),
+                            );
+                            // Refresh after returning from quiz screen
+                            if (result == true) {
+                              await _loadAttempt();
+                            }
+                          } else {
+                            _showResultDialog();
+                          }
+                        },
+                        icon: Icon(
+                          _attempt == null
+                              ? Icons.play_arrow_rounded
+                              : Icons.bar_chart_rounded,
+                          size: 20,
+                        ),
+                        label: Text(
+                            _attempt == null ? 'Start Quiz' : 'View Result'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _attempt == null
+                              ? widget.primaryColor
+                              : Colors.green.shade600,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {},
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: widget.accentColor,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: BorderSide(color: widget.accentColor),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text('T&C'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailChip(IconData icon, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+      IconData icon, String value, String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(icon, color: color, size: 16),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
