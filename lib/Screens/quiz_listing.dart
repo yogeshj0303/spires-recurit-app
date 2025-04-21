@@ -189,62 +189,152 @@ class _QuizCardState extends State<QuizCard> {
   void _showResultDialog() {
     if (_attempt == null) return;
 
+    final score = _attempt!.calculateScore();
+    final correctAnswers =
+        _attempt!.result.where((q) => q.answerStatus == 'Correct').length;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         title: Row(
           children: [
-            Icon(Icons.emoji_events_rounded, color: Colors.amber.shade400),
-            const SizedBox(width: 8),
-            const Text('Quiz Result'),
+            Icon(Icons.check_circle_rounded,
+                color: Colors.green.shade400, size: 28),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Quiz Result',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Score: ${_attempt!.calculateScore()}%',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                Icon(
+                  Icons.emoji_events_rounded,
+                  color: Colors.amber.shade400,
+                  size: 48,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Score: $score%',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '$correctAnswers out of ${_attempt!.totalQuestions} correct',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Attempted: ${_attempt!.attemptedQuestions} of ${_attempt!.totalQuestions}',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 14,
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade200),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Completed on: ${DateFormat('MMM d, yyyy').format(_attempt!.participatedOn)}',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 14,
+              child: Column(
+                children: [
+                  _buildResultStatRow(
+                    'Questions Attempted',
+                    '${_attempt!.attemptedQuestions}/${_attempt!.totalQuestions}',
+                    Icons.question_answer_outlined,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildResultStatRow(
+                    'Completion Date',
+                    DateFormat('MMM d, yyyy').format(_attempt!.participatedOn),
+                    Icons.calendar_today_outlined,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildResultStatRow(
+                    'Accuracy',
+                    '${(correctAnswers / _attempt!.totalQuestions * 100).round()}%',
+                    Icons.analytics_outlined,
+                  ),
+                ],
               ),
             ),
             if (_attempt!.certificateUrl != null) ...[
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () =>
-                    launchUrl(Uri.parse(_attempt!.certificateUrl!)),
-                icon: const Icon(Icons.download),
-                label: const Text('Download Certificate',
-                    style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade600,
+              const SizedBox(height: 16), // Reduced from 20 to 16
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      launchUrl(Uri.parse(_attempt!.certificateUrl!)),
+                  icon: const Icon(Icons.download_rounded),
+                  label: const Text('Download Certificate'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green.shade600,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
             ],
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 0,
+              right: 0,
+              bottom: 0, // Add bottom padding
+              top: 0, // Remove top padding since content has spacing
+            ),
+            child: Container(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -474,6 +564,35 @@ class _QuizCardState extends State<QuizCard> {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResultStatRow(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: Colors.grey.shade600,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );

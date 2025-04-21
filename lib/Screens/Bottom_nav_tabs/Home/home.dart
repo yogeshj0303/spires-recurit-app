@@ -1,6 +1,11 @@
+import 'package:intl/intl.dart';
 import 'package:spires_app/Data/programs_data.dart';
 import 'package:spires_app/Model/logo_model.dart';
+import 'package:spires_app/Models/quiz_model.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
+import 'package:spires_app/Screens/games.dart';
+import 'package:spires_app/Screens/quiz_listing.dart';
+import 'package:spires_app/Services/api_service.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/banner.dart';
 import '../Drawer/programs_screen.dart';
@@ -17,10 +22,33 @@ class _HomeState extends State<Home> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final c = Get.put(MyController());
   final c1 = Get.put(NearbyJobController());
+
+  List<Quiz> _liveQuizzes = [];
+  bool _isLoadingQuizzes = false;
+
   @override
   void initState() {
     super.initState();
     c1.getJobs();
+    _fetchLiveQuizzes();
+  }
+
+  Future<void> _fetchLiveQuizzes() async {
+    setState(() {
+      _isLoadingQuizzes = true;
+    });
+
+    try {
+      final response = await ApiService.fetchQuizzes();
+      setState(() {
+        _liveQuizzes = response.data.quizzes;
+        _isLoadingQuizzes = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingQuizzes = false;
+      });
+    }
   }
 
   @override
@@ -425,6 +453,75 @@ class _HomeState extends State<Home> {
                         ),
                       ],
                     ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Live Contests",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800],
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Get.to(() => const QuizListScreen()),
+                                child: Text(
+                                  "View All",
+                                  style: TextStyle(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 190,
+                          child: _isLoadingQuizzes
+                              ? const Center(child: CircularProgressIndicator())
+                              : _liveQuizzes.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        'No live contests available',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: _liveQuizzes.length,
+                                      itemBuilder: (context, index) {
+                                        final quiz = _liveQuizzes[index];
+                                        return _buildContestCard(
+                                          title: quiz.title,
+                                          dateTime: DateFormat('MMM d, h:mm a')
+                                              .format(quiz.fromDate),
+                                          participants:
+                                              "${quiz.questionsCount} Questions",
+                                          prize: "${quiz.duration} mins",
+                                          color: _getColorForIndex(index),
+                                          icon: _getIconForIndex(index),
+                                          quiz: quiz,
+                                        );
+                                      },
+                                    ),
+                        ),
+                      ],
+                    ),
                     const FeaturedCategory(),
                     Container(
                       margin: const EdgeInsets.symmetric(
@@ -780,5 +877,180 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  Widget _buildContestCard({
+    required String title,
+    required String dateTime,
+    required String participants,
+    required String prize,
+    required Color color,
+    required IconData icon,
+    required Quiz quiz,
+  }) {
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Get.to(() => QuizListScreen()),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: color, size: 24),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.timer_outlined,
+                              color: Colors.red.shade700, size: 14),
+                          const SizedBox(width: 4),
+                          Text(
+                            'LIVE',
+                            style: TextStyle(
+                              color: Colors.red.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today_rounded,
+                        size: 14, color: Colors.grey[600]),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        dateTime,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade50,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.quiz_outlined,
+                              size: 14, color: Colors.grey[700]),
+                          const SizedBox(width: 4),
+                          Text(
+                            participants,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        prize,
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getColorForIndex(int index) {
+    final colors = [
+      Colors.blue[700]!,
+      Colors.green[700]!,
+      Colors.purple[700]!,
+      Colors.orange[700]!,
+      Colors.teal[700]!,
+    ];
+    return colors[index % colors.length];
+  }
+
+  IconData _getIconForIndex(int index) {
+    final icons = [
+      Icons.quiz_rounded,
+      Icons.psychology_rounded,
+      Icons.school_rounded,
+      Icons.lightbulb_rounded,
+      Icons.extension_rounded,
+    ];
+    return icons[index % icons.length];
   }
 }
