@@ -10,11 +10,13 @@ import 'dart:convert';
 
 class QuizScreen extends StatefulWidget {
   final int quizId;
+  final int duration; // Add this
   final Function(int score)? onQuizComplete;
 
   const QuizScreen({
     Key? key,
     required this.quizId,
+    required this.duration, // Add this
     this.onQuizComplete,
   }) : super(key: key);
 
@@ -28,7 +30,8 @@ class _QuizScreenState extends State<QuizScreen> {
   bool _isLoading = true;
   String? _error;
   late Timer _timer;
-  int timeRemaining = 300; // Example: 5 minutes in seconds
+  int timeRemaining = 0;
+  bool _hasTimedOut = false;
   late List<int?> selectedAnswers;
   late PageController _pageController;
   bool _isSubmitting = false;
@@ -37,6 +40,7 @@ class _QuizScreenState extends State<QuizScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
+    timeRemaining = widget.duration * 60; // Convert minutes to seconds
     _fetchQuestions();
   }
 
@@ -64,15 +68,64 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (timeRemaining > 0) {
-        setState(() {
+      if (!mounted) return;
+
+      setState(() {
+        if (timeRemaining > 0) {
           timeRemaining--;
-        });
-      } else {
-        timer.cancel();
-        // Handle quiz timeout
-      }
+        } else {
+          timer.cancel();
+          if (!_hasTimedOut) {
+            _hasTimedOut = true;
+            _handleTimeout();
+          }
+        }
+      });
     });
+  }
+
+  void _handleTimeout() {
+    if (_isSubmitting) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.timer_off_rounded, color: Colors.red.shade400),
+            const SizedBox(width: 12),
+            const Text('Time\'s Up!'),
+          ],
+        ),
+        content: const Text(
+          'Your time has expired. The quiz will be submitted with your current answers.',
+        ),
+        actions: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _proceedWithSubmission();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Submit Quiz'),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _nextQuestion() {
@@ -400,22 +453,43 @@ class _QuizScreenState extends State<QuizScreen> {
             )),
         elevation: 0,
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: Row(
-              children: [
-                Icon(Icons.timer_outlined,
-                    size: 20, color: Colors.grey.shade700),
-                const SizedBox(width: 4),
-                Text(
-                  formatTime(timeRemaining),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade700,
-                  ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: timeRemaining <= 60
+                    ? Colors.red.shade50
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: timeRemaining <= 60
+                      ? Colors.red.shade200
+                      : Colors.grey.shade200,
                 ),
-              ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.timer_outlined,
+                    size: 16,
+                    color: timeRemaining <= 60
+                        ? Colors.red.shade700
+                        : Colors.grey.shade700,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    formatTime(timeRemaining),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: timeRemaining <= 60
+                          ? Colors.red.shade700
+                          : Colors.grey.shade700,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

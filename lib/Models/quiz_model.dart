@@ -41,6 +41,7 @@ class Quiz {
   final String createdBy;
   final String? description;
   final String? quizquetionType;
+  final String? termscondition; // Add this field
   final DateTime createdAt;
   final DateTime updatedAt;
   final int? categoryId;
@@ -56,6 +57,7 @@ class Quiz {
     required this.createdBy,
     this.description,
     this.quizquetionType,
+    this.termscondition, // Add this parameter
     required this.createdAt,
     required this.updatedAt,
     this.categoryId,
@@ -73,6 +75,7 @@ class Quiz {
       createdBy: json['created_by'] ?? '',
       description: json['description'],
       quizquetionType: json['quizquetion_type'],
+      termscondition: json['termscondition'], // Parse termscondition
       createdAt: DateTime.parse(json['created_at'] ?? ''),
       updatedAt: DateTime.parse(json['updated_at'] ?? ''),
       categoryId: json['category_id'],

@@ -341,6 +341,124 @@ class _QuizCardState extends State<QuizCard> {
     );
   }
 
+  void _showTermsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: widget.primaryColor,
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.gavel_rounded, color: Colors.white, size: 24),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Terms & Conditions',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+            // Content
+            Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
+              ),
+              padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (widget.quiz.termscondition != null)
+                      Html(
+                        data: widget.quiz.termscondition!,
+                        style: {
+                          "p": Style(
+                            color: Colors.grey.shade800,
+                            fontSize: FontSize(14),
+                            lineHeight: LineHeight(1.5),
+                          ),
+                          "strong": Style(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          "ul": Style(
+                            margin: Margins.only(top: 8, bottom: 8),
+                          ),
+                          "li": Style(
+                            color: Colors.grey.shade800,
+                            fontSize: FontSize(14),
+                            lineHeight: LineHeight(1.5),
+                          ),
+                        },
+                      )
+                    else
+                      Text(
+                        'No terms and conditions available.',
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            // Footer
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.primaryColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Close',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final formattedFromDate = DateFormat('MMM d').format(widget.quiz.fromDate);
@@ -447,14 +565,14 @@ class _QuizCardState extends State<QuizCard> {
                               MaterialPageRoute(
                                 builder: (context) => QuizScreen(
                                   quizId: widget.quiz.id,
+                                  duration:
+                                      widget.quiz.duration, // Pass the duration
                                   onQuizComplete: (score) async {
-                                    // After quiz completion, refresh the attempt data
                                     await _loadAttempt();
                                   },
                                 ),
                               ),
                             );
-                            // Refresh after returning from quiz screen
                             if (result == true) {
                               await _loadAttempt();
                             }
@@ -481,8 +599,10 @@ class _QuizCardState extends State<QuizCard> {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {},
+                      child: OutlinedButton.icon(
+                        onPressed: _showTermsDialog,
+                        icon: const Icon(Icons.gavel_rounded, size: 18),
+                        label: const Text('T&C'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: widget.accentColor,
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -491,7 +611,6 @@ class _QuizCardState extends State<QuizCard> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text('T&C'),
                       ),
                     ),
                   ],
