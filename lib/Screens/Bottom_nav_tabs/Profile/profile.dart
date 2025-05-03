@@ -20,6 +20,10 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    
+    // Cache the guest mode value before build to avoid changes during build
+    final isGuestMode = c.isGuestMode.value;
+    
     return AnnotatedRegion(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -29,9 +33,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       ),
       child: Scaffold(
         body: SafeArea(
-          child: Obx(() => c.isGuestMode.value 
+          // Use a simpler approach that doesn't rely on Obx during build
+          child: isGuestMode 
             ? _buildGuestModeView()
-            : _buildNormalProfileView()),
+            : _buildNormalProfileView(),
         ),
       ),
     );
@@ -39,6 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   
   Widget _buildGuestModeView() {
     return Center(
+      key: const PageStorageKey<String>('profile_guest_view'),
       child: Container(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -132,6 +138,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   
   Widget _buildNormalProfileView() {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      key: const PageStorageKey<String>('profile_normal_view'),
       child: Column(
         children: [
           const ProfileCard(),
@@ -142,7 +150,6 @@ class _ProfileScreenState extends State<ProfileScreen>
           Education(),
           Skills(),
           CvCard(),
-          // const SizedBox(height: defaultPadding),
           // Add Quiz Results Button
           Padding(
             padding: const EdgeInsets.symmetric(

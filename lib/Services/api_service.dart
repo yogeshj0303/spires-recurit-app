@@ -218,4 +218,34 @@ class ApiService {
       throw Exception('Failed to fetch counsellors: $e');
     }
   }
+
+  static Future<Map<String, dynamic>> registerForQuiz(Map<String, dynamic> registrationData) async {
+    try {
+      final response = await makeRequest(
+        'https://www.spiresrecruit.com/api/register-quiz-user',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(registrationData),
+      );
+
+      final responseData = jsonDecode(response.body);
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return responseData;
+      } else {
+        return {
+          'status': false,
+          'message': responseData['message'] ?? 'Registration failed. Please try again.',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': false,
+        'message': 'An error occurred during registration: $e',
+      };
+    }
+  }
 }

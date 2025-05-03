@@ -5,6 +5,7 @@
    <application
         android:label="Spires Recruit - Your Career Partner"
         android:name="${applicationName}"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/launcher_icon">
         <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyAiL9sFcYEK38Gj1JdLW8d0rU_8w_goIYs"/>

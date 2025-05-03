@@ -50,4 +50,14 @@ class SharedPrefs {
     c.isEmailVerified.value = preferences.getBool('is_email_verified') ?? false;
     c.isPhoneVerified.value = preferences.getBool('is_phone_verified') ?? false;
   }
+
+  static Future<void> saveFcmToken(String token) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString('fcm_token', token);
+  }
+
+  static Future<String?> getFcmToken() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    return preferences.getString('fcm_token');
+  }
 }

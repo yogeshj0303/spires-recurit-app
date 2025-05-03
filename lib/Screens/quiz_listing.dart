@@ -6,9 +6,6 @@ import 'package:intl/intl.dart';
 import 'package:spires_app/Models/quiz_model.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:spires_app/Screens/Auth_Screens/login_screen.dart';
 
 class QuizListScreen extends StatefulWidget {
   const QuizListScreen({Key? key}) : super(key: key);
@@ -160,15 +157,11 @@ class QuizCard extends StatefulWidget {
 
 class _QuizCardState extends State<QuizCard> {
   QuizResultDetail? _attempt;
-  final c = Get.put(MyController());
 
   @override
   void initState() {
     super.initState();
-    // Only load attempts if not in guest mode
-    if (!c.isGuestMode.value) {
-      _loadAttempt();
-    }
+    _loadAttempt();
   }
 
   Future<void> _loadAttempt() async {
@@ -566,26 +559,14 @@ class _QuizCardState extends State<QuizCard> {
                       flex: 2,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          // Check if in guest mode
-                          if (c.isGuestMode.value) {
-                            // Navigate directly to registration form via QuizScreen
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => QuizScreen(
-                                  quizId: widget.quiz.id,
-                                  duration: widget.quiz.duration,
-                                  onQuizComplete: null,
-                                ),
-                              ),
-                            );
-                          } else if (_attempt == null) {
+                          if (_attempt == null) {
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => QuizScreen(
                                   quizId: widget.quiz.id,
-                                  duration: widget.quiz.duration,
+                                  duration:
+                                      widget.quiz.duration, // Pass the duration
                                   onQuizComplete: (score) async {
                                     await _loadAttempt();
                                   },
@@ -600,24 +581,17 @@ class _QuizCardState extends State<QuizCard> {
                           }
                         },
                         icon: Icon(
-                          c.isGuestMode.value
-                              ? Icons.app_registration_rounded
-                              : (_attempt == null
-                                  ? Icons.play_arrow_rounded
-                                  : Icons.bar_chart_rounded),
+                          _attempt == null
+                              ? Icons.play_arrow_rounded
+                              : Icons.bar_chart_rounded,
                           size: 20,
                         ),
                         label: Text(
-                          c.isGuestMode.value
-                              ? 'Register'
-                              : (_attempt == null ? 'Start Quiz' : 'View Result')
-                        ),
+                            _attempt == null ? 'Start Quiz' : 'View Result'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: c.isGuestMode.value
-                              ? Colors.blue.shade600
-                              : (_attempt == null
-                                  ? widget.primaryColor
-                                  : Colors.green.shade600),
+                          backgroundColor: _attempt == null
+                              ? widget.primaryColor
+                              : Colors.green.shade600,
                           foregroundColor: Colors.white,
                           elevation: 0,
                         ),

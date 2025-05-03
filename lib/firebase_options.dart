@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAfveIn4PcqoN4CU7e0TKd1qoa4f9NzHvA',
-    appId: '1:922688829251:web:846921ba50c77f8cd7e1f6',
-    messagingSenderId: '922688829251',
-    projectId: 'spires-2bdda',
-    authDomain: 'spires-2bdda.firebaseapp.com',
-    storageBucket: 'spires-2bdda.appspot.com',
-    measurementId: 'G-33T8NTELJE',
+    apiKey: 'AIzaSyCCl78JfhiKi3jBROr0z2ZZrKMVgRBe90U',
+    appId: '1:140810524533:web:1efa34cc7df0cc0671253c',
+    messagingSenderId: '140810524533',
+    projectId: 'spires-recruit',
+    authDomain: 'spires-recruit.firebaseapp.com',
+    storageBucket: 'spires-recruit.firebasestorage.app',
+    measurementId: 'G-GGD2KETD3L',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBOjg3aE5OSlV6oAhfYsWJ8aYSLfjfysrw',
-    appId: '1:922688829251:android:7e1990fe95621ce0d7e1f6',
-    messagingSenderId: '922688829251',
-    projectId: 'spires-2bdda',
-    storageBucket: 'spires-2bdda.appspot.com',
+    apiKey: 'AIzaSyAwnSyBy-8MATRosfViST-zq6jSJbrlQo0',
+    appId: '1:140810524533:android:c4c037ceace83ca371253c',
+    messagingSenderId: '140810524533',
+    projectId: 'spires-recruit',
+    storageBucket: 'spires-recruit.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCXAeCtSS9MaJe0BESXHa7deCrdLejd33E',
-    appId: '1:922688829251:ios:5105a4c255c889a2d7e1f6',
-    messagingSenderId: '922688829251',
-    projectId: 'spires-2bdda',
-    storageBucket: 'spires-2bdda.appspot.com',
-    iosBundleId: 'com.example.spiresApp',
+    apiKey: 'AIzaSyCpFk5jB_1i_EZCc4vrUcRd8ryCg0mgXd8',
+    appId: '1:140810524533:ios:f01f76cb307719ef71253c',
+    messagingSenderId: '140810524533',
+    projectId: 'spires-recruit',
+    storageBucket: 'spires-recruit.firebasestorage.app',
+    iosBundleId: 'com.atc.spiresApp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCXAeCtSS9MaJe0BESXHa7deCrdLejd33E',
-    appId: '1:922688829251:ios:5105a4c255c889a2d7e1f6',
-    messagingSenderId: '922688829251',
-    projectId: 'spires-2bdda',
-    storageBucket: 'spires-2bdda.appspot.com',
+    apiKey: 'AIzaSyCpFk5jB_1i_EZCc4vrUcRd8ryCg0mgXd8',
+    appId: '1:140810524533:ios:61d35de325f5603e71253c',
+    messagingSenderId: '140810524533',
+    projectId: 'spires-recruit',
+    storageBucket: 'spires-recruit.firebasestorage.app',
     iosBundleId: 'com.example.spiresApp',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAfveIn4PcqoN4CU7e0TKd1qoa4f9NzHvA',
-    appId: '1:922688829251:web:0e21ad4a6bab67b2d7e1f6',
-    messagingSenderId: '922688829251',
-    projectId: 'spires-2bdda',
-    authDomain: 'spires-2bdda.firebaseapp.com',
-    storageBucket: 'spires-2bdda.appspot.com',
-    measurementId: 'G-XK7K65Q0R9',
+    apiKey: 'AIzaSyCCl78JfhiKi3jBROr0z2ZZrKMVgRBe90U',
+    appId: '1:140810524533:web:ce4b54d015f3fc6271253c',
+    messagingSenderId: '140810524533',
+    projectId: 'spires-recruit',
+    authDomain: 'spires-recruit.firebaseapp.com',
+    storageBucket: 'spires-recruit.firebasestorage.app',
+    measurementId: 'G-ZC9WHT0XHR',
   );
+
 }

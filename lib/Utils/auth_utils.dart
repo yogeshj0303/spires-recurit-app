@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:http/http.dart' as http;
+import 'package:spires_app/Utils/notification_utils.dart';
 
 import '../Screens/Main_Screens/main_screen.dart';
 
@@ -29,10 +31,14 @@ class AuthUtils {
       required String email,
       required String pass,
       required String phone}) async {
-    final url =
-        '${apiUrl}employee-signup?fname=$fname&lname=$lname&email=$email&password=$pass&phone_number=$phone';
     c.isRegLoading.value = true;
     c.isGuestMode.value = false;
+    
+    // Get FCM token
+    String fcmToken = await NotificationUtils.getFcmToken();
+    
+    final url =
+        '${apiUrl}employee-signup?fname=$fname&lname=$lname&email=$email&password=$pass&phone_number=$phone&fcm_token=$fcmToken';
     
     final response = await http.post(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -63,9 +69,14 @@ class AuthUtils {
 
   static Future<void> getLogin(
       {required String email, required String pass}) async {
-    final url = '${apiUrl}employee-login?email=$email&password=$pass';
     c.isLoginLoading.value = true;
     c.isGuestMode.value = false;
+    
+    // Get FCM token
+    String fcmToken = await NotificationUtils.getFcmToken();
+    print('FCM Token: $fcmToken');
+    
+    final url = '${apiUrl}employee-login?email=$email&password=$pass&fcm_token=$fcmToken';
     
     final response = await http.post(Uri.parse(url));
     if (response.statusCode == 200) {
@@ -214,6 +225,9 @@ class AuthUtils {
     final String givenName = googleUser.displayName?.split(' ').first ?? '';
     final String familyName = googleUser.displayName?.split(' ').last ?? '';
     final String picture = googleUser.photoUrl ?? '';
+    
+    // Get FCM token
+    String fcmToken = await NotificationUtils.getFcmToken();
 
     final response = await http.post(
       Uri.parse(_apiUrl),
@@ -226,6 +240,7 @@ class AuthUtils {
         'given_name': givenName,
         'family_name': familyName,
         'picture': picture,
+        'fcm_token': fcmToken,
       }),
     );
 
