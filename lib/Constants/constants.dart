@@ -261,6 +261,33 @@ List<ListTileModel> myProfileList = [
 ];
 
 bool isValidToApply() {
+  // First check if user is in guest mode
+  if (controller.isGuestMode.value) {
+    // Show dialog asking user to sign in
+    Get.defaultDialog(
+      title: 'Sign In Required',
+      middleText: 'You need to sign in to apply for jobs. Would you like to sign in now?',
+      confirmTextColor: whiteColor,
+      confirm: myButton(
+        onPressed: () {
+          Get.back(); // Close dialog
+          Get.to(() => LoginScreen(), transition: Transition.rightToLeft); // Navigate to login
+        },
+        label: 'Sign In',
+        color: primaryColor,
+        style: normalWhiteText,
+      ),
+      cancel: myButton(
+        onPressed: () => Get.back(),
+        label: 'Cancel',
+        color: Colors.grey[400]!,
+        style: normalWhiteText,
+      ),
+    );
+    return false;
+  }
+  
+  // If not in guest mode, check the profile completion
   if (controller.progressValue.value >= 70) {
     if (controller.isEmailVerified.value || MyController.veriEmail == '1') {
       if (controller.isPhoneVerified.value || MyController.veriPhone == '1') {

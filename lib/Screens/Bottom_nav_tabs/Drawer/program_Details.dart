@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../Constants/exports.dart';
 import '../../../Controllers/my_controller.dart';
+import '../../../Screens/Auth_Screens/login_screen.dart';
 
 class ProgramDetailScreen extends StatefulWidget {
 
@@ -24,6 +26,23 @@ class ProgramDetailScreen extends StatefulWidget {
 
 class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
   Future<void> inquire(String programName, String userId) async {
+    // Check if user is in guest mode
+    if (c.isGuestMode.value) {
+      // Show simplified dialog asking user to sign in
+      Get.defaultDialog(
+        title: 'Sign In Required',
+        middleText: 'You need to sign in to send an inquiry about this program.',
+        textConfirm: 'Sign In',
+        textCancel: 'Cancel',
+        confirmTextColor: Colors.white,
+        onConfirm: () {
+          Get.back();
+          Get.offAll(() => LoginScreen());
+        },
+      );
+      return;
+    }
+    
     var headers = {
       'Authorization': 'Bearer sk-proj-lvOy2JU3EbHjOlkGjHMZT3BlbkFJbPIDfmDJQk89WcagsYgr'
     };
@@ -100,7 +119,26 @@ class _ProgramDetailScreenState extends State<ProgramDetailScreen> {
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // Check if user is in guest mode
+                      if (c.isGuestMode.value) {
+                        // Show simplified dialog asking user to sign in
+                        Get.defaultDialog(
+                          title: 'Sign In Required',
+                          middleText: 'You need to sign in to make a payment.',
+                          textConfirm: 'Sign In',
+                          textCancel: 'Cancel',
+                          confirmTextColor: Colors.white,
+                          onConfirm: () {
+                            Get.back();
+                            Get.offAll(() => LoginScreen());
+                          },
+                        );
+                      } else {
+                        // Handle payment logic for signed-in users
+                        // Add payment implementation here
+                      }
+                    },
                     child: const Text('Pay Now', style: TextStyle(color: Colors.white)),
                   ),
                 ),

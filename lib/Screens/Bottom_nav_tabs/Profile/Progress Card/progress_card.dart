@@ -1,17 +1,45 @@
 import '../../../../Constants/exports.dart';
 
-class ProgressCard extends StatelessWidget {
+class ProgressCard extends StatefulWidget {
   ProgressCard({super.key});
+
+  @override
+  State<ProgressCard> createState() => _ProgressCardState();
+}
+
+class _ProgressCardState extends State<ProgressCard> {
   final c = Get.put(MyController());
+  
+  @override
+  void initState() {
+    super.initState();
+    // Update the state values in initState instead of during build
+    updateProgressPoints();
+  }
+  
+  void updateProgressPoints() {
+    // Set email points based on verification status
+    if (MyController.veriEmail == '1') {
+      c.emailPoints.value = 15.00;
+    } else {
+      c.emailPoints.value = 0.00;
+    }
+    
+    // Set phone points based on verification status
+    if (MyController.veriPhone == '1') {
+      c.phonePoints.value = 15.00;
+    } else {
+      c.phonePoints.value = 0.00;
+    }
+    
+    // Calculate total progress
+    c.getProgressValue();
+  }
+  
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    MyController.veriEmail == '1'
-        ? c.emailPoints.value = 15.00
-        : c.emailPoints.value = 0.00;
-    MyController.veriPhone == '1'
-        ? c.phonePoints.value = 15.00
-        : c.phonePoints.value = 0.00;
+    
     return Container(
       width: size.width,
       color: primaryColor.withOpacity(0.2),
@@ -30,7 +58,6 @@ class ProgressCard extends StatelessWidget {
   }
 
   Container buildProgress(Size size) {
-    c.getProgressValue();
     return Container(
       margin: const EdgeInsets.fromLTRB(8, 8, 0, 8),
       width: size.width * 0.3,

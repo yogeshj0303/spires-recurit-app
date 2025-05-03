@@ -23,11 +23,22 @@ class SharedPrefs {
 
   static Future<void> logout() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.clear();
+    
+    // First clear all shared preferences
+    await preferences.clear();
+    
+    // Reset essential controller values
     c.selectedIndex.value = 0;
     c.isSubscribed.value = false;
     c.isEmailVerified.value = false;
     c.isPhoneVerified.value = false;
+    c.isGuestMode.value = false;
+    
+    // Reset any additional controller values that might be persisted
+    c.authEmail.value = '';
+    c.authPass.value = '';
+    
+    // Navigate to login screen
     Get.offAll(() => LoginScreen(), transition: Transition.leftToRightWithFade);
   }
 

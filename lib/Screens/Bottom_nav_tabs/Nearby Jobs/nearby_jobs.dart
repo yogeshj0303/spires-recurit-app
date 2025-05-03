@@ -195,4 +195,98 @@ class _NearbyJobsState extends State<NearbyJobs> {
       ),
     );
   }
+  
+  Widget filterJobCard(List<Data> filterData, int index, Size size) {
+    final item = filterData[index];
+    return Container(
+      padding: const EdgeInsets.all(defaultPadding),
+      margin: const EdgeInsets.only(
+          bottom: defaultMargin, left: defaultMargin, right: defaultMargin),
+      decoration: BoxDecoration(
+        color: whiteColor,
+        borderRadius: borderRadius,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          activelyHiring(),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: size.width * 0.55,
+                    child: Text(
+                      item.jobTitle!,
+                      style: mediumBoldText,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(item.admin?.username ?? "Unknown Company", style: normalLightText),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Image.asset(homeFilled, height: 16),
+              const SizedBox(width: 8),
+              Text(item.jobType ?? "", style: smallLightText),
+              const Spacer(),
+              const Icon(Icons.payments, color: primaryColor, size: 16),
+              const SizedBox(width: 8),
+              Text(item.salary != null ? '₹${item.salary} p.a.' : 'Not specified',
+                  style: smallLightText),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Image.asset(jobsfilled, height: 16),
+              const SizedBox(width: 8),
+              Text('${item.experience ?? "0"}+ years experience', style: smallLightText),
+              const Spacer(),
+              const Icon(Icons.location_on, color: primaryColor, size: 16),
+              const SizedBox(width: 8),
+              Text(item.location ?? "Remote", style: smallLightText),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              MyContainer(
+                padding: const EdgeInsets.symmetric(
+                    vertical: defaultPadding * 0.5, horizontal: defaultPadding),
+                color: primaryColor.withOpacity(0.2),
+                child: Text('Job', style: xsmallText),
+              ),
+              const Spacer(),
+              InkWell(
+                onTap: () => shareJobs(item.id!.toInt()),
+                child: const Icon(Icons.share, size: 20),
+              )
+            ],
+          ),
+          const Divider(color: Colors.black26),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () => Get.to(() => FilteredJobDetails(snapshot: filterData, index: index)),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text('View Details', style: normalColorText),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

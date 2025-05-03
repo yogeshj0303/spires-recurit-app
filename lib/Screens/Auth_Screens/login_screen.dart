@@ -206,6 +206,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: size.height * 0.065,
                           child: loginButton(),
                         ),
+                        SizedBox(height: size.height * 0.02),
+                        // Continue as Guest button
+                        continueAsGuestButton(),
                         const Spacer(),
                         donthaveAccount(),
                         SizedBox(height: size.height * 0.02),
@@ -244,6 +247,8 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: () {
         final isValid = loginKey.currentState!.validate();
         if (isValid) {
+          // Set guest mode to false when logging in
+          c.isGuestMode.value = false;
           AuthUtils.getLogin(
               email: emailController.text, pass: passController.text);
         }
@@ -254,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        // padding: const EdgeInsets.symmetric(vertical: 16),
       ),
       child: Text(
         "Login",
@@ -262,6 +267,37 @@ class _LoginScreenState extends State<LoginScreen> {
           fontSize: 16,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget continueAsGuestButton() {
+    return Container(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () {
+          // Set guest mode
+          c.isGuestMode.value = true;
+          
+          // Navigate to main screen
+          Get.offAll(() => MainScreen());
+        },
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: Colors.grey[300]!),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        child: Text(
+          "Continue as Guest",
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[700],
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
         ),
       ),
     );

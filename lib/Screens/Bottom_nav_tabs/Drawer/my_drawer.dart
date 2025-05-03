@@ -45,130 +45,15 @@ class _MyDrawerState extends State<MyDrawer> {
         body: SafeArea(
           child: Column(
             children: [
-              GestureDetector(
-                onTap: () {
-                  Get.back(); // Close drawer first
-                  c.selectedIndex.value =
-                      4; // Use the existing controller instance
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(defaultPadding),
-                  height: 100,
-                  width: widget.size.width,
-                  decoration: const BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(profileBanner), fit: BoxFit.cover),
-                      color: bannerBgColor),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Obx(
-                        () => Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            profilePic(),
-                            if (c.isSubscribed.value ||
-                                MyController.subscribed == '1')
-                              Container(
-                                height: 24,
-                                margin: const EdgeInsets.only(top: 4),
-                                child: myButton(
-                                  onPressed: () => Get.to(() => ResumeScreen()),
-                                  label: 'Build Instant CV',
-                                  color: Colors.white12,
-                                  style: smallWhiteText,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: widget.size.width * 0.04),
-                      Expanded(
-                        child: Obx(
-                          () => Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      '${MyController.userFirstName} ${MyController.userLastName}',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: whiteColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: fontFamily,
-                                      ),
-                                    ),
-                                  ),
-                                  if (c.isSubscribed.value ||
-                                      MyController.subscribed == '1')
-                                    const Padding(
-                                      padding: EdgeInsets.only(left: 4),
-                                      child: Icon(
-                                        Icons.workspace_premium,
-                                        color: whiteColor,
-                                        size: 18,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                MyController.userEmail,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: whiteColor,
-                                  fontFamily: fontFamily,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                MyController.userPhone,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: whiteColor,
-                                  fontFamily: fontFamily,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              Obx(() => c.isGuestMode.value 
+                ? _buildGuestHeader()
+                : _buildUserHeader()),
               const SizedBox(
                 height: 10,
               ),
               Expanded(
                 child: ListView(
                   children: [
-                    // ListTile(
-                    //   dense: true,
-                    //   onTap: () {
-                    //     Get.back();
-                    //     c.selectedIndex.value = 4;
-                    //   },
-                    //   leading: const Icon(
-                    //     CupertinoIcons.person_fill,
-                    //     color: primaryColor,
-                    //     size: 20,
-                    //   ),
-                    //   title: Text(
-                    //     'My Profile',
-                    //     style: TextStyle(
-                    //       fontSize: 14,
-                    //       color: Colors.black87,
-                    //       fontWeight: FontWeight.w500,
-                    //       fontFamily: fontFamily,
-                    //     ),
-                    //   ),
-                    // ),
-                    // const Divider(height: 1),
                     ExpansionTile(
                       initiallyExpanded: true,
                       title: Text(
@@ -308,36 +193,9 @@ class _MyDrawerState extends State<MyDrawer> {
                         ),
                       ],
                     ),
-                    ExpansionTile(
-                      initiallyExpanded: true,
-                      title: Text(
-                        'ACCOUNT SETTINGS',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                          fontFamily: fontFamily,
-                        ),
-                      ),
-                      children: [
-                        ListTile(
-                          dense: true,
-                          onTap: () => Get.to(() => const UpdatePassword()),
-                          leading: const Icon(Icons.lock_outline,
-                              color: primaryColor, size: 20),
-                          title: Text(
-                            'Change Password',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: fontFamily,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    Obx(() => c.isGuestMode.value 
+                      ? _buildGuestOptions()
+                      : _buildUserOptions()),
                     ExpansionTile(
                       initiallyExpanded: true,
                       title: Text(
@@ -429,21 +287,9 @@ class _MyDrawerState extends State<MyDrawer> {
                         ),
                       ),
                     ),
-                    ListTile(
-                      dense: true,
-                      onTap: () => logoutfn(),
-                      leading: const Icon(Icons.logout,
-                          color: primaryColor, size: 20),
-                      title: Text(
-                        'Logout',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: fontFamily,
-                        ),
-                      ),
-                    ),
+                    Obx(() => c.isGuestMode.value 
+                      ? _buildSignInOption()
+                      : _buildLogoutOption()),
                   ],
                 ),
               ),
@@ -461,6 +307,281 @@ class _MyDrawerState extends State<MyDrawer> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildGuestHeader() {
+    return Container(
+      padding: const EdgeInsets.all(defaultPadding),
+      height: 100,
+      width: widget.size.width,
+      decoration: const BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage(profileBanner), fit: BoxFit.cover),
+          color: bannerBgColor),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            height: 60,
+            width: 60,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.2),
+            ),
+            child: Icon(
+              Icons.account_circle_outlined,
+              color: Colors.white,
+              size: 40,
+            ),
+          ),
+          SizedBox(width: widget.size.width * 0.04),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Guest Mode',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: whiteColor,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: fontFamily,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  height: 30,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Get.back();
+                      Get.to(() => LoginScreen(), transition: Transition.rightToLeft);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Sign In',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildUserHeader() {
+    return GestureDetector(
+      onTap: () {
+        Get.back(); // Close drawer first
+        c.selectedIndex.value =
+            4; // Use the existing controller instance
+      },
+      child: Container(
+        padding: const EdgeInsets.all(defaultPadding),
+        height: 100,
+        width: widget.size.width,
+        decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(profileBanner), fit: BoxFit.cover),
+            color: bannerBgColor),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Obx(
+              () => Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  profilePic(),
+                  if (c.isSubscribed.value ||
+                      MyController.subscribed == '1')
+                    Container(
+                      height: 24,
+                      margin: const EdgeInsets.only(top: 4),
+                      child: myButton(
+                        onPressed: () => Get.to(() => ResumeScreen()),
+                        label: 'Build Instant CV',
+                        color: Colors.white12,
+                        style: smallWhiteText,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            SizedBox(width: widget.size.width * 0.04),
+            Expanded(
+              child: Obx(
+                () => Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${MyController.userFirstName} ${MyController.userLastName}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: whiteColor,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
+                        ),
+                        if (c.isSubscribed.value ||
+                            MyController.subscribed == '1')
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4),
+                            child: Icon(
+                              Icons.workspace_premium,
+                              color: whiteColor,
+                              size: 18,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      MyController.userEmail,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: whiteColor,
+                        fontFamily: fontFamily,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      MyController.userPhone,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: whiteColor,
+                        fontFamily: fontFamily,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildGuestOptions() {
+    return ListTile(
+      dense: true,
+      onTap: () {
+        Get.back();
+        Get.to(() => SignUpScreen(), transition: Transition.rightToLeft);
+      },
+      leading: const Icon(
+        Icons.person_add_outlined,
+        color: primaryColor,
+        size: 20,
+      ),
+      title: Text(
+        'Create Account',
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildUserOptions() {
+    return ExpansionTile(
+      initiallyExpanded: true,
+      title: Text(
+        'ACCOUNT SETTINGS',
+        style: TextStyle(
+          fontSize: 12,
+          color: Colors.grey[600],
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+          fontFamily: fontFamily,
+        ),
+      ),
+      children: [
+        ListTile(
+          dense: true,
+          onTap: () => Get.to(() => const UpdatePassword()),
+          leading: const Icon(Icons.lock_outline,
+              color: primaryColor, size: 20),
+          title: Text(
+            'Change Password',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+              fontFamily: fontFamily,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildSignInOption() {
+    return ListTile(
+      dense: true,
+      onTap: () {
+        Get.back();
+        Get.to(() => LoginScreen(), transition: Transition.rightToLeft);
+      },
+      leading: const Icon(
+        Icons.login,
+        color: primaryColor,
+        size: 20,
+      ),
+      title: Text(
+        'Sign In',
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildLogoutOption() {
+    return ListTile(
+      dense: true,
+      onTap: () => logoutfn(),
+      leading: const Icon(
+        Icons.logout,
+        color: primaryColor,
+        size: 20,
+      ),
+      title: Text(
+        'Logout',
+        style: TextStyle(
+          fontSize: 14,
+          color: Colors.black87,
+          fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
         ),
       ),
     );

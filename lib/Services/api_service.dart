@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:spires_app/Constants/exports.dart';
+import 'package:spires_app/Models/counsellor_model.dart';
 import 'package:spires_app/Models/question_model.dart';
 import 'package:spires_app/Models/quiz_model.dart';
 import 'package:spires_app/Models/quiz_result_model.dart';
@@ -194,6 +195,27 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Failed to submit quiz: $e');
+    }
+  }
+
+  static Future<CounsellorsResponse> fetchCounsellors() async {
+    try {
+      final response = await makeRequest(
+        'https://spiresrecruit.com/api/career-counsellors',
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return CounsellorsResponse.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to load counsellors: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch counsellors: $e');
     }
   }
 }

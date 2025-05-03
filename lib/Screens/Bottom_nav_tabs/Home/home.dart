@@ -2,8 +2,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:spires_app/Data/programs_data.dart';
 import 'package:spires_app/Model/logo_model.dart';
+import 'package:spires_app/Models/counsellor_model.dart';
 import 'package:spires_app/Models/quiz_model.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
+import 'package:spires_app/Screens/counsellors_screen.dart';
 import 'package:spires_app/Screens/games.dart';
 import 'package:spires_app/Screens/quiz_listing.dart';
 import 'package:spires_app/Services/api_service.dart';
@@ -25,13 +27,16 @@ class _HomeState extends State<Home> {
   final c1 = Get.put(NearbyJobController());
 
   List<Quiz> _liveQuizzes = [];
+  List<Counsellor> _counsellors = [];
   bool _isLoadingQuizzes = false;
+  bool _isLoadingCounsellors = false;
 
   @override
   void initState() {
     super.initState();
     c1.getJobs();
     _fetchLiveQuizzes();
+    _fetchCounsellors();
   }
 
   Future<void> _fetchLiveQuizzes() async {
@@ -48,6 +53,25 @@ class _HomeState extends State<Home> {
     } catch (e) {
       setState(() {
         _isLoadingQuizzes = false;
+      });
+    }
+  }
+
+  Future<void> _fetchCounsellors() async {
+    setState(() {
+      _isLoadingCounsellors = true;
+    });
+
+    try {
+      final response = await ApiService.fetchCounsellors();
+      setState(() {
+        _counsellors = response.data;
+        _isLoadingCounsellors = false;
+      });
+    } catch (e) {
+      print('Error fetching counsellors: $e');
+      setState(() {
+        _isLoadingCounsellors = false;
       });
     }
   }
@@ -662,13 +686,15 @@ class _HomeState extends State<Home> {
                       fontSize: 14,
                     ),
                   ),
-                  Text(
-                    '${MyController.userFirstName} ${MyController.userLastName}',
+                  Obx(() => Text(
+                    c.isGuestMode.value 
+                        ? 'Guest' 
+                        : '${MyController.userFirstName} ${MyController.userLastName}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),
@@ -1105,9 +1131,9 @@ class _HomeState extends State<Home> {
                 ),
               ),
               TextButton(
-                onPressed: () => _showChatForm(),
+                onPressed: () => Get.to(() => const CounsellorsScreen()),
                 child: Text(
-                  "Chat with Us",
+                  "View All",
                   style: TextStyle(
                     color: primaryColor,
                     fontWeight: FontWeight.w600,
@@ -1119,36 +1145,52 @@ class _HomeState extends State<Home> {
           const SizedBox(height: 16),
           SizedBox(
             height: 260,
-            child: ListView(
-              clipBehavior: Clip.none,
-              scrollDirection: Axis.horizontal,
-              children: [
-                _buildCounsellorCard(
-                  name: "Dr. Sarah Johnson",
-                  imageUrl:
-                      "https://www.spiresrecruit.com/uploads/counsellors/counsellor1.jpg",
-                  expertise: "Career Development & Education",
-                  experience: "15+ years",
-                  specialization: "University Admissions",
-                ),
-                _buildCounsellorCard(
-                  name: "Michael Chen",
-                  imageUrl:
-                      "https://www.spiresrecruit.com/uploads/counsellors/counsellor2.jpg",
-                  expertise: "Professional Development",
-                  experience: "12+ years",
-                  specialization: "Career Transitions",
-                ),
-                _buildCounsellorCard(
-                  name: "Dr. Emily Rodriguez",
-                  imageUrl:
-                      "https://www.spiresrecruit.com/uploads/counsellors/counsellor3.jpg",
-                  expertise: "Student Counselling",
-                  experience: "10+ years",
-                  specialization: "Study Abroad",
-                ),
-              ],
-            ),
+            child: _isLoadingCounsellors
+                ? Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                    ),
+                  )
+                : _counsellors.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.person_off_rounded,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No counsellors available',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        clipBehavior: Clip.none,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _counsellors.length > 3 ? 3 : _counsellors.length,
+                        itemBuilder: (context, index) {
+                          final counsellor = _counsellors[index];
+                          return _buildCounsellorCard(
+                            name: counsellor.name,
+                            imageUrl: 'https://spiresrecruit.com/${counsellor.image}',
+                            expertise: counsellor.speciality,
+                            experience: counsellor.experience,
+                            specialization: counsellor.services.isNotEmpty 
+                                ? counsellor.services.first.title 
+                                : "Career Guidance",
+                            contactNumber: counsellor.contactNumber,
+                          );
+                        },
+                      ),
           ),
         ],
       ),
@@ -1161,6 +1203,7 @@ class _HomeState extends State<Home> {
     required String expertise,
     required String experience,
     required String specialization,
+    required String contactNumber,
   }) {
     return Container(
       width: 280,
@@ -1177,499 +1220,199 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // Image Section - Fixed height
-          SizedBox(
-            height: 140,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(16)),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: double.infinity,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[200],
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[200],
-                      child:
-                          Icon(Icons.person, size: 40, color: Colors.grey[400]),
-                    ),
-                  ),
-                ),
-                // Experience Badge
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      experience,
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Content Section - Flexible height
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Name and WhatsApp button
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: () => Get.to(() => const CounsellorsScreen()),
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            children: [
+              // Image Section - Fixed height
+              SizedBox(
+                height: 140,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(16)),
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        width: double.infinity,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: CircularProgressIndicator(),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          color: Colors.grey[200],
+                          child:
+                              Icon(Icons.person, size: 40, color: Colors.grey[400]),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(4),
+                    ),
+                    // Experience Badge
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {
-                              final url = "https://wa.me/+919329143659";
-                              try {
-                                if (await canLaunch(url)) {
-                                  await launch(url);
-                                } else {
-                                  throw 'Could not launch WhatsApp';
-                                }
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        const Text('Could not launch WhatsApp'),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(8),
-                            child: Padding(
-                              padding: const EdgeInsets.all(0),
-                              child: Image.asset(
-                                'assets/icons/whatsapp.png',
-                                width: 25,
-                                height: 25,
-                                // color: Colors.green.shade600,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.verified_rounded,
+                              size: 12,
+                              color: primaryColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              experience,
+                              style: TextStyle(
+                                color: primaryColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Expertise and Specialization
-                  Row(
-                    children: [
-                      Icon(Icons.school_rounded,
-                          size: 14, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          expertise,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.star_rounded,
-                          size: 14, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          specialization,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showChatForm() {
-    final formKey = GlobalKey<FormState>();
-    String name = '';
-    String email = '';
-    String message = '';
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.85,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Modern Handle
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(top: 12),
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            // Attractive Header
-            Container(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.support_agent_rounded,
-                      color: primaryColor,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Connect with Expert',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Get personalized career guidance',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child:
-                          Icon(Icons.close, size: 20, color: Colors.grey[700]),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(),
-            // Benefits Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              child: Row(
-                children: [
-                  _buildBenefitItem(
-                    Icons.access_time_rounded,
-                    'Quick Response',
-                    'Within 1 hour',
-                  ),
-                  _buildBenefitItem(
-                    Icons.verified_user_rounded,
-                    'Expert Advice',
-                    'Certified counselors',
-                  ),
-                  _buildBenefitItem(
-                    Icons.support_rounded,
-                    'Free Support',
-                    'Always available',
-                  ),
-                ],
-              ),
-            ),
-            // Form Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    children: [
-                      _buildFormField(
-                        label: 'Full Name',
-                        hint: 'Enter your name',
-                        icon: Icons.person_outline_rounded,
-                        onChanged: (value) => name = value,
-                        validator: (value) =>
-                            value?.isEmpty ?? true ? 'Name is required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildFormField(
-                        label: 'Email Address',
-                        hint: 'Enter your email',
-                        icon: Icons.email_outlined,
-                        onChanged: (value) => email = value,
-                        validator: (value) =>
-                            value?.isEmpty ?? true ? 'Email is required' : null,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(height: 16),
-                      _buildFormField(
-                        label: 'Message',
-                        hint: 'How can we help you?',
-                        icon: Icons.message_outlined,
-                        onChanged: (value) => message = value,
-                        validator: (value) => value?.isEmpty ?? true
-                            ? 'Message is required'
-                            : null,
-                        maxLines: 4,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            // Submit Button Container
-            Container(
-              padding: EdgeInsets.fromLTRB(
-                20,
-                16,
-                20,
-                16 + MediaQuery.of(context).padding.bottom,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (formKey.currentState?.validate() ?? false) {
-                    // TODO: Implement form submission
-                    Navigator.pop(context);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      'Start Consultation',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    SizedBox(width: 8),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 20,
-                      color: Colors.white,
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              // Content Section - Flexible height
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Name and WhatsApp button
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () async {
+                                  final url = "https://wa.me/+91$contactNumber";
+                                  try {
+                                    if (await canLaunch(url)) {
+                                      await launch(url);
+                                    } else {
+                                      throw 'Could not launch WhatsApp';
+                                    }
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            const Text('Could not launch WhatsApp'),
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                                borderRadius: BorderRadius.circular(8),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(0),
+                                  child: Image.asset(
+                                    'assets/icons/whatsapp.png',
+                                    width: 25,
+                                    height: 25,
+                                    // color: Colors.green.shade600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Expertise and Specialization
+                      Row(
+                        children: [
+                          Icon(Icons.school_rounded,
+                              size: 14, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              expertise,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.star_rounded,
+                              size: 14, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              specialization,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  // Add these helper methods
-  Widget _buildBenefitItem(IconData icon, String title, String subtitle) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: primaryColor, size: 20),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            subtitle,
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFormField({
-    required String label,
-    required String hint,
-    required IconData icon,
-    required Function(String) onChanged,
-    required String? Function(String?) validator,
-    TextInputType keyboardType = TextInputType.text,
-    int maxLines = 1,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[800],
-            letterSpacing: -0.2,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          onChanged: onChanged,
-          validator: validator,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          style: const TextStyle(fontSize: 15),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 14,
-            ),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Icon(icon, size: 22, color: Colors.grey[400]),
-            ),
-            filled: true,
-            fillColor: Colors.grey[50],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: primaryColor, width: 1.5),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: Colors.red[400]!, width: 1.5),
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: maxLines > 1 ? 16 : 0,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

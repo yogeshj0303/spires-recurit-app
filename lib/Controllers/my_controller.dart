@@ -8,6 +8,7 @@ class MyController extends GetxController {
   RxBool isRegLoading = false.obs;
   RxBool isotpLoading = false.obs;
   RxBool isemailLoading = false.obs;
+  RxBool isGuestMode = false.obs;
 
   RxString otp = '0000'.obs;
   RxString myotp = '0000'.obs;

@@ -32,6 +32,8 @@ class AuthUtils {
     final url =
         '${apiUrl}employee-signup?fname=$fname&lname=$lname&email=$email&password=$pass&phone_number=$phone';
     c.isRegLoading.value = true;
+    c.isGuestMode.value = false;
+    
     final response = await http.post(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
@@ -63,6 +65,8 @@ class AuthUtils {
       {required String email, required String pass}) async {
     final url = '${apiUrl}employee-login?email=$email&password=$pass';
     c.isLoginLoading.value = true;
+    c.isGuestMode.value = false;
+    
     final response = await http.post(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);

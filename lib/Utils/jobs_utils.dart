@@ -61,6 +61,32 @@ class JobsUtils {
   }
 
   static Future<void> applyForJob({required int jobId}) async {
+    // Check if user is in guest mode
+    if (c.isGuestMode.value) {
+      // Show dialog asking user to sign in
+      Get.defaultDialog(
+        title: 'Sign In Required',
+        middleText: 'You need to sign in to apply for jobs. Would you like to sign in now?',
+        confirmTextColor: whiteColor,
+        confirm: myButton(
+          onPressed: () {
+            Get.back(); // Close dialog
+            Get.to(() => LoginScreen(), transition: Transition.rightToLeft); // Navigate to login
+          },
+          label: 'Sign In',
+          color: primaryColor,
+          style: normalWhiteText,
+        ),
+        cancel: myButton(
+          onPressed: () => Get.back(),
+          label: 'Cancel',
+          color: Colors.grey[400]!,
+          style: normalWhiteText,
+        ),
+      );
+      return;
+    }
+    
     c.isJobLoading.value = true;
     final url = '${apiUrl}job-apply?user_id=${MyController.id}&job_id=$jobId';
     final response = await http.post(Uri.parse(url));
@@ -83,6 +109,32 @@ class JobsUtils {
   }
 
   static Future<void> saveJob({required int jobId}) async {
+    // Check if user is in guest mode
+    if (c.isGuestMode.value) {
+      // Show dialog asking user to sign in
+      Get.defaultDialog(
+        title: 'Sign In Required',
+        middleText: 'You need to sign in to save jobs. Would you like to sign in now?',
+        confirmTextColor: whiteColor,
+        confirm: myButton(
+          onPressed: () {
+            Get.back(); // Close dialog
+            Get.to(() => LoginScreen(), transition: Transition.rightToLeft); // Navigate to login
+          },
+          label: 'Sign In',
+          color: primaryColor,
+          style: normalWhiteText,
+        ),
+        cancel: myButton(
+          onPressed: () => Get.back(),
+          label: 'Cancel',
+          color: Colors.grey[400]!,
+          style: normalWhiteText,
+        ),
+      );
+      return;
+    }
+    
     final url = '${apiUrl}saveJob?user_id=${MyController.id}&job_id=$jobId';
     c.isJobLoading.value = true;
     final response = await http.post(Uri.parse(url));

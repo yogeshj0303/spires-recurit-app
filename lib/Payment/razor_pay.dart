@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:get/get.dart';
 
 import '../Constants/exports.dart';
+import '../Screens/Auth_Screens/login_screen.dart';
 
 class RazorPay extends StatefulWidget {
   const RazorPay({super.key});
@@ -14,6 +16,7 @@ class RazorPay extends StatefulWidget {
 class _RazorPayState extends State<RazorPay> {
   late Razorpay _razorpay;
   TextEditingController amtController = TextEditingController();
+  final c = Get.put(MyController());
 
   @override
   void initState() {
@@ -29,6 +32,23 @@ class _RazorPayState extends State<RazorPay> {
   }
 
   void openCheckout() async {
+    // Check if user is in guest mode
+    if (c.isGuestMode.value) {
+      // Show dialog asking user to sign in
+      Get.defaultDialog(
+        title: 'Sign In Required',
+        middleText: 'You need to sign in to make a payment. Would you like to sign in now?',
+        textConfirm: 'Sign In',
+        textCancel: 'Cancel',
+        confirmTextColor: Colors.white,
+        onConfirm: () {
+          Get.back();
+          Get.to(() => LoginScreen(), transition: Transition.rightToLeft);
+        },
+      );
+      return;
+    }
+    
     var amount = num.parse(amtController.text) * 100;
     var options = {
       'key': 'rzp_test_1DP5mmOlF5G5ag',

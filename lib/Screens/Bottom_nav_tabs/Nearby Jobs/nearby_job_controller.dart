@@ -73,6 +73,9 @@ class NearbyJobController extends GetxController {
   RxList<CityModel> cities = <CityModel>[].obs;
   RxList<CityModel> filteredCities = <CityModel>[].obs;
   RxList<JobsModel> jobs = <JobsModel>[].obs;
+  RxList<JobsModel> allJobs = <JobsModel>[].obs; // Store original jobs list
+  RxString searchQuery = ''.obs;
+  RxBool searchActive = false.obs;
 
   // Set fixed radius of 50km
   final double radius = 50.0;
@@ -80,6 +83,28 @@ class NearbyJobController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initializeLocation();
+  }
+  
+  Future<void> _initializeLocation() async {
+    // Check if location is already initialized
+    if (LocationServices.latitude == 0.0 && LocationServices.longitude == 0.0) {
+      print("Initializing location services in controller");
+      bool success = await LocationServices.getLocation();
+      if (success) {
+        print("Location initialized successfully: Lat: ${LocationServices.latitude}, Long: ${LocationServices.longitude}");
+      } else {
+        print("Failed to initialize location services");
+        Fluttertoast.showToast(
+          msg: 'Please enable location services for better job recommendations',
+          toastLength: Toast.LENGTH_LONG,
+        );
+      }
+    } else {
+      print("Location already initialized: Lat: ${LocationServices.latitude}, Long: ${LocationServices.longitude}");
+    }
+    
+    // Get cities and jobs data
     getCities();
     getJobs();
   }
@@ -113,11 +138,45 @@ class NearbyJobController extends GetxController {
   }
 
   getFilteredCities(String query) {
+    if (query.isEmpty) {
+      filteredCities.clear();
+      searchActive.value = false;
+      return;
+    }
+    
+    searchActive.value = true;
     filteredCities.value = cities.where((e) {
       final inputText = query.toLowerCase();
-      final cit = e.cityName.toLowerCase();
-      return cit.contains(inputText);
+      final cityName = e.cityName.toLowerCase();
+      return cityName.contains(inputText);
     }).toList();
+  }
+  
+  void filterJobs() {
+    final query = searchQuery.value.toLowerCase();
+    
+    if (query.isEmpty) {
+      // If search is cleared, restore original jobs list
+      jobs.value = allJobs;
+      return;
+    }
+    
+    // Filter jobs by location
+    jobs.value = allJobs.where((job) {
+      return job.location.toLowerCase().contains(query);
+    }).toList();
+    
+    // Also search for cities in the cities list
+    getFilteredCities(query);
+  }
+  
+  void useCurrentLocation() {
+    // Clear search and reload jobs based on current location
+    searchQuery.value = '';
+    filteredCities.clear();
+    searchActive.value = false;
+    getJobs();
+    Fluttertoast.showToast(msg: 'Using your current location');
   }
 
   Future<JobModel> showNearbyJobs(String cityName) async {
@@ -143,15 +202,41 @@ class NearbyJobController extends GetxController {
 
   Future<void> getJobs() async {
     isNLoading.value = true;
+    
+    // Check if location is initialized, if not, try to get it
+    if (LocationServices.latitude == 0.0 && LocationServices.longitude == 0.0) {
+      print("Location not initialized, attempting to get location");
+      bool success = await LocationServices.getLocation();
+      if (!success) {
+        print("Failed to get location, using default values");
+        // Use default values if location services failed
+        Fluttertoast.showToast(msg: 'Using default location. Enable location for better results.');
+      }
+    }
+    
+    print("Fetching jobs with: Lat: ${LocationServices.latitude}, Long: ${LocationServices.longitude}, Radius: $radius");
+    
     final url = '${apiUrl}job?user_id=${MyController.id}&latitude=${LocationServices.latitude}&longitude=${LocationServices.longitude}&radius=$radius';
+    print("API URL: $url");
     
     try {
       final response = await ApiService.makeRequest(url);
+      print("Response status: ${response.statusCode}");
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print("Response data: ${data['error']} - Jobs count: ${data['data']?.length ?? 0}");
+        
         if (data['error'] == false) {
-          List<JobsModel> allJobs = (data['data'] as List)
+          if (data['data'] == null || (data['data'] as List).isEmpty) {
+            print("No jobs data found in response");
+            jobs.value = [];
+            allJobs.value = []; // Clear all jobs
+            Fluttertoast.showToast(msg: 'No nearby jobs found in your area');
+            return;
+          }
+          
+          List<JobsModel> jobsList = (data['data'] as List)
               .map((e) => JobsModel(
                   lat: e['admin']?['latitude'] ?? '0.0',
                   long: e['admin']?['longitude'] ?? '0.0',
@@ -180,15 +265,25 @@ class NearbyJobController extends GetxController {
                   hired: e['candidate_hired'] ?? '0',
                   hiringSince: e['date'] ?? ''))
               .toList();
-          jobs.value = allJobs;
+          
+          print("Mapped ${jobsList.length} jobs successfully");
+          jobs.value = jobsList;
+          allJobs.value = jobsList; // Store original list
+          
+          if (jobsList.isEmpty) {
+            Fluttertoast.showToast(msg: 'No nearby jobs found within ${radius}km radius');
+          }
         } else {
+          print("API returned error: ${data['message']}");
           Fluttertoast.showToast(msg: data['message'] ?? 'Something went wrong');
         }
       } else {
+        print("Server error with code: ${response.statusCode}");
         Fluttertoast.showToast(
             msg: 'Server error: ${response.statusCode}');
       }
     } catch (e) {
+      print("Exception while fetching jobs: $e");
       Fluttertoast.showToast(msg: 'Error fetching jobs: $e');
     } finally {
       isNLoading.value = false;

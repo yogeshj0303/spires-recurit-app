@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 import '../Constants/exports.dart';
 import '../Screens/Resumes/cv_two.dart';
+import '../Screens/Auth_Screens/login_screen.dart';
 
 class BannerCarousel extends StatelessWidget {
   final Size size;
@@ -88,7 +89,13 @@ class BannerCarousel extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        c.isSubscribed.value || MyController.subscribed == '1'
+                        c.isGuestMode.value
+                            ? Text(
+                          "Sign in to access premium features",
+                          style: normalWhiteText,
+                          textAlign: TextAlign.left,
+                        )
+                            : c.isSubscribed.value || MyController.subscribed == '1'
                             ? Text(
                           "Congratulations!!!\nto unlock premium benefits",
                           style: normalWhiteText,
@@ -100,7 +107,14 @@ class BannerCarousel extends StatelessWidget {
                           textAlign: TextAlign.left,
                         ),
                         const SizedBox(height: defaultPadding),
-                        c.isSubscribed.value || MyController.subscribed == '1'
+                        c.isGuestMode.value
+                            ? myButton(
+                          onPressed: () => Get.to(() => LoginScreen()),
+                          color: Colors.white24,
+                          label: 'Sign In',
+                          style: normalWhiteText,
+                        )
+                            : c.isSubscribed.value || MyController.subscribed == '1'
                             ? myButton(
                           onPressed: () => Get.to(() => ResumeScreen()),
                           color: Colors.white24,
@@ -164,32 +178,36 @@ class BannerCarousel extends StatelessWidget {
             ),
             SizedBox(width: 10.0),
             Expanded(
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Oops! Recruiters cannot see your profile right now.\n',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14.0,
+              child: Obx(() {
+                return RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: c.isGuestMode.value 
+                          ? 'Sign in to create your profile and be discovered by recruiters.\n'
+                          : 'Oops! Recruiters cannot see your profile right now.\n',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14.0,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: 'Update your profile ',
-                      style: TextStyle(
-                        color: Color(0xFF6F35A5), // Purple color for "Update your profile"
-                        fontWeight: FontWeight.bold,
+                      TextSpan(
+                        text: c.isGuestMode.value ? 'Create an account ' : 'Update your profile ',
+                        style: TextStyle(
+                          color: Color(0xFF6F35A5), // Purple color for "Update your profile"
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: 'to be visible to recruiters.',
-                      style: TextStyle(
-                        color: Colors.black,
+                      TextSpan(
+                        text: 'to be visible to recruiters.',
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  ),
+                );
+              }),
             ),
           ],
         ),
@@ -230,32 +248,36 @@ class BannerCarousel extends StatelessWidget {
             ),
             SizedBox(width: 10.0),
             Expanded(
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Oops! Recruiters cannot see your profile right now.\n',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 14.0,
+              child: Obx(() {
+                return RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: c.isGuestMode.value 
+                          ? 'Try premium features and improve your chances of getting hired!\n'
+                          : 'Oops! Recruiters cannot see your profile right now.\n',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14.0,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: 'Update your profile ',
-                      style: TextStyle(
-                        color: Color(0xFF6F35A5), // Purple color for "Update your profile"
-                        fontWeight: FontWeight.bold,
+                      TextSpan(
+                        text: c.isGuestMode.value ? 'Sign in ' : 'Update your profile ',
+                        style: TextStyle(
+                          color: Color(0xFF6F35A5), // Purple color for "Update your profile"
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                      text: 'to be visible to recruiters.',
-                      style: TextStyle(
-                        color: Colors.black,
+                      TextSpan(
+                        text: c.isGuestMode.value ? 'to access all features.' : 'to be visible to recruiters.',
+                        style: TextStyle(
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    ],
+                  ),
+                );
+              }),
             ),
           ],
         ),

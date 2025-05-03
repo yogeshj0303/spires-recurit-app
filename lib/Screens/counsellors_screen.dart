@@ -2,22 +2,96 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:spires_app/Constants/exports.dart';
+import 'package:spires_app/Models/counsellor_model.dart';
+import 'package:spires_app/Services/api_service.dart';
 
-class CounsellorsScreen extends StatelessWidget {
+class CounsellorsScreen extends StatefulWidget {
   const CounsellorsScreen({Key? key}) : super(key: key);
 
+  @override
+  State<CounsellorsScreen> createState() => _CounsellorsScreenState();
+}
+
+class _CounsellorsScreenState extends State<CounsellorsScreen> {
   // #region Constants
   static const String _defaultImageUrl =
       'https://www.spiresrecruit.com/uploads/counsellors/default_profile.jpg';
-  static const List<String> _counsellorImages = [
-    'https://www.spiresrecruit.com/uploads/counsellors/counsellor1.jpg',
-    'https://www.spiresrecruit.com/uploads/counsellors/counsellor2.jpg',
-    'https://www.spiresrecruit.com/uploads/counsellors/counsellor3.jpg',
-    'https://www.spiresrecruit.com/uploads/counsellors/counsellor4.jpg',
-    'https://www.spiresrecruit.com/uploads/counsellors/counsellor5.jpg',
-    'https://www.spiresrecruit.com/uploads/counsellors/counsellor6.jpg',
-  ];
   // #endregion
+
+  List<Counsellor> counsellors = [];
+  List<Counsellor> filteredCounsellors = [];
+  bool isLoading = true;
+  bool isSearching = false;
+  String? errorMessage;
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedFilter = 'All';
+  final FocusNode _searchFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCounsellors();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchCounsellors() async {
+    try {
+      setState(() {
+        isLoading = true;
+        errorMessage = null;
+      });
+
+      final response = await ApiService.fetchCounsellors();
+      
+      setState(() {
+        counsellors = response.data;
+        filteredCounsellors = counsellors;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Failed to load counsellors: $e';
+        isLoading = false;
+      });
+    }
+  }
+
+  void _filterCounsellors(String query) {
+    setState(() {
+      if (query.isEmpty && _selectedFilter == 'All') {
+        filteredCounsellors = counsellors;
+      } else {
+        filteredCounsellors = counsellors.where((counsellor) {
+          final nameMatch = counsellor.name.toLowerCase().contains(query.toLowerCase());
+          final specialityMatch = counsellor.speciality.toLowerCase().contains(query.toLowerCase());
+          final addressMatch = counsellor.address.toLowerCase().contains(query.toLowerCase());
+          final servicesMatch = counsellor.services.any((service) => 
+            service.title.toLowerCase().contains(query.toLowerCase()));
+          
+          bool filterMatch = true;
+          if (_selectedFilter != 'All') {
+            filterMatch = counsellor.speciality.contains(_selectedFilter) || 
+                          counsellor.services.any((service) => service.title.contains(_selectedFilter));
+          }
+          
+          return (nameMatch || specialityMatch || addressMatch || servicesMatch) && filterMatch;
+        }).toList();
+      }
+    });
+  }
+
+  void _applyFilter(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+      _filterCounsellors(_searchController.text);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +104,58 @@ class CounsellorsScreen extends StatelessWidget {
 
   // #region AppBar
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    if (isSearching) {
+      return AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leadingWidth: 40,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.grey[800],
+          ),
+          onPressed: () {
+            setState(() {
+              isSearching = false;
+              _searchController.clear();
+              _filterCounsellors('');
+            });
+          },
+        ),
+        title: TextField(
+          controller: _searchController,
+          focusNode: _searchFocusNode,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: 'Search counsellors...',
+            hintStyle: TextStyle(
+              color: Colors.grey[500],
+              fontSize: 16,
+            ),
+            border: InputBorder.none,
+          ),
+          style: TextStyle(
+            color: Colors.grey[800],
+            fontSize: 16,
+          ),
+          onChanged: _filterCounsellors,
+        ),
+        actions: [
+          if (_searchController.text.isNotEmpty)
+            IconButton(
+              icon: Icon(
+                Icons.close,
+                color: Colors.grey[700],
+              ),
+              onPressed: () {
+                _searchController.clear();
+                _filterCounsellors('');
+              },
+            ),
+        ],
+      );
+    }
+
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -103,7 +229,12 @@ class CounsellorsScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // Implement search
+                  setState(() {
+                    isSearching = true;
+                  });
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    _searchFocusNode.requestFocus();
+                  });
                 },
               ),
               IconButton(
@@ -138,14 +269,137 @@ class CounsellorsScreen extends StatelessWidget {
 
   // #region Body Components
   Widget _buildBody() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    if (isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+        ),
+      );
+    }
+    
+    if (errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red[400]),
+            const SizedBox(height: 16),
+            Text(
+              errorMessage!,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _fetchCounsellors,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    if (counsellors.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.person_off, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'No counsellors available at the moment',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _fetchCounsellors,
+      color: primaryColor,
+      child: Stack(
         children: [
-          _buildHeaderSection(),
-          _buildFilterSection(),
-          _buildCounsellorsGrid(),
-          const SizedBox(height: 20),
+          SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!isSearching) _buildHeaderSection(),
+                _buildFilterSection(),
+                _buildCounsellorsGrid(),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+          if (isSearching && _searchController.text.isNotEmpty && filteredCounsellors.isEmpty)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.search_off_rounded,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No results found for "${_searchController.text}"',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[700],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Try different keywords or reset filters',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _searchController.clear();
+                        _selectedFilter = 'All';
+                        _filterCounsellors('');
+                      });
+                    },
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: const Text('Reset Search'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -184,7 +438,7 @@ class CounsellorsScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
-              '20+ Expert Counsellors',
+              '${counsellors.length}+ Expert Counsellors',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.9),
                 fontSize: 13,
@@ -217,18 +471,131 @@ class CounsellorsScreen extends StatelessWidget {
   }
 
   Widget _buildFilterSection() {
+    // For a cleaner UI, don't show filters when searching to focus on search results
+    if (isSearching && _searchController.text.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+        child: Row(
+          children: [
+            Icon(
+              Icons.filter_list_rounded,
+              size: 16,
+              color: Colors.grey[700],
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Results for "${_searchController.text}"',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[800],
+              ),
+            ),
+            const Spacer(),
+            if (_selectedFilter != 'All')
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Filter: $_selectedFilter',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: primaryColor,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedFilter = 'All';
+                          _filterCounsellors(_searchController.text);
+                        });
+                      },
+                      child: Icon(
+                        Icons.close,
+                        size: 14,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
+    }
+
+    // Get unique specialties from counsellors
+    final Set<String> specialties = {'All'};
+    for (final counsellor in counsellors) {
+      // Add speciality and services as filters
+      if (counsellor.speciality.isNotEmpty) {
+        final specialityKeywords = counsellor.speciality.split(', ');
+        specialties.addAll(specialityKeywords);
+      }
+      
+      for (final service in counsellor.services) {
+        specialties.add(service.title);
+      }
+    }
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12), // Reduced padding
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Expertise',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Expertise',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                ),
+              ),
+              if (_selectedFilter != 'All')
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedFilter = 'All';
+                      _filterCounsellors(_searchController.text);
+                    });
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.clear_all,
+                        size: 16,
+                        color: primaryColor,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Clear Filters',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 12),
           SingleChildScrollView(
@@ -236,13 +603,11 @@ class CounsellorsScreen extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             child: Row(
-              children: [
-                _buildFilterChip('All', isSelected: true),
-                _buildFilterChip('Career Development'),
-                _buildFilterChip('Study Abroad'),
-                _buildFilterChip('Professional Growth'),
-                _buildFilterChip('Industry Expert'),
-              ],
+              children: specialties
+                  .toList()
+                  .map((specialty) => _buildFilterChip(
+                      specialty, isSelected: _selectedFilter == specialty))
+                  .toList(),
             ),
           ),
         ],
@@ -252,31 +617,92 @@ class CounsellorsScreen extends StatelessWidget {
 
   Widget _buildCounsellorsGrid() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12), // Consistent padding
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 0.58, // Adjusted for more compact cards
-          crossAxisSpacing: 8, // Reduced spacing
-          mainAxisSpacing: 8, // Reduced spacing
-        ),
-        itemCount: _counsellorImages.length,
-        itemBuilder: (context, index) => AnimatedContainer(
-          duration: Duration(milliseconds: 200 + (index * 100)),
-          curve: Curves.easeInOut,
-          child: _buildCounsellorCard(
-            name: "Dr. Sarah Johnson",
-            imageUrl: _counsellorImages[index],
-            expertise: "Career Development",
-            experience: "${10 + index}+ years",
-            rating: 4.5 + (index * 0.1),
-            reviewCount: 50 + (index * 10),
-            specializations: ["Career Guidance", "Study Abroad"],
-          ),
-        ),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: filteredCounsellors.isEmpty
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 40),
+                child: Column(
+                  children: [
+                    Icon(Icons.search_off, size: 48, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No counsellors match your search',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _selectedFilter = 'All';
+                          isSearching = false;
+                          _filterCounsellors('');
+                        });
+                      },
+                      icon: const Icon(Icons.refresh, size: 16),
+                      label: const Text('Reset Filters'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text(
+                    'Found ${filteredCounsellors.length} counsellors',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.58,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemCount: filteredCounsellors.length,
+                  itemBuilder: (context, index) {
+                    final counsellor = filteredCounsellors[index];
+                    return AnimatedContainer(
+                      duration: Duration(milliseconds: 200 + (index * 100)),
+                      curve: Curves.easeInOut,
+                      child: _buildCounsellorCard(
+                        name: counsellor.name,
+                        imageUrl: counsellor.image,
+                        expertise: counsellor.speciality,
+                        experience: counsellor.experience,
+                        rating: 4.5 + (index * 0.1 > 0.4 ? 0.4 : index * 0.1),
+                        reviewCount: 50 + (index * 10),
+                        specializations: counsellor.services.map((service) => service.title).toList(),
+                        contactNumber: counsellor.contactNumber,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
     );
   }
   // #endregion
@@ -290,6 +716,7 @@ class CounsellorsScreen extends StatelessWidget {
     required double rating,
     required int reviewCount,
     required List<String> specializations,
+    required String contactNumber,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -309,12 +736,15 @@ class CounsellorsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildCardImageSection(imageUrl, experience),
-            _buildCardContentSection(
-              name: name,
-              expertise: expertise,
-              rating: rating,
-              reviewCount: reviewCount,
-              specializations: specializations,
+            Expanded(
+              child: _buildCardContentSection(
+                name: name,
+                expertise: expertise,
+                rating: rating,
+                reviewCount: reviewCount,
+                specializations: specializations,
+                contactNumber: contactNumber,
+              ),
             ),
           ],
         ),
@@ -323,13 +753,19 @@ class CounsellorsScreen extends StatelessWidget {
   }
 
   Widget _buildCardImageSection(String imageUrl, String experience) {
+    // Standardize the image URL handling
+    String finalImageUrl = imageUrl;
+    if (!imageUrl.startsWith('http')) {
+      finalImageUrl = 'https://spiresrecruit.com/$imageUrl';
+    }
+    
     return Stack(
       children: [
         Hero(
           tag: 'counsellor_$imageUrl',
           child: CachedNetworkImage(
-            imageUrl: imageUrl,
-            height: 120, // Reduced height
+            imageUrl: finalImageUrl,
+            height: 120,
             width: double.infinity,
             fit: BoxFit.cover,
             placeholder: (context, url) => _buildImagePlaceholder(),
@@ -365,7 +801,7 @@ class CounsellorsScreen extends StatelessWidget {
 
   Widget _buildExperienceBadge(String experience) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -382,14 +818,14 @@ class CounsellorsScreen extends StatelessWidget {
         children: [
           Icon(
             Icons.verified_rounded,
-            size: 14,
+            size: 12,
             color: primaryColor,
           ),
           const SizedBox(width: 4),
           Text(
             experience,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 8,
               fontWeight: FontWeight.w600,
               color: primaryColor,
             ),
@@ -405,20 +841,24 @@ class CounsellorsScreen extends StatelessWidget {
     required double rating,
     required int reviewCount,
     required List<String> specializations,
+    required String contactNumber,
   }) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.all(8), // Reduced padding
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildNameAndRating(name, rating, reviewCount),
-            const SizedBox(height: 4), // Reduced spacing
-            _buildSpecializations(specializations),
-            const SizedBox(height: 12), // Reduced spacing
-            _buildBookButton(),
-          ],
-        ),
+    // Limit specializations to prevent overflow
+    final displaySpecializations = specializations.take(2).toList();
+    
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildNameAndRating(name, rating, reviewCount),
+          const SizedBox(height: 4),
+          Expanded(
+            child: _buildSpecializations(displaySpecializations),
+          ),
+          const SizedBox(height: 8),
+          _buildBookButton(contactNumber),
+        ],
       ),
     );
   }
@@ -466,37 +906,39 @@ class CounsellorsScreen extends StatelessWidget {
   }
 
   Widget _buildSpecializations(List<String> specializations) {
-    return Wrap(
-      spacing: 2, // Reduced spacing
-      runSpacing: 2, // Reduced spacing
-      children: specializations
-          .map((spec) => Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 6, vertical: 2), // Reduced padding
-                decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  spec,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: primaryColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ))
-          .toList(),
+    return SingleChildScrollView(
+      child: Wrap(
+        spacing: 10,
+        runSpacing: 4,
+        children: specializations.map((spec) {
+          return Container(
+            // margin: const EdgeInsets.only(bottom: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              spec,
+              style: TextStyle(
+                fontSize: 10,
+                color: primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
-  Widget _buildBookButton() {
+  Widget _buildBookButton(String contactNumber) {
     return SizedBox(
       width: double.infinity,
       height: 32, // Fixed compact height
       child: ElevatedButton.icon(
         onPressed: () async {
-          final url = "https://wa.me/+919329143659";
+          final url = "https://wa.me/+91$contactNumber";
           try {
             if (await canLaunch(url)) {
               await launch(url);
@@ -535,8 +977,6 @@ class CounsellorsScreen extends StatelessWidget {
   }
   // #endregion
 
-  // #endregion
-
   // #region Helper Methods
   Widget _buildFilterChip(String label, {bool isSelected = false}) {
     return Container(
@@ -544,7 +984,7 @@ class CounsellorsScreen extends StatelessWidget {
       child: FilterChip(
         label: Text(label),
         onSelected: (bool selected) {
-          // Implement filter logic
+          _applyFilter(selected ? label : 'All');
         },
         backgroundColor:
             isSelected ? primaryColor.withOpacity(0.1) : Colors.white,

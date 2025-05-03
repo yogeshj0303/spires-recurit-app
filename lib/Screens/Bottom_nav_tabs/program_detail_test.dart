@@ -32,6 +32,32 @@ class ProgramDetailTest extends StatefulWidget {
 class _ProgramDetailTestState extends State<ProgramDetailTest>
     with SingleTickerProviderStateMixin {
   Future<void> inquire(String programName, String userId) async {
+    // Check if user is in guest mode
+    if (widget.c.isGuestMode.value) {
+      // Show dialog asking user to sign in
+      Get.defaultDialog(
+        title: 'Sign In Required',
+        middleText: 'You need to sign in to send an inquiry about this program. Would you like to sign in now?',
+        confirmTextColor: whiteColor,
+        confirm: myButton(
+          onPressed: () {
+            Get.back(); // Close dialog
+            Get.to(() => LoginScreen(), transition: Transition.rightToLeft); // Navigate to login
+          },
+          label: 'Sign In',
+          color: primaryColor,
+          style: normalWhiteText,
+        ),
+        cancel: myButton(
+          onPressed: () => Get.back(),
+          label: 'Cancel',
+          color: Colors.grey[400]!,
+          style: normalWhiteText,
+        ),
+      );
+      return;
+    }
+    
     var headers = {
       'Authorization':
           'Bearer sk-proj-lvOy2JU3EbHjOlkGjHMZT3BlbkFJbPIDfmDJQk89WcagsYgr'
@@ -142,6 +168,32 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
 
   TextEditingController amtController = TextEditingController();
   void openCheckout() async {
+    // Check if user is in guest mode
+    if (widget.c.isGuestMode.value) {
+      // Show dialog asking user to sign in
+      Get.defaultDialog(
+        title: 'Sign In Required',
+        middleText: 'You need to sign in to enroll in this program. Would you like to sign in now?',
+        confirmTextColor: whiteColor,
+        confirm: myButton(
+          onPressed: () {
+            Get.back(); // Close dialog
+            Get.to(() => LoginScreen(), transition: Transition.rightToLeft); // Navigate to login
+          },
+          label: 'Sign In',
+          color: primaryColor,
+          style: normalWhiteText,
+        ),
+        cancel: myButton(
+          onPressed: () => Get.back(),
+          label: 'Cancel',
+          color: Colors.grey[400]!,
+          style: normalWhiteText,
+        ),
+      );
+      return;
+    }
+    
     var amount = num.parse(amtController.text) * 100;
     var options = {
       'key': 'rzp_test_1DP5mmOlF5G5ag',
@@ -510,7 +562,35 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            // Check if user is in guest mode
+                            if (widget.c.isGuestMode.value) {
+                              // Show dialog asking user to sign in
+                              Get.defaultDialog(
+                                title: 'Sign In Required',
+                                middleText: 'You need to sign in to contact us. Would you like to sign in now?',
+                                confirmTextColor: whiteColor,
+                                confirm: myButton(
+                                  onPressed: () {
+                                    Get.back(); // Close dialog
+                                    Get.to(() => LoginScreen(), transition: Transition.rightToLeft); // Navigate to login
+                                  },
+                                  label: 'Sign In',
+                                  color: primaryColor,
+                                  style: normalWhiteText,
+                                ),
+                                cancel: myButton(
+                                  onPressed: () => Get.back(),
+                                  label: 'Cancel',
+                                  color: Colors.grey[400]!,
+                                  style: normalWhiteText,
+                                ),
+                              );
+                            } else {
+                              // Handle contact action for signed-in users
+                              inquire(widget.title, MyController.id.toString());
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
                             shape: RoundedRectangleBorder(
