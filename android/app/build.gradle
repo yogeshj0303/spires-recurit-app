@@ -38,7 +38,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace "com.atc.spires_app"
-    compileSdkVersion 34
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
     compileOptions {
