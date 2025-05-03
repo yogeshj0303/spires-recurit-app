@@ -90,6 +90,7 @@ class AuthUtils {
         MyController.userPhone = data['data']['phone_number'];
         c.profileImg.value = data['data']['image'] ?? "";
         MyController.veriEmail = data['data']['is_everify'];
+        //ffsr
         MyController.veriPhone = data['data']['is_phone_verified'];
         MyController.subscribed = data['data']['sub_status'];
         Get.offAll(() => MainScreen());
