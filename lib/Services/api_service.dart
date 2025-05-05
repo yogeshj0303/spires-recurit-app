@@ -114,10 +114,10 @@ class ApiService {
     }
   }
 
-  static Future<QuizResultResponse> fetchUserQuizResults(int userId) async {
+  static Future<QuizResultResponse> fetchUserQuizResults(int userId, {String userType = 'user'}) async {
     try {
       final response = await makeRequest(
-        'https://www.spiresrecruit.com/api/quiz-by-user/$userId',
+        'https://www.spiresrecruit.com/api/quiz-by-user/$userId/$userType',
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -135,11 +135,12 @@ class ApiService {
     }
   }
 
-  static Future<QuizResultDetail> submitQuiz(QuizSubmission submission) async {
+  static Future<QuizResultDetail> submitQuiz(QuizSubmission submission, {String userType = 'user'}) async {
     try {
       final queryParameters = {
-        'user_id': submission.userId.toString(), // Use the actual user ID
+        'user_id': submission.userId.toString(),
         'quiz_id': submission.quizId.toString(),
+        'user_type': userType,
       };
 
       // Add answers to query parameters
@@ -180,7 +181,7 @@ class ApiService {
         });
 
         // Important: Force refresh of quiz results in memory
-        await fetchUserQuizResults(submission.userId); // Add this line
+        await fetchUserQuizResults(submission.userId, userType: userType); // Add this line
 
         // Store the result locally
         final prefs = await SharedPreferences.getInstance();
