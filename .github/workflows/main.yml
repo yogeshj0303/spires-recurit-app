@@ -9,11 +9,11 @@ on:
       - master
       - develop
 
-name: "Build APK Only"
+name: "Build & Release"
 
 jobs:
   build:
-    name: Build APK
+    name: Build APK & Release
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,3 +37,20 @@ jobs:
       - name: Build APK
         run: flutter build apk --release --split-per-abi
 
+      - name: Check if tag exists
+        id: tag_check
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        if: steps.tag_check.outputs.exists == 'false'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/app/outputs/apk/release/*.apk"
+          tag: v${{ steps.version.outputs.version }}
+          token: ${{ secrets.TOKEN }}
