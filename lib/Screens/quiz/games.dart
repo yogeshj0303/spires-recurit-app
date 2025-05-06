@@ -7,6 +7,9 @@ import 'package:spires_app/Models/quiz_submission_model.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:get/get.dart';
+import 'package:spires_app/Screens/quiz/quiz_registration.dart';
+import 'package:spires_app/Screens/quiz/olympiad_login_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   final int quizId;
@@ -206,11 +209,83 @@ class _QuizScreenState extends State<QuizScreen> {
         }
       }
 
-      final submission = QuizSubmission(
+      // Check if user is in guest mode
+      final c = Get.find<MyController>();
+      if (c.isGuestMode.value || MyController.id <= 0) {
+        // Guest mode - show a dialog to register/login
+        if (!mounted) return;
+        
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: Text('Registration Required'),
+            content: Text('Please register or log in to save your quiz results.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Get.to(() => QuizRegistrationForm(
+                    quizId: widget.quizId,
+                    duration: widget.duration,
+                    onRegistrationComplete: () {
+                      // After registration, try to take the quiz again
+                      // This will be called when returning from registration
+                      _proceedWithSubmission();
+                    },
+                  ));
+                },
+                child: Text('Register'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Get.to(() => OlympiadLoginScreen(
+                    onLoginComplete: () {
+                      // After login, try to take the quiz again
+                      _proceedWithSubmission();
+                    },
+                  ));
+                },
+                child: Text('Login'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      // Create submission object with user ID
+      QuizSubmission submission = QuizSubmission(
         userId: MyController.id,
         quizId: widget.quizId,
         answers: answers,
       );
+
+      // Enhanced debugging to check user ID
+      print("Submitting quiz with user_id: ${MyController.id}, guest mode: ${c.isGuestMode.value}");
+      
+      // Load user ID from preferences again as a final verification
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final storedUserId = prefs.getInt('user_id');
+        print("User ID from SharedPreferences: $storedUserId");
+        
+        // If stored ID is valid but controller ID is invalid, use the stored ID
+        if ((storedUserId != null && storedUserId > 0) && MyController.id <= 0) {
+          MyController.id = storedUserId;
+          print("Updated controller ID from SharedPreferences: $storedUserId");
+          
+          // Create a new submission with the correct user ID
+          submission = QuizSubmission(
+            userId: storedUserId,
+            quizId: widget.quizId,
+            answers: answers,
+          );
+        }
+      } catch (e) {
+        print("Error accessing SharedPreferences: $e");
+      }
 
       final result = await ApiService.submitQuiz(submission);
 

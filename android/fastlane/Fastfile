@@ -1,0 +1,9 @@
+default_platform(:android)
+
+platform :android do
+  desc "Build and upload a release APK to the Play Store"
+  lane :beta do
+    gradle(task: "assembleRelease")
+    upload_to_play_store(track: 'beta')
+  end
+end

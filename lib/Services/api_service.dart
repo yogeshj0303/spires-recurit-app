@@ -137,6 +137,11 @@ class ApiService {
 
   static Future<QuizResultDetail> submitQuiz(QuizSubmission submission, {String userType = 'user'}) async {
     try {
+      // Validate user ID
+      if (submission.userId <= 0) {
+        throw Exception('Invalid user ID. Please login or register first.');
+      }
+      
       final queryParameters = {
         'user_id': submission.userId.toString(),
         'quiz_id': submission.quizId.toString(),
@@ -220,16 +225,67 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> registerForQuiz(Map<String, dynamic> registrationData) async {
+  // static Future<Map<String, dynamic>> registerForQuiz(Map<String, dynamic> registrationData) async {
+  //   try {
+  //     final response = await makeRequest(
+  //       'https://www.spiresrecruit.com/api/register-quiz-user',
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Accept': 'application/json',
+  //       },
+  //       body: jsonEncode(registrationData),
+  //     );
+
+  //     final responseData = jsonDecode(response.body);
+      
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       return responseData;
+  //     } else {
+  //       return {
+  //         'status': false,
+  //         'message': responseData['message'] ?? 'Registration failed. Please try again.',
+  //       };
+  //     }
+  //   } catch (e) {
+  //     return {
+  //       'status': false,
+  //       'message': 'An error occurred during registration: $e',
+  //     };
+  //   }
+  // }
+
+  static Future<Map<String, dynamic>> registerForOlympiad({
+    required String studentName,
+    required String parentName,
+    required String mobile,
+    required String standard,
+    required String password,
+    required String parentEmail,
+  }) async {
     try {
+      final queryParameters = {
+        'student_name': studentName,
+        'parent_name': parentName,
+        'mobile': mobile,
+        'standard': standard,
+        'password': password,
+        'parent_email': parentEmail,
+      };
+
+      final uri = Uri.https(
+        'spiresrecruit.com',
+        '/api/olympaid-registration',
+        queryParameters,
+      );
+
       final response = await makeRequest(
-        'https://www.spiresrecruit.com/api/register-quiz-user',
+        uri.toString(),
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: jsonEncode(registrationData),
       );
 
       final responseData = jsonDecode(response.body);
@@ -246,6 +302,53 @@ class ApiService {
       return {
         'status': false,
         'message': 'An error occurred during registration: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> olympiadLogin({
+    required String parentEmail,
+    required String password,
+  }) async {
+    try {
+      final queryParameters = {
+        'parent_email': parentEmail,
+        'password': password,
+      };
+
+      final uri = Uri.https(
+        'spiresrecruit.com',
+        '/api/olympaid-login',
+        queryParameters,
+      );
+
+      final response = await makeRequest(
+        uri.toString(),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      final responseData = jsonDecode(response.body);
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {
+          'status': true,
+          'message': 'Login successful',
+          'data': responseData,
+        };
+      } else {
+        return {
+          'status': false,
+          'message': responseData['message'] ?? 'Login failed. Please check your credentials.',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': false,
+        'message': 'An error occurred during login: $e',
       };
     }
   }

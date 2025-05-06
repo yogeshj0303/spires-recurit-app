@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../Constants/exports.dart';
 import '../Main_Screens/main_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
@@ -244,11 +245,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget loginButton() {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         final isValid = loginKey.currentState!.validate();
         if (isValid) {
           // Set guest mode to false when logging in
           c.isGuestMode.value = false;
+          
+          // Clear guest mode in SharedPreferences
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('is_guest_mode', false);
+          
+          // Regular login flow
           AuthUtils.getLogin(
               email: emailController.text, pass: passController.text);
         }
@@ -276,9 +283,15 @@ class _LoginScreenState extends State<LoginScreen> {
     return Container(
       width: double.infinity,
       child: OutlinedButton(
-        onPressed: () {
+        onPressed: () async {
           // Set guest mode
           c.isGuestMode.value = true;
+          
+          // Save guest mode state to SharedPreferences and clear any existing login credentials
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('is_guest_mode', true);
+          await prefs.remove('email');
+          await prefs.remove('pass');
           
           // Navigate to main screen
           Get.offAll(() => MainScreen());

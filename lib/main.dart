@@ -3,6 +3,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/firebase_options.dart';
 import 'package:spires_app/Utils/notification_utils.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
+import 'package:spires_app/Controllers/my_controller.dart';
 
 // Initialize Firebase Messaging background handler
 @pragma('vm:entry-point')
@@ -69,16 +73,24 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  FutureBuilder<bool> autoLoginSystem() {
+  FutureBuilder<Map<String, dynamic>> autoLoginSystem() {
     return FutureBuilder(
-      future: SharedPrefs.autoLogin(),
+      future: _checkLoginStatus(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         } else {
-          if (snapshot.data == true) {
+          final data = snapshot.data ?? {'isLoggedIn': false, 'isGuestMode': false};
+          
+          // Send both regular login and guest mode through splash screen
+          if (data['isLoggedIn'] || data['isGuestMode']) {
+            // Set up guest mode flag if needed, which splash will read later
+            if (data['isGuestMode']) {
+              final c = Get.put(MyController());
+              c.isGuestMode.value = true;
+            }
             return const SplashScreen();
           } else {
             return const WelcomeScreen();
@@ -86,6 +98,20 @@ class MyApp extends StatelessWidget {
         }
       },
     );
+  }
+
+  Future<Map<String, dynamic>> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = await SharedPrefs.autoLogin();
+    final isGuestMode = prefs.getBool('is_guest_mode') ?? false;
+    
+    // Load user data including user ID 
+    await SharedPrefs.getUserData();
+    
+    return {
+      'isLoggedIn': isLoggedIn,
+      'isGuestMode': isGuestMode,
+    };
   }
 
   ThemeData myTheme() {

@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:spires_app/Constants/exports.dart';
-import 'package:spires_app/Screens/Auth_Screens/login_screen.dart';
-import 'package:spires_app/Screens/quiz_listing.dart';
+import 'package:spires_app/Screens/quiz/olympiad_login_screen.dart';
+import 'package:spires_app/Screens/quiz/quiz_listing.dart';
 import 'package:spires_app/Services/api_service.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class QuizRegistrationForm extends StatefulWidget {
   final int quizId;
@@ -218,7 +216,7 @@ class _QuizRegistrationFormState extends State<QuizRegistrationForm> {
           InkWell(
             onTap: () {
               Navigator.pop(context);
-              Get.to(() => LoginScreen(), transition: Transition.rightToLeft);
+              Get.to(() => OlympiadLoginScreen(), transition: Transition.rightToLeft);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -496,69 +494,76 @@ class _QuizRegistrationFormState extends State<QuizRegistrationForm> {
 
   // Handle the registration process
   void _handleRegistration() {
-    // Validate form fields manually since we're not using a form key
-    bool isValid = true;
-    
-    // Check student name
-    if (_studentNameController.text.isEmpty) {
-      isValid = false;
-    }
-    
-    // Check standard
-    if (_selectedStandard == null) {
-      isValid = false;
-    }
-    
-    // Check parent name
-    if (_parentNameController.text.isEmpty) {
-      isValid = false;
-    }
-    
-    // Check parent email
-    if (_parentEmailController.text.isEmpty || 
-        !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(_parentEmailController.text)) {
-      isValid = false;
-    }
-    
-    // Check mobile number
-    if (_mobileNumberController.text.isEmpty || _mobileNumberController.text.length < 10) {
-      isValid = false;
-    }
-    
-    // Check password
-    if (_passwordController.text.isEmpty || _passwordController.text.length < 6) {
-      isValid = false;
-    }
-    
-    // If validation passes
-    if (isValid) {
-      try {
-        // Get controller instance 
-        final MyController c = Get.find<MyController>();
-        
-        // Set guest mode to false safely
-        c.isGuestMode.value = false;
-        
-        // Call completion callback if provided (before navigation)
-        if (widget.onRegistrationComplete != null) {
-          widget.onRegistrationComplete!();
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Call the API service to register for Olympiad
+      ApiService.registerForOlympiad(
+        studentName: _studentNameController.text,
+        parentName: _parentNameController.text,
+        mobile: _mobileNumberController.text,
+        standard: _selectedStandard!.replaceAll(RegExp(r'[a-zA-Z]'), '').trim(), // Extract just the number
+        password: _passwordController.text,
+        parentEmail: _parentEmailController.text,
+      ).then((response) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        if (response['status'] == true) {
+          // Registration successful
+          // Store user data in shared preferences
+          _saveUserData(response);
+          
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message'] ?? 'Registration successful!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Set guest mode to false
+          try {
+            final MyController c = Get.find<MyController>();
+            c.isGuestMode.value = false;
+          } catch (e) {
+            print("Error updating controller: $e");
+          }
+          
+          // Call completion callback if provided
+          if (widget.onRegistrationComplete != null) {
+            widget.onRegistrationComplete!();
+            // Navigate back to previous screen
+            Navigator.of(context).pop();
+          } else {
+            // Navigate to quiz list screen
+            Get.to(() => QuizListScreen());
+          }
+        } else {
+          // Registration failed
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response['message'] ?? 'Registration failed. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
+      }).catchError((error) {
+        setState(() {
+          _isLoading = false;
+        });
         
-        // Navigate using Navigator to avoid Get issues
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => QuizListScreen(),
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $error'),
+            backgroundColor: Colors.red,
           ),
         );
-      } catch (e) {
-        print("Error during registration: $e");
-        // Fallback if something goes wrong
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => QuizListScreen(),
-          ),
-        );
-      }
+      });
     } else {
       // Show error message for invalid form
       ScaffoldMessenger.of(context).showSnackBar(
@@ -567,6 +572,37 @@ class _QuizRegistrationFormState extends State<QuizRegistrationForm> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  // Save user data to shared preferences
+  Future<void> _saveUserData(Map<String, dynamic> userData) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // In registration, the user ID could be in either 'id' or 'user_id'
+      int? userId;
+      if (userData['id'] != null) {
+        userId = userData['id'];
+      } else if (userData['user_id'] != null) {
+        userId = userData['user_id'];
+      }
+      
+      if (userId != null) {
+        await prefs.setInt('user_id', userId);
+        
+        // IMPORTANT: Set user ID in MyController
+        MyController.id = userId;
+        print("Setting MyController.id to: $userId");
+      }
+      
+      // Save user data as JSON string
+      await prefs.setString('user_data', jsonEncode(userData));
+      
+      // Set logged in status
+      await prefs.setBool('is_logged_in', true);
+    } catch (e) {
+      print("Error saving user data: $e");
     }
   }
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Models/quiz_result_model.dart';
-import 'package:spires_app/Screens/games.dart';
+import 'package:spires_app/Screens/quiz/games.dart';
 import 'package:intl/intl.dart';
 import 'package:spires_app/Models/quiz_model.dart';
+import 'package:spires_app/Screens/quiz/quiz_registration.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -559,7 +560,13 @@ class _QuizCardState extends State<QuizCard> {
                       flex: 2,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          if (_attempt == null) {
+                          final c = Get.find<MyController>();
+                          if (c.isGuestMode.value) {
+                            Get.to(() => QuizRegistrationForm(
+                                  quizId: widget.quiz.id,
+                                  duration: widget.quiz.duration,
+                                ));
+                          } else if (_attempt == null) {
                             final result = await Navigator.push(
                               context,
                               MaterialPageRoute(

@@ -11,7 +11,9 @@ class SharedPrefs {
 
   static Future<bool> autoLogin() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    if (preferences.containsKey('email')) {
+    if (preferences.containsKey('email') && 
+        preferences.getString('email') != null && 
+        preferences.getString('email')!.isNotEmpty) {
       String mail = preferences.getString('email')!;
       String password = preferences.getString('pass')!;
       c.authEmail.value = mail;
@@ -26,6 +28,9 @@ class SharedPrefs {
     
     // First clear all shared preferences
     await preferences.clear();
+    
+    // Explicitly remove guest mode setting
+    await preferences.setBool('is_guest_mode', false);
     
     // Reset essential controller values
     c.selectedIndex.value = 0;
@@ -49,6 +54,15 @@ class SharedPrefs {
     c.isSubscribed.value = preferences.getBool('is_subscribed') ?? false;
     c.isEmailVerified.value = preferences.getBool('is_email_verified') ?? false;
     c.isPhoneVerified.value = preferences.getBool('is_phone_verified') ?? false;
+    
+    // Load user ID into controller
+    final userId = preferences.getInt('user_id');
+    if (userId != null && userId > 0) {
+      MyController.id = userId;
+      print("Loaded user ID from preferences: $userId");
+    } else {
+      print("No valid user ID found in preferences. Current MyController.id: ${MyController.id}");
+    }
   }
 
   static Future<void> saveFcmToken(String token) async {

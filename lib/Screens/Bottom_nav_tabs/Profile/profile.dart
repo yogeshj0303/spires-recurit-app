@@ -1,4 +1,4 @@
-import 'package:spires_app/Screens/quiz_results_screen.dart';
+import 'package:spires_app/Screens/quiz/quiz_results_screen.dart';
 
 import '../../../Constants/exports.dart';
 

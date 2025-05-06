@@ -1,4 +1,6 @@
 import 'package:spires_app/Constants/exports.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,13 +17,14 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(
       const Duration(seconds: 2),
       () {
+        // Check if user is in guest mode
+        if (c.isGuestMode.value) {
+          // Navigate to main screen for guest mode users
+          Get.offAll(() => MainScreen());
+        } else {
+          // Regular authentication for normal users
           AuthUtils.getLogin(email: c.authEmail.value, pass: c.authPass.value);
-        // final isLoggedIn = FirebaseAuth.instance.currentUser!=null;
-        // if(isLoggedIn){
-        //   AuthUtils().signInWithGoogle();
-        // }else{
-        //   AuthUtils.getLogin(email: c.authEmail.value, pass: c.authPass.value);
-        // }
+        }
       },
     );
     Future.delayed(const Duration(milliseconds: 200),
