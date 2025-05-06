@@ -75,6 +75,7 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
+    // gsdog
     buildTypes {
         release {
             signingConfig signingConfigs.debug
