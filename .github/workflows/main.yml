@@ -9,11 +9,11 @@ on:
       - master
       - develop
 
-name: "Build & Release"
+name: "Build APK Only"
 
 jobs:
   build:
-    name: Build & Release
+    name: Build APK
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,9 +37,3 @@ jobs:
       - name: Build APK
         run: flutter build apk --release --split-per-abi
 
-      - name: Push to Releases
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "build/app/outputs/apk/release/*.apk"
-          tag: v${{ steps.version.outputs.version }}
-          token: ${{ secrets.TOKEN }}
