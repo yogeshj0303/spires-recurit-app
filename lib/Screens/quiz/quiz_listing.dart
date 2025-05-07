@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Models/quiz_result_model.dart';
+import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
 import 'package:spires_app/Screens/quiz/games.dart';
 import 'package:intl/intl.dart';
 import 'package:spires_app/Models/quiz_model.dart';
@@ -71,6 +72,12 @@ class _QuizListScreenState extends State<QuizListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Get.to(() => MainScreen());
+          },
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+        ),
         title: const Text('Live Quizzes',
             style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: _primaryOrange,
