@@ -437,15 +437,10 @@ class ApiService {
       final userType = prefs.getString('user_type');
       if (userType == 'olympiad_user') {
         await prefs.remove('user_type');
-        await prefs.remove('user_id');
-        await prefs.setBool('is_logged_in', false);
       }
       
       // Clear quiz results
       await prefs.remove('quiz_results_olympiad_user_${MyController.id}');
-      
-      // Reset MyController
-      MyController.id = 0;
       
       print('Olympiad session cleared successfully');
     } catch (e) {

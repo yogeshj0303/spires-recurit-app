@@ -393,14 +393,6 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
               backgroundColor: Colors.green,
             ),
           );
-
-          // Set guest mode to false
-          try {
-            final MyController c = Get.find<MyController>();
-            c.isGuestMode.value = false;
-          } catch (e) {
-            print("Error updating controller: $e");
-          }
           
           // Execute login completion callback if provided
           if (widget.onLoginComplete != null) {

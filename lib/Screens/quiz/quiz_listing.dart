@@ -9,6 +9,7 @@ import 'package:spires_app/Screens/quiz/quiz_registration.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class QuizListScreen extends StatefulWidget {
   const QuizListScreen({Key? key}) : super(key: key);
@@ -83,6 +84,47 @@ class _QuizListScreenState extends State<QuizListScreen> {
         backgroundColor: _primaryOrange,
         foregroundColor: Colors.white,
         elevation: 1,
+        actions: [
+          FutureBuilder<bool>(
+            future: SharedPreferences.getInstance().then((prefs) => 
+              prefs.getBool('is_olympiad_logged_in') ?? false),
+            builder: (context, snapshot) {
+              if (snapshot.data == true) {
+                return IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () async {
+                    try {
+                      final prefs = await SharedPreferences.getInstance();
+                      await ApiService.clearOlympiadSession();
+                      
+                      // Show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Successfully logged out from Quiz'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      
+                      // Navigate back to main screen
+                      Get.offAll(() => MainScreen());
+                    } catch (e) {
+                      print('Error during logout: $e');
+                      // Show error message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Error during logout. Please try again.'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  },
+                  tooltip: 'Logout from Quiz',
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60.0),
           child: Padding(
@@ -174,66 +216,77 @@ class _QuizCardState extends State<QuizCard> {
   }
 
   Future<void> _loadAttempt() async {
+    if (!mounted) return;
+    
     try {
-      final c = Get.find<MyController>();
-      
-      // If in guest mode, don't try to load attempts
-      if (c.isGuestMode.value) {
-        setState(() {
-          _attempt = null;
-        });
-        return;
-      }
-
-      // Get user type and ID from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
+      final userType = prefs.getString('user_type');
       final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
       
-      int userId;
-      String userType;
-      
+      String? userId;
+      String? userTypeStr;
+
       if (isOlympiadLoggedIn) {
-        // Use olympiad user ID and type
-        userId = prefs.getInt('olympiad_user_id') ?? 0;
-        userType = 'olympiad_user';
+        final userData = prefs.getString('olympiad_user_data');
+        if (userData != null) {
+          try {
+            final userDataMap = jsonDecode(userData);
+            if (userDataMap['data'] != null && userDataMap['data']['id'] != null) {
+              userId = userDataMap['data']['id'].toString();
+              userTypeStr = 'olympiad_user';
+            }
+          } catch (e) {
+            print('Error parsing olympiad user data: $e');
+          }
+        }
       } else {
-        // Use regular user ID and type
-        userId = MyController.id;
-        userType = 'user';
+        userId = MyController.id.toString();
+        userTypeStr = userType;
       }
 
-      // Check if user is properly logged in
-      if (userId <= 0) {
+      print('Loading attempt with userId: $userId, userType: $userTypeStr');
+
+      if (userId == null || userId.isEmpty || userId == '0') {
         print('User not logged in - userId: $userId');
-        setState(() {
-          _attempt = null;
-        });
+        if (mounted) {
+          setState(() {
+            _attempt = null;
+          });
+        }
         return;
       }
 
-      print('Loading quiz attempt for:');
-      print('User ID: $userId');
-      print('User Type: $userType');
+      final results = await ApiService.fetchUserQuizResults(
+        int.parse(userId),
+        userType: userTypeStr ?? 'user',
+      );
 
-      final results = await ApiService.fetchUserQuizResults(userId, userType: userType);
-      
       if (!mounted) return;
 
-      setState(() {
-        try {
-          _attempt = results.quizzes.firstWhere(
-            (quiz) => quiz.quizId == widget.quiz.id,
-          );
-        } catch (e) {
+      if (results != null && results.quizzes.isNotEmpty) {
+        setState(() {
+          try {
+            final matchingQuiz = results.quizzes.where(
+              (quiz) => quiz.quizId == widget.quiz.id,
+            ).firstOrNull;
+            _attempt = matchingQuiz;
+          } catch (e) {
+            print('Error finding quiz attempt: $e');
+            _attempt = null;
+          }
+        });
+      } else {
+        setState(() {
           _attempt = null;
-        }
-      });
+        });
+      }
     } catch (e) {
-      print('Error in _loadAttempt: $e');
-      if (!mounted) return;
-      setState(() {
-        _attempt = null;
-      });
+      print('Error loading attempt: $e');
+      if (mounted) {
+        setState(() {
+          _attempt = null;
+        });
+      }
     }
   }
 
@@ -610,31 +663,34 @@ class _QuizCardState extends State<QuizCard> {
                       flex: 2,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          final c = Get.find<MyController>();
-                          if (c.isGuestMode.value) {
-                            Get.to(() => QuizRegistrationForm(
-                                  quizId: widget.quiz.id,
-                                  duration: widget.quiz.duration,
-                                ));
-                          } else if (_attempt == null) {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => QuizScreen(
-                                  quizId: widget.quiz.id,
-                                  duration:
-                                      widget.quiz.duration, // Pass the duration
-                                  onQuizComplete: (score) async {
-                                    await _loadAttempt();
-                                  },
+                          final prefs = await SharedPreferences.getInstance();
+                          final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
+                          
+                          if (isOlympiadLoggedIn) {
+                            if (_attempt == null) {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => QuizScreen(
+                                    quizId: widget.quiz.id,
+                                    duration: widget.quiz.duration,
+                                    onQuizComplete: (score) async {
+                                      await _loadAttempt();
+                                    },
+                                  ),
                                 ),
-                              ),
-                            );
-                            if (result == true) {
-                              await _loadAttempt();
+                              );
+                              if (result == true) {
+                                await _loadAttempt();
+                              }
+                            } else {
+                              _showResultDialog();
                             }
                           } else {
-                            _showResultDialog();
+                            Get.to(() => QuizRegistrationForm(
+                              quizId: widget.quiz.id,
+                              duration: widget.quiz.duration,
+                            ));
                           }
                         },
                         icon: Icon(

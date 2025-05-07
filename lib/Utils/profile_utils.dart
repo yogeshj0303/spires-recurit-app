@@ -330,34 +330,41 @@ class ProfileUtils {
   }
 
   static Future<ProfileModel> showProfile() async {
-    final url = '${apiUrl}showCV?user_id=${MyController.id}';
-    final response = await http.delete(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['error'] == false) {
-        c.aboutMe.value = data['message']['description'] ?? "";
-        c.profileImg.value = data['message']['image'] ?? "";
-        data['message']['cv'] == null
-            ? c.resumePoints.value = 0.00
-            : c.resumePoints.value = 15.00;
-        data['message']['description'] == null ||
-                data['message']['description'] == ''
-            ? c.aboutMePoints.value = 0.00
-            : c.aboutMePoints.value = 10.00;
-        data['message']['image'] == null || data['message']['image'] == ''
-            ? c.imgPoints.value = 0.00
-            : c.imgPoints.value = 15.00;
-        c.getProgressValue();
-        return ProfileModel.fromJson(data);
+    try {
+      final url = '${apiUrl}showCV?user_id=${MyController.id}';
+      final response = await http.get(Uri.parse(url));
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['error'] == false) {
+          c.aboutMe.value = data['message']['description'] ?? "";
+          c.profileImg.value = data['message']['image'] ?? "";
+          data['message']['cv'] == null
+              ? c.resumePoints.value = 0.00
+              : c.resumePoints.value = 15.00;
+          data['message']['description'] == null ||
+                  data['message']['description'] == ''
+              ? c.aboutMePoints.value = 0.00
+              : c.aboutMePoints.value = 10.00;
+          data['message']['image'] == null || data['message']['image'] == ''
+              ? c.imgPoints.value = 0.00
+              : c.imgPoints.value = 15.00;
+          c.getProgressValue();
+          return ProfileModel.fromJson(data);
+        } else {
+          print('API Error: ${data['message']}');
+          Fluttertoast.showToast(msg: data['message'] ?? 'Something went wrong');
+        }
       } else {
-        Fluttertoast.showToast(msg: 'Something went wrong');
+        print('HTTP Error: ${response.statusCode} ${response.reasonPhrase}');
+        Fluttertoast.showToast(
+            msg: 'Server error: ${response.statusCode} ${response.reasonPhrase}');
       }
-    } else {
-      Fluttertoast.showToast(
-          msg:
-              'Internal server error ${response.statusCode} ${response.reasonPhrase}');
+    } catch (e) {
+      print('Exception in showProfile: $e');
+      Fluttertoast.showToast(msg: 'Failed to load profile data');
     }
-    throw Exception('Unable to load data');
+    throw Exception('Unable to load profile data');
   }
 
   static Future<void> deleteCV() async {

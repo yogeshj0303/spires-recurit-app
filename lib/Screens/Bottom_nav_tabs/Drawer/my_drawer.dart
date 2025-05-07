@@ -679,15 +679,14 @@ class _MyDrawerState extends State<MyDrawer> {
       dense: true,
       onTap: () async {
         final prefs = await SharedPreferences.getInstance();
-        final userType = prefs.getString('user_type');
+        final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
         
-        if (userType == 'olympiad_user') {
-          // Handle olympiad logout
-          await ApiService.clearOlympiadSession();
-          c.isGuestMode.value = true;
-          Get.offAll(() => MainScreen());
+        if (isOlympiadLoggedIn) {
+          // If olympiad user is logged in, only clear regular user session
+          logoutfn();
         } else {
-          // Handle regular logout
+          // If no olympiad user, clear everything
+          await ApiService.clearOlympiadSession();
           logoutfn();
         }
       },
