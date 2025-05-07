@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/nearby_jobs_screen.dart';
@@ -7,11 +8,14 @@ import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import 'package:spires_app/Screens/counsellors_screen.dart';
 import 'package:spires_app/Screens/quiz/quiz_listing.dart';
 import 'package:spires_app/Screens/quiz/quiz_registration.dart';
+import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/share_utils.dart';
 import '../../Resumes/cv_two.dart';
 import 'help_centre.dart';
 import '../../../Data/programs_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../Services/api_service.dart';
 
 class MyDrawer extends StatefulWidget {
   final Size size;
@@ -412,8 +416,7 @@ class _MyDrawerState extends State<MyDrawer> {
     return GestureDetector(
       onTap: () {
         Get.back(); // Close drawer first
-        c.selectedIndex.value =
-            4; // Use the existing controller instance
+        c.selectedIndex.value = 4; // Use the existing controller instance
       },
       child: Container(
         padding: const EdgeInsets.all(defaultPadding),
@@ -458,7 +461,7 @@ class _MyDrawerState extends State<MyDrawer> {
                       children: [
                         Expanded(
                           child: Text(
-                            '${MyController.userFirstName} ${MyController.userLastName}',
+                            _getUserName(),
                             style: TextStyle(
                               fontSize: 14,
                               color: whiteColor,
@@ -481,7 +484,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      MyController.userEmail,
+                      _getUserEmail(),
                       style: TextStyle(
                         fontSize: 12,
                         color: whiteColor,
@@ -490,7 +493,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      MyController.userPhone,
+                      _getUserPhone(),
                       style: TextStyle(
                         fontSize: 12,
                         color: whiteColor,
@@ -505,6 +508,68 @@ class _MyDrawerState extends State<MyDrawer> {
         ),
       ),
     );
+  }
+  
+  String _getUserName() {
+    final prefs = SharedPreferences.getInstance();
+    final userType = prefs.then((p) => p.getString('user_type'));
+    
+    return userType.then((type) {
+      if (type == 'olympiad_user') {
+        final userData = prefs.then((p) => p.getString('olympiad_user_data'));
+        return userData.then((data) {
+          if (data != null) {
+            try {
+              final userDataMap = jsonDecode(data);
+              if (userDataMap['data'] != null && userDataMap['data']['student_name'] != null) {
+                return userDataMap['data']['student_name'];
+              }
+            } catch (e) {
+              print('Error parsing olympiad user data: $e');
+            }
+          }
+          return 'Olympiad User';
+        });
+      }
+      return '${MyController.userFirstName} ${MyController.userLastName}';
+    }).toString();
+  }
+
+  String _getUserEmail() {
+    final prefs = SharedPreferences.getInstance();
+    final userType = prefs.then((p) => p.getString('user_type'));
+    
+    return userType.then((type) {
+      if (type == 'olympiad_user') {
+        final userData = prefs.then((p) => p.getString('olympiad_user_data'));
+        return userData.then((data) {
+          if (data != null) {
+            try {
+              final userDataMap = jsonDecode(data);
+              if (userDataMap['data'] != null && userDataMap['data']['parent_email'] != null) {
+                return userDataMap['data']['parent_email'];
+              }
+            } catch (e) {
+              print('Error parsing olympiad user data: $e');
+            }
+          }
+          return '';
+        });
+      }
+      return MyController.userEmail;
+    }).toString();
+  }
+
+  String _getUserPhone() {
+    final prefs = SharedPreferences.getInstance();
+    final userType = prefs.then((p) => p.getString('user_type'));
+    
+    return userType.then((type) {
+      if (type == 'olympiad_user') {
+        return ''; // Olympiad users don't have phone numbers
+      }
+      return MyController.userPhone;
+    }).toString();
   }
   
   Widget _buildGuestOptions() {
@@ -591,7 +656,20 @@ class _MyDrawerState extends State<MyDrawer> {
   Widget _buildLogoutOption() {
     return ListTile(
       dense: true,
-      onTap: () => logoutfn(),
+      onTap: () async {
+        final prefs = await SharedPreferences.getInstance();
+        final userType = prefs.getString('user_type');
+        
+        if (userType == 'olympiad_user') {
+          // Handle olympiad logout
+          await ApiService.clearOlympiadSession();
+          c.isGuestMode.value = true;
+          Get.offAll(() => MainScreen());
+        } else {
+          // Handle regular logout
+          logoutfn();
+        }
+      },
       leading: const Icon(
         Icons.logout,
         color: primaryColor,

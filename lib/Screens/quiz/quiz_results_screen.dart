@@ -4,6 +4,7 @@ import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Models/quiz_result_model.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuizResultsScreen extends StatefulWidget {
   const QuizResultsScreen({Key? key}) : super(key: key);
@@ -31,19 +32,54 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
         _error = null;
       });
 
-      // Get userId from MyController
-      final userId = MyController.id;
-      if (userId == null) {
-        throw Exception('User not logged in');
+      // Check if in guest mode
+      if (c.isGuestMode.value) {
+        setState(() {
+          _results = null;
+          _isLoading = false;
+        });
+        return;
       }
 
-      final results = await ApiService.fetchUserQuizResults(userId);
+      // Get user type and ID from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
+      
+      int userId;
+      String userType;
+      
+      if (isOlympiadLoggedIn) {
+        // Use olympiad user ID and type
+        userId = prefs.getInt('olympiad_user_id') ?? 0;
+        userType = 'olympiad_user';
+      } else {
+        // Use regular user ID and type
+        userId = MyController.id;
+        userType = 'user';
+      }
+
+      // Check if user is properly logged in
+      if (userId <= 0) {
+        print('User not logged in - userId: $userId');
+        setState(() {
+          _results = null;
+          _isLoading = false;
+        });
+        return;
+      }
+
+      print('Fetching quiz results for:');
+      print('User ID: $userId');
+      print('User Type: $userType');
+
+      final results = await ApiService.fetchUserQuizResults(userId, userType: userType);
 
       setState(() {
         _results = results;
         _isLoading = false;
       });
     } catch (e) {
+      print('Error in _fetchResults: $e');
       setState(() {
         _error = e.toString();
         _isLoading = false;

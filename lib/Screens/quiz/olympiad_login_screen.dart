@@ -24,6 +24,44 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
   bool _obscurePassword = true;
 
   @override
+  void initState() {
+    super.initState();
+    _checkExistingSession();
+  }
+
+  Future<void> _checkExistingSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
+    final userData = prefs.getString('olympiad_user_data');
+    
+    if (isLoggedIn && userData != null) {
+      try {
+        final userDataMap = jsonDecode(userData);
+        if (userDataMap['data'] != null && userDataMap['data']['id'] != null) {
+          // Auto login with existing session
+          _handleAutoLogin(userDataMap);
+          return;
+        }
+      } catch (e) {
+        print('Error parsing stored olympiad user data: $e');
+      }
+    }
+  }
+
+  void _handleAutoLogin(Map<String, dynamic> userData) {
+    if (widget.onLoginComplete != null) {
+      widget.onLoginComplete!();
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => QuizListScreen(),
+        ),
+      );
+    }
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -343,11 +381,10 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
 
         if (response['status'] == true) {
           // Login successful
-          // Print debug info
           print("Login successful response data: ${response['data']}");
           
           // Store user data in shared preferences
-          _saveUserData(response['data']);
+          _saveUserData(response);
           
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -368,10 +405,8 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
           // Execute login completion callback if provided
           if (widget.onLoginComplete != null) {
             widget.onLoginComplete!();
-            // Navigate back to previous screen
             Navigator.of(context).pop();
           } else {
-            // Navigate to quiz list screen
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => QuizListScreen(),
@@ -392,7 +427,6 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
           _isLoading = false;
         });
         
-        // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('An error occurred: $error'),
@@ -403,26 +437,32 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
     }
   }
 
-  // Save user data to shared preferences
   Future<void> _saveUserData(dynamic userData) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       
-      // Save user ID - in olympiad login, the ID is directly in the 'id' field
-      if (userData['id'] != null) {
-        final userId = userData['id'];
-        await prefs.setInt('user_id', userId);
+      // Save olympiad user ID from the nested data structure
+      if (userData['data'] != null && userData['data']['id'] != null) {
+        final olympiadUserId = userData['data']['id'];
+        await prefs.setInt('olympiad_user_id', olympiadUserId);
+        await prefs.setInt('user_id', olympiadUserId); // Also set as current user_id
         
         // IMPORTANT: Set user ID in MyController
-        MyController.id = userId;
-        print("Setting MyController.id to: $userId");
+        MyController.id = olympiadUserId;
+        print("Setting MyController.id to olympiad user ID: $olympiadUserId");
+      } else {
+        print("Warning: Could not find olympiad user ID in response data");
       }
       
-      // Save user data as JSON string
-      await prefs.setString('user_data', jsonEncode(userData));
+      // Save complete user data
+      await prefs.setString('olympiad_user_data', jsonEncode(userData));
       
-      // Set logged in status
+      // Set olympiad specific login status
+      await prefs.setBool('is_olympiad_logged_in', true);
       await prefs.setBool('is_logged_in', true);
+
+      // Set user type for olympiad login
+      await prefs.setString('user_type', 'olympiad_user');
     } catch (e) {
       print("Error saving user data: $e");
     }

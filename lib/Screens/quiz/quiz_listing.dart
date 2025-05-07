@@ -7,6 +7,7 @@ import 'package:spires_app/Models/quiz_model.dart';
 import 'package:spires_app/Screens/quiz/quiz_registration.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuizListScreen extends StatefulWidget {
   const QuizListScreen({Key? key}) : super(key: key);
@@ -167,7 +168,48 @@ class _QuizCardState extends State<QuizCard> {
 
   Future<void> _loadAttempt() async {
     try {
-      final results = await ApiService.fetchUserQuizResults(MyController.id);
+      final c = Get.find<MyController>();
+      
+      // If in guest mode, don't try to load attempts
+      if (c.isGuestMode.value) {
+        setState(() {
+          _attempt = null;
+        });
+        return;
+      }
+
+      // Get user type and ID from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
+      
+      int userId;
+      String userType;
+      
+      if (isOlympiadLoggedIn) {
+        // Use olympiad user ID and type
+        userId = prefs.getInt('olympiad_user_id') ?? 0;
+        userType = 'olympiad_user';
+      } else {
+        // Use regular user ID and type
+        userId = MyController.id;
+        userType = 'user';
+      }
+
+      // Check if user is properly logged in
+      if (userId <= 0) {
+        print('User not logged in - userId: $userId');
+        setState(() {
+          _attempt = null;
+        });
+        return;
+      }
+
+      print('Loading quiz attempt for:');
+      print('User ID: $userId');
+      print('User Type: $userType');
+
+      final results = await ApiService.fetchUserQuizResults(userId, userType: userType);
+      
       if (!mounted) return;
 
       setState(() {
@@ -180,6 +222,7 @@ class _QuizCardState extends State<QuizCard> {
         }
       });
     } catch (e) {
+      print('Error in _loadAttempt: $e');
       if (!mounted) return;
       setState(() {
         _attempt = null;

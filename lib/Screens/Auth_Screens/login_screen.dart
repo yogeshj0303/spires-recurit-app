@@ -255,6 +255,12 @@ class _LoginScreenState extends State<LoginScreen> {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool('is_guest_mode', false);
           
+          // Clear any existing olympiad user ID
+          await prefs.remove('olympiad_user_id');
+          
+          // Set user type for main login
+          await prefs.setString('user_type', 'user');
+          
           // Regular login flow
           AuthUtils.getLogin(
               email: emailController.text, pass: passController.text);

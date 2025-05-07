@@ -209,9 +209,15 @@ class _QuizScreenState extends State<QuizScreen> {
         }
       }
 
-      // Check if user is in guest mode
+      // Check user login status
+      final prefs = await SharedPreferences.getInstance();
+      final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
+      final userType = prefs.getString('user_type');
+      final userId = prefs.getInt('user_id');
+      
+      // Check if user is in guest mode or not logged in
       final c = Get.find<MyController>();
-      if (c.isGuestMode.value || MyController.id <= 0) {
+      if ((c.isGuestMode.value || MyController.id <= 0) && !isOlympiadLoggedIn) {
         // Guest mode - show a dialog to register/login
         if (!mounted) return;
         
@@ -230,7 +236,6 @@ class _QuizScreenState extends State<QuizScreen> {
                     duration: widget.duration,
                     onRegistrationComplete: () {
                       // After registration, try to take the quiz again
-                      // This will be called when returning from registration
                       _proceedWithSubmission();
                     },
                   ));
@@ -255,37 +260,36 @@ class _QuizScreenState extends State<QuizScreen> {
         return;
       }
 
-      // Create submission object with user ID
-      QuizSubmission submission = QuizSubmission(
-        userId: MyController.id,
-        quizId: widget.quizId,
-        answers: answers,
-      );
-
-      // Enhanced debugging to check user ID
-      print("Submitting quiz with user_id: ${MyController.id}, guest mode: ${c.isGuestMode.value}");
+      // Create submission object with appropriate user ID
+      QuizSubmission submission;
       
-      // Load user ID from preferences again as a final verification
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        final storedUserId = prefs.getInt('user_id');
-        print("User ID from SharedPreferences: $storedUserId");
-        
-        // If stored ID is valid but controller ID is invalid, use the stored ID
-        if ((storedUserId != null && storedUserId > 0) && MyController.id <= 0) {
-          MyController.id = storedUserId;
-          print("Updated controller ID from SharedPreferences: $storedUserId");
-          
-          // Create a new submission with the correct user ID
+      if (isOlympiadLoggedIn && userType == 'olympiad_user') {
+        // Use olympiad user ID
+        final olympiadUserId = prefs.getInt('olympiad_user_id');
+        if (olympiadUserId != null && olympiadUserId > 0) {
           submission = QuizSubmission(
-            userId: storedUserId,
+            userId: olympiadUserId,
             quizId: widget.quizId,
             answers: answers,
           );
+        } else {
+          throw Exception('Invalid olympiad user ID');
         }
-      } catch (e) {
-        print("Error accessing SharedPreferences: $e");
+      } else {
+        // Use regular user ID
+        submission = QuizSubmission(
+          userId: MyController.id,
+          quizId: widget.quizId,
+          answers: answers,
+        );
       }
+
+      // Enhanced debugging
+      print("Submitting quiz with:");
+      print("User Type: $userType");
+      print("Is Olympiad Logged In: $isOlympiadLoggedIn");
+      print("User ID: ${submission.userId}");
+      print("Guest Mode: ${c.isGuestMode.value}");
 
       final result = await ApiService.submitQuiz(submission);
 

@@ -116,6 +116,29 @@ class ApiService {
 
   static Future<QuizResultResponse> fetchUserQuizResults(int userId, {String userType = 'user'}) async {
     try {
+      // Get the correct user type and ID from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
+      
+      // If olympiad user is logged in, use olympiad user ID and type
+      if (isOlympiadLoggedIn) {
+        final olympiadUserData = prefs.getString('olympiad_user_data');
+        if (olympiadUserData != null) {
+          try {
+            final userData = jsonDecode(olympiadUserData);
+            userId = userData['data']['id'] ?? 0;
+            userType = 'olympiad_user';
+          } catch (e) {
+            print('Error parsing olympiad user data: $e');
+            throw Exception('Failed to parse olympiad user data: $e');
+          }
+        }
+      }
+
+      print('Fetching quiz results for:');
+      print('User ID: $userId');
+      print('User Type: $userType');
+
       final response = await makeRequest(
         'https://www.spiresrecruit.com/api/quiz-by-user/$userId/$userType',
         method: 'GET',
@@ -125,25 +148,52 @@ class ApiService {
         },
       );
 
+      print('Quiz results response status: ${response.statusCode}');
+      print('Quiz results response body: ${response.body}');
+
       if (response.statusCode == 200) {
-        return QuizResultResponse.fromJson(jsonDecode(response.body));
+        final result = QuizResultResponse.fromJson(jsonDecode(response.body));
+        
+        // Store the results in SharedPreferences for quick access
+        await prefs.setString('quiz_results_${userType}_$userId', response.body);
+        
+        return result;
       } else {
         throw Exception('Failed to load quiz results: ${response.statusCode}');
       }
     } catch (e) {
+      print('Error fetching quiz results: $e');
       throw Exception('Failed to fetch quiz results: $e');
     }
   }
 
-  static Future<QuizResultDetail> submitQuiz(QuizSubmission submission, {String userType = 'user'}) async {
+  static Future<QuizResultDetail> submitQuiz(QuizSubmission submission) async {
     try {
+      // Get user type and appropriate user ID from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userType = prefs.getString('user_type') ?? 'user';
+      
+      // Get the appropriate user ID based on user type
+      int userId;
+      if (userType == 'olympiad_user') {
+        userId = prefs.getInt('olympiad_user_id') ?? submission.userId;
+      } else {
+        userId = submission.userId;
+      }
+
       // Validate user ID
-      if (submission.userId <= 0) {
+      if (userId <= 0) {
         throw Exception('Invalid user ID. Please login or register first.');
       }
+
+      print('Submitting quiz with:');
+      print('User ID: $userId');
+      print('User Type: $userType');
+      print('Quiz ID: ${submission.quizId}');
+      print('Number of answers: ${submission.answers.length}');
       
       final queryParameters = {
-        'user_id': submission.userId.toString(),
+        'user_id': userId.toString(),
         'quiz_id': submission.quizId.toString(),
         'user_type': userType,
       };
@@ -155,11 +205,15 @@ class ApiService {
         queryParameters['answers[$i][answer]'] = submission.answers[i].answer;
       }
 
+      print('Query Parameters: $queryParameters');
+
       final uri = Uri.https(
         'www.spiresrecruit.com',
         '/api/quiz-outcomes',
         queryParameters,
       );
+
+      print('Request URL: ${uri.toString()}');
 
       final response = await makeRequest(
         uri.toString(),
@@ -169,6 +223,9 @@ class ApiService {
           'Accept': 'application/json',
         },
       );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
@@ -186,10 +243,9 @@ class ApiService {
         });
 
         // Important: Force refresh of quiz results in memory
-        await fetchUserQuizResults(submission.userId, userType: userType); // Add this line
+        await fetchUserQuizResults(userId, userType: userType);
 
         // Store the result locally
-        final prefs = await SharedPreferences.getInstance();
         await prefs.setString(
           'quiz_${submission.quizId}',
           jsonEncode(quizResult.toJson()),
@@ -197,9 +253,16 @@ class ApiService {
 
         return quizResult;
       } else {
-        throw Exception('Failed to submit quiz: ${response.statusCode}');
+        final errorMessage = response.body.isNotEmpty 
+            ? jsonDecode(response.body)['message'] ?? 'Unknown error'
+            : 'Server error ${response.statusCode}';
+        throw Exception('Failed to submit quiz: $errorMessage');
       }
     } catch (e) {
+      print('Error in submitQuiz: $e');
+      if (e is Exception) {
+        rethrow;
+      }
       throw Exception('Failed to submit quiz: $e');
     }
   }
@@ -334,11 +397,19 @@ class ApiService {
       final responseData = jsonDecode(response.body);
       
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return {
-          'status': true,
-          'message': 'Login successful',
-          'data': responseData,
-        };
+        // Ensure the response has the correct structure
+        if (responseData['data'] != null && responseData['data']['id'] != null) {
+          return {
+            'status': true,
+            'message': 'Login successful',
+            'data': responseData['data'],
+          };
+        } else {
+          return {
+            'status': false,
+            'message': 'Invalid response format from server',
+          };
+        }
       } else {
         return {
           'status': false,
@@ -350,6 +421,35 @@ class ApiService {
         'status': false,
         'message': 'An error occurred during login: $e',
       };
+    }
+  }
+
+  static Future<void> clearOlympiadSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Clear olympiad specific data
+      await prefs.remove('olympiad_user_id');
+      await prefs.remove('olympiad_user_data');
+      await prefs.setBool('is_olympiad_logged_in', false);
+      
+      // Clear user type if it was olympiad
+      final userType = prefs.getString('user_type');
+      if (userType == 'olympiad_user') {
+        await prefs.remove('user_type');
+        await prefs.remove('user_id');
+        await prefs.setBool('is_logged_in', false);
+      }
+      
+      // Clear quiz results
+      await prefs.remove('quiz_results_olympiad_user_${MyController.id}');
+      
+      // Reset MyController
+      MyController.id = 0;
+      
+      print('Olympiad session cleared successfully');
+    } catch (e) {
+      print('Error clearing olympiad session: $e');
     }
   }
 }
