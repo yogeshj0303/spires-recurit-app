@@ -452,56 +452,87 @@ class _MyDrawerState extends State<MyDrawer> {
             ),
             SizedBox(width: widget.size.width * 0.04),
             Expanded(
-              child: Obx(
-                () => Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _getUserName(),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: whiteColor,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: fontFamily,
+              child: FutureBuilder(
+                future: Future.wait([
+                  _getUserName(),
+                  _getUserEmail(),
+                  _getUserPhone(),
+                ]),
+                builder: (context, AsyncSnapshot<List<String>> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  
+                  if (snapshot.hasError) {
+                    return Text(
+                      'Error loading user data',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: whiteColor,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: fontFamily,
+                      ),
+                    );
+                  }
+
+                  final userName = snapshot.data?[0] ?? 'User';
+                  final userEmail = snapshot.data?[1] ?? '';
+                  final userPhone = snapshot.data?[2] ?? '';
+
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              userName,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: whiteColor,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: fontFamily,
+                              ),
                             ),
+                          ),
+                          if (c.isSubscribed.value ||
+                              MyController.subscribed == '1')
+                            const Padding(
+                              padding: EdgeInsets.only(left: 4),
+                              child: Icon(
+                                Icons.workspace_premium,
+                                color: whiteColor,
+                                size: 18,
+                              ),
+                            ),
+                        ],
+                      ),
+                      if (userEmail.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          userEmail,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: whiteColor,
+                            fontFamily: fontFamily,
                           ),
                         ),
-                        if (c.isSubscribed.value ||
-                            MyController.subscribed == '1')
-                          const Padding(
-                            padding: EdgeInsets.only(left: 4),
-                            child: Icon(
-                              Icons.workspace_premium,
-                              color: whiteColor,
-                              size: 18,
-                            ),
-                          ),
                       ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _getUserEmail(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: whiteColor,
-                        fontFamily: fontFamily,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _getUserPhone(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: whiteColor,
-                        fontFamily: fontFamily,
-                      ),
-                    ),
-                  ],
-                ),
+                      if (userPhone.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          userPhone,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: whiteColor,
+                            fontFamily: fontFamily,
+                          ),
+                        ),
+                      ],
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -510,66 +541,56 @@ class _MyDrawerState extends State<MyDrawer> {
     );
   }
   
-  String _getUserName() {
-    final prefs = SharedPreferences.getInstance();
-    final userType = prefs.then((p) => p.getString('user_type'));
+  Future<String> _getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userType = prefs.getString('user_type');
     
-    return userType.then((type) {
-      if (type == 'olympiad_user') {
-        final userData = prefs.then((p) => p.getString('olympiad_user_data'));
-        return userData.then((data) {
-          if (data != null) {
-            try {
-              final userDataMap = jsonDecode(data);
-              if (userDataMap['data'] != null && userDataMap['data']['student_name'] != null) {
-                return userDataMap['data']['student_name'];
-              }
-            } catch (e) {
-              print('Error parsing olympiad user data: $e');
-            }
+    if (userType == 'olympiad_user') {
+      final userData = prefs.getString('olympiad_user_data');
+      if (userData != null) {
+        try {
+          final userDataMap = jsonDecode(userData);
+          if (userDataMap['data'] != null && userDataMap['data']['student_name'] != null) {
+            return userDataMap['data']['student_name'];
           }
-          return 'Olympiad User';
-        });
+        } catch (e) {
+          print('Error parsing olympiad user data: $e');
+        }
       }
-      return '${MyController.userFirstName} ${MyController.userLastName}';
-    }).toString();
+      return 'Olympiad User';
+    }
+    return '${MyController.userFirstName} ${MyController.userLastName}';
   }
 
-  String _getUserEmail() {
-    final prefs = SharedPreferences.getInstance();
-    final userType = prefs.then((p) => p.getString('user_type'));
+  Future<String> _getUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userType = prefs.getString('user_type');
     
-    return userType.then((type) {
-      if (type == 'olympiad_user') {
-        final userData = prefs.then((p) => p.getString('olympiad_user_data'));
-        return userData.then((data) {
-          if (data != null) {
-            try {
-              final userDataMap = jsonDecode(data);
-              if (userDataMap['data'] != null && userDataMap['data']['parent_email'] != null) {
-                return userDataMap['data']['parent_email'];
-              }
-            } catch (e) {
-              print('Error parsing olympiad user data: $e');
-            }
+    if (userType == 'olympiad_user') {
+      final userData = prefs.getString('olympiad_user_data');
+      if (userData != null) {
+        try {
+          final userDataMap = jsonDecode(userData);
+          if (userDataMap['data'] != null && userDataMap['data']['parent_email'] != null) {
+            return userDataMap['data']['parent_email'];
           }
-          return '';
-        });
+        } catch (e) {
+          print('Error parsing olympiad user data: $e');
+        }
       }
-      return MyController.userEmail;
-    }).toString();
+      return '';
+    }
+    return MyController.userEmail;
   }
 
-  String _getUserPhone() {
-    final prefs = SharedPreferences.getInstance();
-    final userType = prefs.then((p) => p.getString('user_type'));
+  Future<String> _getUserPhone() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userType = prefs.getString('user_type');
     
-    return userType.then((type) {
-      if (type == 'olympiad_user') {
-        return ''; // Olympiad users don't have phone numbers
-      }
-      return MyController.userPhone;
-    }).toString();
+    if (userType == 'olympiad_user') {
+      return ''; // Olympiad users don't have phone numbers
+    }
+    return MyController.userPhone;
   }
   
   Widget _buildGuestOptions() {
