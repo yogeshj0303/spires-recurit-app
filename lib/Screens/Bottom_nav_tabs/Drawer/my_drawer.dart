@@ -9,6 +9,7 @@ import 'package:spires_app/Screens/counsellors_screen.dart';
 import 'package:spires_app/Screens/quiz/quiz_listing.dart';
 import 'package:spires_app/Screens/quiz/quiz_registration.dart';
 import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
+import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/share_utils.dart';
 import '../../Resumes/cv_two.dart';
@@ -166,26 +167,7 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListTile(
                           dense: true,
                           onTap: () {
-                            Get.to(() => QuizListScreen());
-
-                            // if (c.isGuestMode.value) {
-                            //   // Use Navigator directly instead of Get to avoid key issues
-                            //   Navigator.of(context).push(
-                            //     MaterialPageRoute(
-                            //       builder: (context) => QuizRegistrationForm(
-                            //         quizId: 0,
-                            //         duration: 30,
-                            //         onRegistrationComplete: () {
-                            //           // Update state if needed after registration
-                            //           if (mounted) setState(() {});
-                            //         },
-                            //       ),
-                            //     ),
-                            //   );
-                            // } else {
-                            //   // If logged in, show quiz list
-                            //   Get.to(() => QuizListScreen());
-                            // }
+                            Get.to(() => QuizzesAndOlympiadScreen());
                           },
                           leading: Icon(Icons.quiz_outlined,
                               color: primaryColor, size: 20),

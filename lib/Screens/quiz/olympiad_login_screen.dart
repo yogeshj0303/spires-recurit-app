@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Screens/quiz/quiz_listing.dart';
 import 'package:spires_app/Screens/quiz/quiz_registration.dart';
+import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -55,7 +56,7 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => QuizListScreen(),
+          builder: (context) => QuizzesAndOlympiadScreen(),
         ),
       );
     }
@@ -401,7 +402,7 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
           } else {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
-                builder: (context) => QuizListScreen(),
+                builder: (context) => QuizzesAndOlympiadScreen(),
               ),
             );
           }

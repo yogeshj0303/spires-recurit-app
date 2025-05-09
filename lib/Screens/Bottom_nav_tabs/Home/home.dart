@@ -7,7 +7,7 @@ import 'package:spires_app/Models/quiz_model.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import 'package:spires_app/Screens/counsellors_screen.dart';
 import 'package:spires_app/Screens/quiz/games.dart';
-import 'package:spires_app/Screens/quiz/quiz_listing.dart';
+import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
 import 'package:spires_app/Services/api_service.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/banner.dart';
@@ -523,7 +523,7 @@ class _HomeState extends State<Home> {
                                 ),
                                 TextButton(
                                   onPressed: () =>
-                                      Get.to(() => const QuizListScreen()),
+                                      Get.to(() => const QuizzesAndOlympiadScreen()),
                                   child: Text(
                                     "View All",
                                     style: TextStyle(
@@ -962,7 +962,7 @@ class _HomeState extends State<Home> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => Get.to(() => QuizListScreen()),
+          onTap: () => Get.to(() => QuizzesAndOlympiadScreen()),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(16),

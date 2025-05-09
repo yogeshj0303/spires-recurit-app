@@ -1,7 +1,9 @@
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Screens/quiz/olympiad_login_screen.dart';
 import 'package:spires_app/Screens/quiz/quiz_listing.dart';
+import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
 import 'package:spires_app/Services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class QuizRegistrationForm extends StatefulWidget {
@@ -540,7 +542,7 @@ class _QuizRegistrationFormState extends State<QuizRegistrationForm> {
             Navigator.of(context).pop();
           } else {
             // Navigate to quiz list screen
-            Get.to(() => QuizListScreen());
+            Get.to(() => QuizzesAndOlympiadScreen());
           }
         } else {
           // Registration failed
