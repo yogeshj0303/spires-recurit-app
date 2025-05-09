@@ -454,6 +454,11 @@ class _OlympiadLoginScreenState extends State<OlympiadLoginScreen> {
       await prefs.setBool('is_olympiad_logged_in', true);
       await prefs.setBool('is_logged_in', true);
 
+      // Set guest mode to true for olympiad users
+      final c = Get.find<MyController>();
+      c.isGuestMode.value = true;
+      await prefs.setBool('is_guest_mode', true);
+
       // Set user type for olympiad login
       await prefs.setString('user_type', 'olympiad_user');
     } catch (e) {

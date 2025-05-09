@@ -114,7 +114,14 @@ class NearbyJobController extends GetxController {
     const url = '${apiUrl}showLocation';
     
     try {
-      final response = await ApiService.makeRequest(url);
+      final response = await ApiService.makeRequest(
+        url,
+        method: 'POST', // Explicitly set method to GET
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -182,7 +189,14 @@ class NearbyJobController extends GetxController {
   Future<JobModel> showNearbyJobs(String cityName) async {
     final url = '${apiUrl}getMatchingJobs?location=$cityName&user_id=${MyController.id}';
       try {
-      final response = await ApiService.makeRequest(url);
+      final response = await ApiService.makeRequest(
+        url,
+        method: 'GET', // Explicitly set method to GET
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -220,7 +234,14 @@ class NearbyJobController extends GetxController {
     print("API URL: $url");
     
     try {
-      final response = await ApiService.makeRequest(url);
+      final response = await ApiService.makeRequest(
+        url,
+        method: 'POST', // Explicitly set method to GET
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
       print("Response status: ${response.statusCode}");
       
       if (response.statusCode == 200) {

@@ -82,6 +82,8 @@ class AuthUtils {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['error'] == false) {
+        print('Login successful');
+        print('Data: $data');
         SharedPrefs.loginSave(email: email, password: pass);
         MyController.id = data['data']['id'];
         MyController.userFirstName = data['data']['fname'];
