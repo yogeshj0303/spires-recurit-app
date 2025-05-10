@@ -217,14 +217,6 @@ class _HomeState extends State<Home> {
                                           color: Colors.white,
                                           borderRadius:
                                               BorderRadius.circular(24),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black
-                                                  .withOpacity(0.06),
-                                              blurRadius: 20,
-                                              offset: const Offset(0, 8),
-                                            ),
-                                          ],
                                         ),
                                         child: Column(
                                           crossAxisAlignment:
@@ -535,7 +527,7 @@ class _HomeState extends State<Home> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: 10),
                           SizedBox(
                             height: 190,
                             child: _isLoadingQuizzes

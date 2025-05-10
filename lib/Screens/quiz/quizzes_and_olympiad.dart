@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Screens/quiz/quiz_listing.dart';
+import 'package:spires_app/Screens/quiz/olympiad_registration.dart';
 
 class QuizzesAndOlympiadScreen extends StatelessWidget {
   const QuizzesAndOlympiadScreen({Key? key}) : super(key: key);
@@ -71,14 +72,26 @@ class QuizzesAndOlympiadScreen extends StatelessWidget {
   }
 
   void navigateToQuizList(BuildContext context, {required bool isOlympiad}) {
-    // For now, both cards navigate to the same QuizListScreen
-    // You can later modify this to filter quizzes based on isOlympiad parameter
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const QuizListScreen(),
-      ),
-    );
+    if (isOlympiad) {
+      // Navigate to Olympiad registration
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const OlympiadRegistrationForm(
+            olympiadId: 0, // This will be set by the API
+            duration: 60, // Default duration in minutes
+          ),
+        ),
+      );
+    } else {
+      // Navigate to Quiz list
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const QuizListScreen(),
+        ),
+      );
+    }
   }
 
   Widget _buildLargeCard(
@@ -112,99 +125,64 @@ class QuizzesAndOlympiadScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -20,
-              bottom: -20,
-              child: Opacity(
-                opacity: 0.2,
-                child: Icon(
-                  title == 'Quizzes' ? Icons.quiz_outlined : Icons.school_outlined,
-                  size: 120,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 12),
+              Text(
+                description,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white.withOpacity(0.9),
+                  height: 1.5,
+                ),
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          title == 'Quizzes' ? Icons.quiz_outlined : Icons.school_outlined,
-                          size: 24,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: Text(
-                      description,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white,
-                        height: 1.4,
-                      ),
-                      maxLines: 5,
-                      overflow: TextOverflow.ellipsis,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Start Now',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: Colors.white.withOpacity(0.9),
+                          size: 18,
                         ),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Get Started',
-                              style: TextStyle(
-                                color: color,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_forward_rounded,
-                              size: 16,
-                              color: color,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
