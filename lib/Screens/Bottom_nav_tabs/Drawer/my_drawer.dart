@@ -7,7 +7,6 @@ import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/nearby_jobs_scr
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import 'package:spires_app/Screens/counsellors_screen.dart';
 import 'package:spires_app/Screens/quiz/quiz_listing.dart';
-import 'package:spires_app/Screens/quiz/quiz_registration.dart';
 import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
 import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
 import '../../../Constants/exports.dart';

@@ -5,10 +5,11 @@ import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
 import 'package:spires_app/Screens/quiz/games.dart';
 import 'package:intl/intl.dart';
 import 'package:spires_app/Models/quiz_model.dart';
-import 'package:spires_app/Screens/quiz/quiz_registration.dart';
+import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:spires_app/Screens/Auth_Screens/login_screen.dart';
 import 'dart:convert';
 
 class QuizListScreen extends StatefulWidget {
@@ -378,7 +379,7 @@ class _QuizCardState extends State<QuizCard> {
                   ),
                   const SizedBox(height: 12),
                   _buildResultStatRow(
-                    'Accuracy',
+                    'Percentile',
                     '${(correctAnswers / _attempt!.totalQuestions * 100).round()}%',
                     Icons.analytics_outlined,
                   ),
@@ -663,34 +664,49 @@ class _QuizCardState extends State<QuizCard> {
                       flex: 2,
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          final isOlympiadLoggedIn = prefs.getBool('is_olympiad_logged_in') ?? false;
-                          
-                          if (isOlympiadLoggedIn) {
-                            if (_attempt == null) {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => QuizScreen(
-                                    quizId: widget.quiz.id,
-                                    duration: widget.quiz.duration,
-                                    onQuizComplete: (score) async {
-                                      await _loadAttempt();
-                                    },
+                          final c = Get.find<MyController>();
+                          if (c.isGuestMode.value) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Login Required'),
+                                content: const Text('Please login to take this quiz.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: const Text('Cancel'),
                                   ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      Get.to(() => LoginScreen());
+                                    },
+                                    child: const Text('Login'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (_attempt == null) {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => QuizScreen(
+                                  quizId: widget.quiz.id,
+                                  duration: widget.quiz.duration,
+                                  onQuizComplete: (score) async {
+                                    await _loadAttempt();
+                                  },
                                 ),
-                              );
-                              if (result == true) {
-                                await _loadAttempt();
-                              }
-                            } else {
-                              _showResultDialog();
+                              ),
+                            );
+                            if (result == true) {
+                              await _loadAttempt();
                             }
                           } else {
-                            Get.to(() => QuizRegistrationForm(
-                              quizId: widget.quiz.id,
-                              duration: widget.quiz.duration,
-                            ));
+                            _showResultDialog();
                           }
                         },
                         icon: Icon(

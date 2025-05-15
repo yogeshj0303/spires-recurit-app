@@ -8,8 +8,8 @@ import 'package:spires_app/Services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:get/get.dart';
-import 'package:spires_app/Screens/quiz/quiz_registration.dart';
-import 'package:spires_app/Screens/quiz/olympiad_login_screen.dart';
+import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
+
 
 class QuizScreen extends StatefulWidget {
   final int quizId;
@@ -218,41 +218,22 @@ class _QuizScreenState extends State<QuizScreen> {
       // Check if user is in guest mode or not logged in
       final c = Get.find<MyController>();
       if ((c.isGuestMode.value || MyController.id <= 0) && !isOlympiadLoggedIn) {
-        // Guest mode - show a dialog to register/login
+        // Guest mode - show a dialog to login
         if (!mounted) return;
         
         await showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            title: Text('Registration Required'),
-            content: Text('Please register or log in to save your quiz results.'),
+            title: const Text('Login Required'),
+            content: const Text('Please login to save your quiz results.'),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  Get.to(() => QuizRegistrationForm(
-                    quizId: widget.quizId,
-                    duration: widget.duration,
-                    onRegistrationComplete: () {
-                      // After registration, try to take the quiz again
-                      _proceedWithSubmission();
-                    },
-                  ));
+                  Get.to(() => const QuizzesAndOlympiadScreen());
                 },
-                child: Text('Register'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Get.to(() => OlympiadLoginScreen(
-                    onLoginComplete: () {
-                      // After login, try to take the quiz again
-                      _proceedWithSubmission();
-                    },
-                  ));
-                },
-                child: Text('Login'),
+                child: const Text('Go to Olympiad Registration'),
               ),
             ],
           ),

@@ -1,5 +1,8 @@
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Model/show_plan_model.dart';
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class UpgradeNow extends StatefulWidget {
   const UpgradeNow({super.key});
@@ -10,32 +13,111 @@ class UpgradeNow extends StatefulWidget {
 
 class _UpgradeNowState extends State<UpgradeNow> {
   int planId = 0;
-  final _razorpay = Razorpay();
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    HomeUtils.purchasePlan(planId);
-    Fluttertoast.showToast(msg: response.paymentId!);
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    Fluttertoast.showToast(msg: response.message.toString());
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    Fluttertoast.showToast(msg: response.walletName.toString());
-  }
+  String environment = "SANDBOX";
+  String appId = "com.atc.spires_app";
+  String merchantId = "PGTESTPAYUAT";
+  String saltKey = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399";
+  String saltIndex = "1";
+  String apiEndPoint = "/pg/orders";
+  bool isPhonePeInitialized = false;
 
   @override
   void initState() {
     super.initState();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    initializePhonePe();
   }
 
-  @override
-  void dispose() {
-    _razorpay.clear();
-    super.dispose();
+  void initializePhonePe() async {
+    try {
+      await PhonePePaymentSdk.init(
+        environment,
+        appId,
+        merchantId,
+        true,
+      );
+      setState(() {
+        isPhonePeInitialized = true;
+      });
+      print("PhonePe SDK initialized successfully");
+    } catch (e) {
+      print("PhonePe initialization error: ${e.toString()}");
+      Fluttertoast.showToast(msg: "Failed to initialize PhonePe: ${e.toString()}");
+    }
+  }
+
+  String generateSHA256(String input) {
+    var bytes = utf8.encode(input);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  void startPhonePePayment(double amount, String planName) async {
+    if (!isPhonePeInitialized) {
+      Fluttertoast.showToast(msg: "PhonePe is not initialized. Please try again.");
+      return;
+    }
+
+    try {
+      String baseUrl = "https://api.phonepe.com/apis/hermes";
+      String callbackUrl = "https://webhook.site/your-callback-url";
+      String redirectUrl = "https://webhook.site/your-redirect-url";
+      
+      String merchantTransactionId = "MT${DateTime.now().millisecondsSinceEpoch}_${planId}_${(amount * 100).toInt()}";
+      
+      Map<String, dynamic> paymentData = {
+        "merchantId": merchantId,
+        "merchantTransactionId": merchantTransactionId,
+        "merchantUserId": "MUID${DateTime.now().millisecondsSinceEpoch}",
+        "amount": (amount * 100).toInt(),
+        "redirectUrl": redirectUrl,
+        "redirectMode": "POST",
+        "callbackUrl": callbackUrl,
+        "mobileNumber": MyController.userPhone,
+        "paymentInstrument": {
+          "type": "UPI_INTENT",
+          "targetApp": "PHONEPE"
+        }
+      };
+
+      String jsonString = json.encode(paymentData);
+      String base64String = base64.encode(utf8.encode(jsonString));
+      String sha256String = generateSHA256(base64String + apiEndPoint + saltKey);
+      String finalXHeader = sha256String + "###" + saltIndex;
+
+      Map<String, dynamic> requestBody = {
+        "request": base64String
+      };
+
+      String finalRequestBody = json.encode(requestBody);
+
+      print("Starting PhonePe transaction with data: $finalRequestBody");
+
+      try {
+        var response = await PhonePePaymentSdk.startTransaction(
+          finalRequestBody,
+          callbackUrl,
+        );
+
+        print("PhonePe transaction response: $response");
+
+        if (response != null) {
+          String status = response['status'].toString();
+          String error = response['error'].toString();
+          if (status == 'SUCCESS') {
+            HomeUtils.purchasePlan(planId);
+            Fluttertoast.showToast(msg: "Payment Successful");
+          } else {
+            Fluttertoast.showToast(msg: error);
+          }
+        }
+      } catch (e) {
+        print("PhonePe transaction error: ${e.toString()}");
+        Fluttertoast.showToast(msg: "Payment failed: ${e.toString()}");
+      }
+    } catch (e) {
+      print("PhonePe payment error: ${e.toString()}");
+      Fluttertoast.showToast(msg: "Error: ${e.toString()}");
+    }
   }
 
   @override
@@ -93,18 +175,7 @@ class _UpgradeNowState extends State<UpgradeNow> {
           myButton(
             onPressed: () {
               planId = item.id!.toInt();
-              var options = {
-                'key': 'rzp_test_Xnvv8oiApC5dMT',
-                'amount': double.parse(item.price!) * 100,
-                'name': 'Spires Recruit',
-                'description': 'Apply for latest Jobs and Internships',
-                'theme': {'color': '#F38E27'},
-                'prefill': {
-                  'contact': MyController.userPhone,
-                  'email': MyController.userEmail,
-                }
-              };
-              _razorpay.open(options);
+              startPhonePePayment(double.parse(item.price!), item.planName!);
             },
             label: 'Buy Now',
             color: primaryColor,
