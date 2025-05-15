@@ -861,7 +861,7 @@
     },
     {
       "name": "phonepe_payment_sdk",
-      "rootUri": "file:///C:/Users/yashs/AppData/Local/Pub/Cache/hosted/pub.dev/phonepe_payment_sdk-1.1.0",
+      "rootUri": "file:///C:/Users/yashs/AppData/Local/Pub/Cache/hosted/pub.dev/phonepe_payment_sdk-3.0.0",
       "packageUri": "lib/",
       "languageVersion": "2.17"
     },
@@ -1340,7 +1340,7 @@
       "languageVersion": "2.19"
     }
   ],
-  "generated": "2025-05-15T14:14:47.190253Z",
+  "generated": "2025-05-15T14:16:44.158109Z",
   "generator": "pub",
   "generatorVersion": "3.6.0",
   "flutterRoot": "file:///C:/flutter",

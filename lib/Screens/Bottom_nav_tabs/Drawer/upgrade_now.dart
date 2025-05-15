@@ -96,8 +96,6 @@ class _UpgradeNowState extends State<UpgradeNow> {
         var response = await PhonePePaymentSdk.startTransaction(
           finalRequestBody,
           callbackUrl,
-          redirectUrl,
-          baseUrl,
         );
 
         print("PhonePe transaction response: $response");
