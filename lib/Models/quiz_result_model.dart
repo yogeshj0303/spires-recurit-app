@@ -51,6 +51,9 @@ class QuizResultDetail {
   final int attemptedQuestions;
   final List<QuestionResult> result;
   final String? certificateUrl;
+  final int scorePercentageWeb;
+  final int pointsWeb;
+  final String rank;
 
   QuizResultDetail({
     required this.quizId,
@@ -60,6 +63,9 @@ class QuizResultDetail {
     required this.attemptedQuestions,
     required this.result,
     this.certificateUrl,
+    required this.scorePercentageWeb,
+    required this.pointsWeb,
+    required this.rank,
   });
 
   factory QuizResultDetail.fromJson(Map<String, dynamic> json) {
@@ -73,6 +79,9 @@ class QuizResultDetail {
       attemptedQuestions: json['attempted_questions'] ?? 0,
       result: resultList.map((r) => QuestionResult.fromJson(r)).toList(),
       certificateUrl: json['certificate_url'],
+      scorePercentageWeb: json['score_percentage_web'] ?? 0,
+      pointsWeb: json['points_web'] ?? 0,
+      rank: json['rank'] ?? '',
     );
   }
 
@@ -85,6 +94,9 @@ class QuizResultDetail {
       'attempted_questions': attemptedQuestions,
       'result': result.map((r) => r.toJson()).toList(),
       'certificate_url': certificateUrl,
+      'score_percentage_web': scorePercentageWeb,
+      'points_web': pointsWeb,
+      'rank': rank,
     };
   }
 

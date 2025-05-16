@@ -39,34 +39,32 @@ class _ProfileCardState extends State<ProfileCard> {
           ),
         ],
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(24, 20, 24, 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        profilePic(),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: _buildUserInfo(),
-                        ),
-                      ],
-                    ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(24, 20, 24, 28),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      profilePic(),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: _buildUserInfo(),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 12),
-              _buildStatisticsRow(),
-            ],
-          ),
+                ),
+              ],
+            ),
+            SizedBox(height: 12),
+            _buildStatisticsRow(),
+          ],
         ),
       ),
     );

@@ -3,6 +3,10 @@ import '../Constants/exports.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:phonepe_payment_sdk/phonepe_payment_sdk.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'dart:math';
 
 class MembershipDriveScreen extends StatefulWidget {
   const MembershipDriveScreen({super.key});
@@ -12,194 +16,367 @@ class MembershipDriveScreen extends StatefulWidget {
 }
 
 class _MembershipDriveScreenState extends State<MembershipDriveScreen> {
+  String environment = "SANDBOX";
+  String appId = "TEST-M2262FQ2G51D7_25050";
+  String merchantId = "MERCHANTUAT";
+  bool enableLogging = true;
+  String checksum = "";
+  String saltKey = "ZDViYzI4MzgtODQ4Ny00M2YyLWFjYzItZmI2MTU5NTU1ZDIy";
+  String saltIndex = "1";
+  String apiEndPoint = "/pg/orders";
+
+  @override
+  void initState() {
+    super.initState();
+    initializePhonePe();
+  }
+
+  void initializePhonePe() {
+    PhonePePaymentSdk.init(environment, appId, merchantId, enableLogging)
+        .then((val) {
+      setState(() {
+        // SDK initialized successfully
+      });
+    }).catchError((error) {
+      // Handle initialization error
+      print("PhonePe SDK initialization error: $error");
+    });
+  }
+
+  String generateSha256(String input) {
+    var bytes = utf8.encode(input);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  void startPhonePePayment(String amount, String planName) async {
+    try {
+      // Generate a unique order ID in the format required by PhonePe
+      String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      String orderId = "ORDER_${timestamp}_${(1000 + Random().nextInt(9000))}";
+      String merchantTransactionId = orderId;
+      
+      // Create the payment payload according to PhonePe's requirements
+      Map<String, dynamic> data = {
+        "merchantId": merchantId,
+        "merchantTransactionId": merchantTransactionId,
+        "merchantUserId": "MUID_$timestamp",
+        "amount": (int.parse(amount) * 100).toString(), // Convert to paise
+        "redirectUrl": "https://webhook.site/redirect-url",
+        "redirectMode": "POST",
+        "callbackUrl": "https://webhook.site/callback-url",
+        "mobileNumber": "9999999999",
+        "paymentInstrument": {
+          "type": "PAYMENT_PAGE",
+          "targetApp": "com.phonepe.app",
+          "appId": "com.atc.spires_app"
+        }
+      };
+
+      // Convert to JSON string first, then encode to base64
+      String jsonString = json.encode(data);
+      String base64Body = base64.encode(utf8.encode(jsonString));
+      
+      // Generate checksum
+      String string = base64Body + apiEndPoint + saltKey;
+      String sha256 = generateSha256(string);
+      checksum = sha256 + "###" + saltIndex;
+
+      print("Payment payload: $jsonString");
+      print("Base64 encoded payload: $base64Body");
+      print("Checksum: $checksum");
+
+      // Create the final payload
+      Map<String, dynamic> finalPayload = {
+        "merchantId": merchantId,
+        "merchantTransactionId": merchantTransactionId,
+        "merchantUserId": "MUID_$timestamp",
+        "amount": (int.parse(amount) * 100).toString(),
+        "redirectUrl": "https://webhook.site/redirect-url",
+        "redirectMode": "POST",
+        "callbackUrl": "https://webhook.site/callback-url",
+        "mobileNumber": "9999999999",
+        "paymentInstrument": {
+          "type": "PAYMENT_PAGE",
+          "targetApp": "com.phonepe.app",
+          "appId": "com.atc.spires_app"
+        },
+        "data": base64Body,
+        "checksum": checksum,
+        "saltKey": saltKey,
+        "saltIndex": saltIndex,
+        "apiEndPoint": apiEndPoint,
+        "orderId": orderId,
+        "token": checksum
+      };
+
+      print("Final payload: ${json.encode(finalPayload)}");
+
+      // First initialize the SDK
+      await PhonePePaymentSdk.init(environment, appId, merchantId, enableLogging);
+      
+      // Then start the transaction
+      var response = await PhonePePaymentSdk.startTransaction(
+        json.encode(finalPayload),
+        checksum,
+      );
+
+      if (response != null) {
+        print("Payment response: $response");
+        String status = response['status']?.toString() ?? 'FAILED';
+        String error = response['error']?.toString() ?? 'Unknown error';
+        
+        if (status == 'SUCCESS') {
+          // Payment successful
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Payment Successful'),
+                content: Text('Your $planName plan has been activated successfully!'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          // Payment failed
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Payment Failed'),
+                content: Text('Error: $error'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      }
+    } catch (error) {
+      print("Payment error: $error");
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Error'),
+            content: Text('An error occurred while processing the payment: $error'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(65),
-        child: Container(
-          child: AppBar(
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    primaryColor,
-                    primaryColor.withOpacity(1), // Dark blue-gray color
-                  ],
-                ),
-              ),
-            ),
-            title: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'SPIRES RECRUIT',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white70,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Membership Drive',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            centerTitle: true,
-            elevation: 0,
-            actions: [
-              IconButton(
-                icon: const Icon(
-                  Icons.info_outline,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        backgroundColor: Colors.white,
-                        title: Row(
-                          children: [
-                            Icon(Icons.info_outline, color: primaryColor),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Important Information',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildInfoItem(
-                              'Payment',
-                              'One-time registration fee of ₹199',
-                            ),
-                            const SizedBox(height: 12),
-                            _buildInfoItem(
-                              'Validity',
-                              'Membership valid for 1 year',
-                            ),
-                            const SizedBox(height: 12),
-                            _buildInfoItem(
-                              'Support',
-                              'Contact: +91 7753900602',
-                            ),
-                            const SizedBox(height: 12),
-                            _buildInfoItem(
-                              'Note',
-                              'Profile picture is mandatory for ID card',
-                            ),
-                          ],
-                        ),
-                        actions: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                            ),
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: Text(
-                              'Got it',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-              const SizedBox(width: 4),
-            ],
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Container(
-                height: 1,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+value: const SystemUiOverlayStyle(
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(65),
+          child: Container(
+            child: AppBar(
+              backgroundColor: Colors.transparent,
+              flexibleSpace: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                     colors: [
-                      Colors.white.withOpacity(0.1),
-                      Colors.white.withOpacity(0.05),
+                      primaryColor,
+                      primaryColor.withOpacity(1), // Dark blue-gray color
                     ],
+                  ),
+                ),
+              ),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'SPIRES RECRUIT',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white70,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Membership Drive',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+              centerTitle: true,
+              elevation: 0,
+              actions: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.info_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: Colors.white,
+                          title: Row(
+                            children: [
+                              Icon(Icons.info_outline, color: primaryColor),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Important Information',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInfoItem(
+                                'Payment',
+                                'One-time registration fee of ₹199',
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoItem(
+                                'Validity',
+                                'Membership valid for 1 year',
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoItem(
+                                'Support',
+                                'Contact: +91 7753900602',
+                              ),
+                              const SizedBox(height: 12),
+                              _buildInfoItem(
+                                'Note',
+                                'Profile picture is mandatory for ID card',
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryColor,
+                              ),
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: Text(
+                                'Got it',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(width: 4),
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(1),
+                child: Container(
+                  height: 1,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.1),
+                        Colors.white.withOpacity(0.05),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header Container with gradient background
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [primaryColor, primaryColor.withOpacity(0.1)],
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Header Container with gradient background
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [primaryColor, primaryColor.withOpacity(0.1)],
+                  ),
+                ),
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'SPIRES RECRUIT',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'An organization dedicated to the career growth of students in internship and job searching, as well as skill improvement.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white.withOpacity(0.9),
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'SPIRES RECRUIT',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'An organization dedicated to the career growth of students in internship and job searching, as well as skill improvement.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withOpacity(0.9),
-                      height: 1.5,
-                    ),
-                  ),
-                ],
+      
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [                
+                    // After Benefits Section and before Registration Form
+                    _buildPricingTable(),
+                    _buildFooter(),
+                    const SizedBox(height: 10),
+                  ],
+                ),
               ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [                
-                  // After Benefits Section and before Registration Form
-                  _buildPricingTable(),
-                  _buildFooter(),
-                  const SizedBox(height: 10),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -577,7 +754,9 @@ class _MembershipDriveScreenState extends State<MembershipDriveScreen> {
                     height: 46,
                     margin: const EdgeInsets.only(top: 20),
                     child: ElevatedButton(
-                      onPressed: buttonText == 'Current Plan' ? null : () {},
+                      onPressed: buttonText == 'Current Plan' 
+                          ? null 
+                          : () => startPhonePePayment(price, title),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isPopular ? primaryColor : Colors.white,
                         foregroundColor: isPopular ? Colors.white : primaryColor,

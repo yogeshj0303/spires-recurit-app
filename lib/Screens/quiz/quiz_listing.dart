@@ -383,6 +383,12 @@ class _QuizCardState extends State<QuizCard> {
                     '${(correctAnswers / _attempt!.totalQuestions * 100).round()}%',
                     Icons.analytics_outlined,
                   ),
+                  const SizedBox(height: 12),
+                  _buildResultStatRow(
+                    'Rank',
+                    _attempt!.rank,
+                    Icons.leaderboard_outlined,
+                  ),
                 ],
               ),
             ),

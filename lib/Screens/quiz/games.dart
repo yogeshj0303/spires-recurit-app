@@ -375,6 +375,12 @@ class _QuizScreenState extends State<QuizScreen> {
                               '${(correctAnswers / result.totalQuestions * 100).round()}%',
                               Icons.analytics_outlined,
                             ),
+                            Divider(color: Colors.grey.shade200),
+                            _buildStatItem(
+                              'Rank',
+                              result.rank,
+                              Icons.leaderboard_outlined,
+                            ),
                           ],
                         ),
                       ),

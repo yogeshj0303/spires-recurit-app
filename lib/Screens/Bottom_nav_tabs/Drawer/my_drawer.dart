@@ -183,21 +183,21 @@ class _MyDrawerState extends State<MyDrawer> {
                         ),
 
                         //also add a listtile for the quiz ranking screen
-                        ListTile(
-                          dense: true,
-                          onTap: () => Get.to(() => const RankingScreen()),
-                          leading: Icon(Icons.leaderboard_outlined,
-                              color: primaryColor, size: 20),
-                          title: Text(
-                            'Quiz Ranking',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: fontFamily,
-                            ),
-                          ),
-                        ),
+                        // ListTile(
+                        //   dense: true,
+                        //   onTap: () => Get.to(() => const RankingScreen()),
+                        //   leading: Icon(Icons.leaderboard_outlined,
+                        //       color: primaryColor, size: 20),
+                        //   title: Text(
+                        //     'Quiz Ranking',
+                        //     style: TextStyle(
+                        //       fontSize: 14,
+                        //       color: Colors.black87,
+                        //       fontWeight: FontWeight.w500,
+                        //       fontFamily: fontFamily,
+                        //     ),
+                        //   ),
+                        // ),
                         ListTile(
                           dense: true,
                           onTap: () => Get.to(() => const CounsellorsScreen()),
