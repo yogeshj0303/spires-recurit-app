@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:spires_app/Constants/exports.dart';
 import 'package:spires_app/Models/question_model.dart';
 import 'package:spires_app/Models/quiz_submission_model.dart';
+import 'package:spires_app/Screens/quiz/quiz_listing.dart';
 import 'package:spires_app/Services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -113,7 +114,6 @@ class _QuizScreenState extends State<QuizScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
                 _proceedWithSubmission();
               },
               style: ElevatedButton.styleFrom(
@@ -405,8 +405,9 @@ class _QuizScreenState extends State<QuizScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context)
-                                .popUntil((route) => route.isFirst);
+                            Get.to(() => const QuizListScreen());
+                            // Navigator.of(context)
+                            //     .popUntil((route) => route.isFirst);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor,

@@ -148,30 +148,30 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              // Continue as Guest button
-              TextButton(
-                onPressed: () async {
-                  c.isGuestMode.value = true;
+              // const SizedBox(height: 16),
+              // // Continue as Guest button
+              // TextButton(
+              //   onPressed: () async {
+              //     c.isGuestMode.value = true;
                   
-                  // Save guest mode state to SharedPreferences and clear any existing login credentials
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('is_guest_mode', true);
-                  await prefs.remove('email');
-                  await prefs.remove('pass');
+              //     // Save guest mode state to SharedPreferences and clear any existing login credentials
+              //     final prefs = await SharedPreferences.getInstance();
+              //     await prefs.setBool('is_guest_mode', true);
+              //     await prefs.remove('email');
+              //     await prefs.remove('pass');
                   
-                  Get.offAll(() => MainScreen());
-                },
-                child: Text(
-                  'Continue as Guest',
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
+              //     Get.offAll(() => MainScreen());
+              //   },
+              //   child: Text(
+              //     'Continue as Guest',
+              //     style: GoogleFonts.poppins(
+              //       fontSize: 15,
+              //       fontWeight: FontWeight.w500,
+              //       color: Colors.grey[700],
+              //       letterSpacing: 0.2,
+              //     ),
+              //   ),
+              // ),
               const SizedBox(height: 16),
             ],
           ),

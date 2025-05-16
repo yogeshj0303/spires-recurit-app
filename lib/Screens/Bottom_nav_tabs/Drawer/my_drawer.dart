@@ -9,6 +9,7 @@ import 'package:spires_app/Screens/counsellors_screen.dart';
 import 'package:spires_app/Screens/quiz/quiz_listing.dart';
 import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
 import 'package:spires_app/Screens/quiz/quizzes_and_olympiad.dart';
+import 'package:spires_app/Screens/quiz/ranking_screen.dart';
 import '../../../Constants/exports.dart';
 import '../../../Utils/share_utils.dart';
 import '../../Resumes/cv_two.dart';
@@ -172,6 +173,23 @@ class _MyDrawerState extends State<MyDrawer> {
                               color: primaryColor, size: 20),
                           title: Text(
                             'Quiz',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
+                        ),
+
+                        //also add a listtile for the quiz ranking screen
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() => const RankingScreen()),
+                          leading: Icon(Icons.leaderboard_outlined,
+                              color: primaryColor, size: 20),
+                          title: Text(
+                            'Quiz Ranking',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.black87,
