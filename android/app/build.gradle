@@ -62,8 +62,8 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
-        versionCode 19
-        versionName "19.0.0"
+        versionCode 21
+        versionName "21.0.0"
         multiDexEnabled true
     }
 
@@ -78,14 +78,12 @@ android {
     // gsdog
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             shrinkResources true
-            minifyEnabled true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 flutter {

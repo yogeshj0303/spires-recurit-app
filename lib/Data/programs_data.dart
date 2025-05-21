@@ -104,105 +104,105 @@ class ProgramsData {
       howItWorks: '• Sign up for the Spires Recruit Coding Club through the Spires Recruit app / website.\n• Participate in weekly coding challenges designed to test and enhance your skills.\n• Attend regular online workshops and Q&A sessions hosted by industry experts.\n• Join discussions, share solutions, and get help from fellow club members.\n• Connect with other coders through the forum and participate in virtual coding meetups.',
       fit: BoxFit.fill,
     ),
-    Program(
-      imageUrl: 'assets/icons/computer.png',
-      title: 'Basic Computer',
-      description: 'Master essential computer skills with our comprehensive Basic Computer course. Learn fundamental operations, software applications, and digital literacy skills needed in today\'s workplace.',
-      benefits: '• Learn basic computer operations and terminology.\n• Master common office software applications.\n• Understand file management and organization.\n• Develop internet navigation and online safety skills.\n• Build confidence in using digital tools.',
-      faqs: [
-        {
-          'question': 'Do I need my own computer to take this course?',
-          'answer': 'While having access to a computer is beneficial, you can access the course content through any device with internet connectivity.'
-        },
-        {
-          'question': 'What software applications will I learn?',
-          'answer': 'You\'ll learn essential applications like Microsoft Office (Word, Excel, PowerPoint), email clients, and web browsers.'
-        },
-        {
-          'question': 'Is this course suitable for complete beginners?',
-          'answer': 'Yes, this course is specifically designed for beginners with little to no computer experience.'
-        },
-        {
-          'question': 'Will I receive a certificate upon completion?',
-          'answer': 'Yes, you\'ll receive a digital certificate upon successfully completing the course.'
-        },
-      ],
-      howItWorks: '1. Start with basic computer concepts and terminology.\n2. Progress through hands-on exercises with common software applications.\n3. Practice file management and organization techniques.\n4. Complete interactive modules on internet usage and safety.\n5. Demonstrate your skills through practical assessments.',
-    ),
-    Program(
-      imageUrl: 'assets/icons/market.png',
-      title: 'Digital Marketing',
-      description: 'Launch your digital marketing career with our comprehensive beginner\'s course. Learn the fundamentals of online marketing, social media management, and digital advertising strategies.',
-      benefits: '• Understand core digital marketing concepts.\n• Learn social media marketing strategies.\n• Master basic SEO techniques.\n• Develop email marketing skills.\n• Create effective content marketing plans.\n• Analyze marketing metrics and data.',
-      faqs: [
-        {
-          'question': 'What platforms will I learn about?',
-          'answer': 'You\'ll learn about major platforms including Facebook, Instagram, LinkedIn, Google Ads, and email marketing tools.'
-        },
-        {
-          'question': 'Do I need marketing experience?',
-          'answer': 'No prior marketing experience is required. This course is designed for beginners.'
-        },
-        {
-          'question': 'Will I create actual marketing campaigns?',
-          'answer': 'Yes, you\'ll work on practical projects and create sample marketing campaigns as part of the learning process.'
-        },
-        {
-          'question': 'How long does the course take to complete?',
-          'answer': 'The course is self-paced and typically takes 4-6 weeks to complete.'
-        },
-      ],
-      howItWorks: '1. Learn digital marketing fundamentals through video lessons.\n2. Practice with hands-on exercises and real-world examples.\n3. Create sample marketing campaigns and content.\n4. Analyze marketing metrics and optimization techniques.\n5. Complete a final project showcasing your skills.',
-    ),
-    Program(
-      imageUrl: 'assets/icons/graphic.png',
-      title: 'Graphic Designing',
-      description: 'Start your journey in graphic design with our beginner-friendly course. Learn design principles, industry-standard tools, and create professional visual content.',
-      benefits: '• Master fundamental design principles.\n• Learn industry-standard design software.\n• Create professional logos and graphics.\n• Develop a design portfolio.\n• Understand color theory and typography.\n• Practice with real-world projects.',
-      faqs: [
-        {
-          'question': 'What software will I learn?',
-          'answer': 'You\'ll learn popular design tools like Adobe Photoshop, Illustrator, and Canva.'
-        },
-        {
-          'question': 'Do I need artistic skills?',
-          'answer': 'No prior artistic experience is required. We\'ll teach you the fundamentals of design.'
-        },
-        {
-          'question': 'Will I create a portfolio?',
-          'answer': 'Yes, you\'ll complete projects throughout the course that can be included in your portfolio.'
-        },
-        {
-          'question': 'What can I design after completing the course?',
-          'answer': 'You\'ll be able to create logos, social media graphics, business cards, and other basic design materials.'
-        },
-      ],
-      howItWorks: '1. Start with design principles and theory.\n2. Learn essential tools and software techniques.\n3. Practice with guided design projects.\n4. Create various types of graphic content.\n5. Build a basic design portfolio.',
-    ),
-    Program(
-      imageUrl: 'assets/icons/web.png',
-      title: 'Website Development',
-      description: 'Begin your web development journey with our comprehensive course. Learn HTML, CSS, and basic JavaScript to create responsive and attractive websites.',
-      benefits: '• Learn HTML5 and CSS3 fundamentals.\n• Understand basic JavaScript concepts.\n• Create responsive web designs.\n• Build interactive web pages.\n• Learn web hosting basics.\n• Develop real-world projects.',
-      faqs: [
-        {
-          'question': 'Do I need coding experience?',
-          'answer': 'No prior coding experience is required. We\'ll teach you everything from the basics.'
-        },
-        {
-          'question': 'What tools will I need?',
-          'answer': 'You\'ll need a computer with internet access and a text editor (we\'ll recommend free options).'
-        },
-        {
-          'question': 'Will I build actual websites?',
-          'answer': 'Yes, you\'ll create multiple websites as part of the course projects.'
-        },
-        {
-          'question': 'Can I get a job after this course?',
-          'answer': 'This course provides foundational skills that can help you start an entry-level web development position or freelance work.'
-        },
-      ],
-      howItWorks: '1. Learn HTML structure and elements.\n2. Master CSS styling and layouts.\n3. Understand basic JavaScript and interactivity.\n4. Practice with hands-on coding projects.\n5. Build and deploy complete websites.',
-    ),
+//     Program(
+//       imageUrl: 'assets/icons/computer.png',
+//       title: 'Basic Computer',
+//       description: 'Master essential computer skills with our comprehensive Basic Computer course. Learn fundamental operations, software applications, and digital literacy skills needed in today\'s workplace.',
+//       benefits: '• Learn basic computer operations and terminology.\n• Master common office software applications.\n• Understand file management and organization.\n• Develop internet navigation and online safety skills.\n• Build confidence in using digital tools.',
+//       faqs: [
+//         {
+//           'question': 'Do I need my own computer to take this course?',
+//           'answer': 'While having access to a computer is beneficial, you can access the course content through any device with internet connectivity.'
+//         },
+//         {
+//           'question': 'What software applications will I learn?',
+//           'answer': 'You\'ll learn essential applications like Microsoft Office (Word, Excel, PowerPoint), email clients, and web browsers.'
+//         },
+//         {
+//           'question': 'Is this course suitable for complete beginners?',
+//           'answer': 'Yes, this course is specifically designed for beginners with little to no computer experience.'
+//         },
+//         {
+//           'question': 'Will I receive a certificate upon completion?',
+//           'answer': 'Yes, you\'ll receive a digital certificate upon successfully completing the course.'
+//         },
+//       ],
+//       howItWorks: '1. Start with basic computer concepts and terminology.\n2. Progress through hands-on exercises with common software applications.\n3. Practice file management and organization techniques.\n4. Complete interactive modules on internet usage and safety.\n5. Demonstrate your skills through practical assessments.',
+//     ),
+//     Program(
+//       imageUrl: 'assets/icons/market.png',
+//       title: 'Digital Marketing',
+//       description: 'Launch your digital marketing career with our comprehensive beginner\'s course. Learn the fundamentals of online marketing, social media management, and digital advertising strategies.',
+//       benefits: '• Understand core digital marketing concepts.\n• Learn social media marketing strategies.\n• Master basic SEO techniques.\n• Develop email marketing skills.\n• Create effective content marketing plans.\n• Analyze marketing metrics and data.',
+//       faqs: [
+//         {
+//           'question': 'What platforms will I learn about?',
+//           'answer': 'You\'ll learn about major platforms including Facebook, Instagram, LinkedIn, Google Ads, and email marketing tools.'
+//         },
+//         {
+//           'question': 'Do I need marketing experience?',
+//           'answer': 'No prior marketing experience is required. This course is designed for beginners.'
+//         },
+//         {
+//           'question': 'Will I create actual marketing campaigns?',
+//           'answer': 'Yes, you\'ll work on practical projects and create sample marketing campaigns as part of the learning process.'
+//         },
+//         {
+//           'question': 'How long does the course take to complete?',
+//           'answer': 'The course is self-paced and typically takes 4-6 weeks to complete.'
+//         },
+//       ],
+//       howItWorks: '1. Learn digital marketing fundamentals through video lessons.\n2. Practice with hands-on exercises and real-world examples.\n3. Create sample marketing campaigns and content.\n4. Analyze marketing metrics and optimization techniques.\n5. Complete a final project showcasing your skills.',
+//     ),
+//     Program(
+//       imageUrl: 'assets/icons/graphic.png',
+//       title: 'Graphic Designing',
+//       description: 'Start your journey in graphic design with our beginner-friendly course. Learn design principles, industry-standard tools, and create professional visual content.',
+//       benefits: '• Master fundamental design principles.\n• Learn industry-standard design software.\n• Create professional logos and graphics.\n• Develop a design portfolio.\n• Understand color theory and typography.\n• Practice with real-world projects.',
+//       faqs: [
+//         {
+//           'question': 'What software will I learn?',
+//           'answer': 'You\'ll learn popular design tools like Adobe Photoshop, Illustrator, and Canva.'
+//         },
+//         {
+//           'question': 'Do I need artistic skills?',
+//           'answer': 'No prior artistic experience is required. We\'ll teach you the fundamentals of design.'
+//         },
+//         {
+//           'question': 'Will I create a portfolio?',
+//           'answer': 'Yes, you\'ll complete projects throughout the course that can be included in your portfolio.'
+//         },
+//         {
+//           'question': 'What can I design after completing the course?',
+//           'answer': 'You\'ll be able to create logos, social media graphics, business cards, and other basic design materials.'
+//         },
+//       ],
+//       howItWorks: '1. Start with design principles and theory.\n2. Learn essential tools and software techniques.\n3. Practice with guided design projects.\n4. Create various types of graphic content.\n5. Build a basic design portfolio.',
+//     ),
+//     Program(
+//       imageUrl: 'assets/icons/web.png',
+//       title: 'Website Development',
+//       description: 'Begin your web development journey with our comprehensive course. Learn HTML, CSS, and basic JavaScript to create responsive and attractive websites.',
+//       benefits: '• Learn HTML5 and CSS3 fundamentals.\n• Understand basic JavaScript concepts.\n• Create responsive web designs.\n• Build interactive web pages.\n• Learn web hosting basics.\n• Develop real-world projects.',
+//       faqs: [
+//         {
+//           'question': 'Do I need coding experience?',
+//           'answer': 'No prior coding experience is required. We\'ll teach you everything from the basics.'
+//         },
+//         {
+//           'question': 'What tools will I need?',
+//           'answer': 'You\'ll need a computer with internet access and a text editor (we\'ll recommend free options).'
+//         },
+//         {
+//           'question': 'Will I build actual websites?',
+//           'answer': 'Yes, you\'ll create multiple websites as part of the course projects.'
+//         },
+//         {
+//           'question': 'Can I get a job after this course?',
+//           'answer': 'This course provides foundational skills that can help you start an entry-level web development position or freelance work.'
+//         },
+//       ],
+//       howItWorks: '1. Learn HTML structure and elements.\n2. Master CSS styling and layouts.\n3. Understand basic JavaScript and interactivity.\n4. Practice with hands-on coding projects.\n5. Build and deploy complete websites.',
+//     ),
   ];
 } 

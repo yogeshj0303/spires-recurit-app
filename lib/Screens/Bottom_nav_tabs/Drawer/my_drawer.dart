@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:spires_app/Screens/Bottom_nav_tabs/Drawer/programs_screen.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Nearby%20Jobs/nearby_jobs_screen.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import 'package:spires_app/Screens/counsellors_screen.dart';
@@ -17,6 +18,10 @@ import 'help_centre.dart';
 import '../../../Data/programs_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Services/api_service.dart';
+import 'package:spires_app/Screens/programs_screen.dart';
+import 'package:spires_app/Screens/privacy_policy_screen.dart';
+import 'package:spires_app/Screens/refund_policy_screen.dart';
+import 'package:spires_app/Screens/terms_and_conditions_screen.dart';
 
 class MyDrawer extends StatefulWidget {
   final Size size;
@@ -76,9 +81,14 @@ class _MyDrawerState extends State<MyDrawer> {
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: ProgramsData.programs.length,
+                          itemCount: ProgramsData.programs.where((program) => 
+                            !['SkillUp 1.0', 'Resume Workshop', 'Interview Preparation', 'Coding Clubs']
+                              .contains(program.title)).length,
                           itemBuilder: (context, index) {
-                            final program = ProgramsData.programs[index];
+                            final filteredPrograms = ProgramsData.programs.where((program) => 
+                              !['SkillUp 1.0', 'Resume Workshop', 'Interview Preparation', 'Coding Clubs']
+                                .contains(program.title)).toList();
+                            final program = filteredPrograms[index];
                             final iconMap = {
                               'SkillUp 1.0': 'skills',
                               'Resume Workshop': 'curriculum-vitae',
@@ -118,6 +128,21 @@ class _MyDrawerState extends State<MyDrawer> {
                               ),
                             );
                           },
+                        ),
+                        ListTile(
+                          dense: true,
+                          onTap: () => Get.to(() => const ProgramsScreen(fromBottomNav: false)),
+                          leading: Icon(Icons.school_outlined,
+                              color: primaryColor, size: 20),
+                          title: Text(
+                            'Our Programs',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                              fontFamily: fontFamily,
+                            ),
+                          ),
                         ),
                         ListTile(
                           dense: true,
@@ -321,7 +346,7 @@ class _MyDrawerState extends State<MyDrawer> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
-                  '$appName\nUnit of Act T Connect (P) Ltd.',
+                  '$appName\nUnit of Act T Connect Private Limited',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -945,28 +970,13 @@ class _MyDrawerState extends State<MyDrawer> {
 }
 
 Future<void> openRefundPolicy() async {
-  final Uri url = Uri.parse('https://spiresrecruit.com/refund-policy');
-  if (!await canLaunchUrl(url)) {
-    throw Exception('Could not launch $url');
-  } else {
-    await launchUrl(url);
-  }
+  Get.to(() => const RefundPolicyScreen());
 }
 
 Future<void> openTermOfUse() async {
-  final Uri url = Uri.parse('https://spiresrecruit.com/terms-of-use');
-  if (!await canLaunchUrl(url)) {
-    throw Exception('Could not launch $url');
-  } else {
-    await launchUrl(url);
-  }
+  Get.to(() => const TermsAndConditionsScreen());
 }
 
 Future<void> openPrivacyPolicy() async {
-  final Uri url = Uri.parse('https://spiresrecruit.com/privacy-policy');
-  if (!await canLaunchUrl(url)) {
-    throw Exception('Could not launch $url');
-  } else {
-    await launchUrl(url);
-  }
+  Get.to(() => const PrivacyPolicyScreen());
 }
