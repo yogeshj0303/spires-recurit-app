@@ -16,14 +16,12 @@ class BannerCarousel extends StatelessWidget {
       options: CarouselOptions(
         height: size.height * 0.2,
         viewportFraction: 1.0,
-        autoPlay: true,
+        autoPlay: false,
+        enableInfiniteScroll: false,
         enlargeCenterPage: true,
         aspectRatio: 2.0,
-        onPageChanged: (index, reason) {
-          // Add any specific action you want to perform on page change
-        },
       ),
-      items: [buildBanner1(), buildBanner2(), buildBanner3()].map((banner) {
+      items: [buildBanner1()].map((banner) {
         return Builder(
           builder: (BuildContext context) {
             return Container(
@@ -144,128 +142,128 @@ class BannerCarousel extends StatelessWidget {
     );
   }
 
-  Widget buildBanner2() {
-    // Build your second banner here
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10 ),
-        decoration: BoxDecoration(
-          color: Color(0xFFF5D9F2), // Lighter pink background
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Color(0xFFFF914D), // Orange icon background
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.warning_amber_rounded, // Notification bell icon
-                color: Colors.white,
-                size: 20.0,
-              ),
-            ),
-            SizedBox(width: 10.0),
-            Expanded(
-              child: Obx(() {
-                return RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: c.isGuestMode.value 
-                          ? 'Sign in to create your profile and be discovered by recruiters.\n'
-                          : 'Oops! Recruiters cannot see your profile right now.\n',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14.0,
-                        ),
-                      ),
-                      TextSpan(
-                        text: c.isGuestMode.value ? 'Create an account ' : 'Update your profile ',
-                        style: TextStyle(
-                          color: Color(0xFF6F35A5), // Purple color for "Update your profile"
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'to be visible to recruiters.',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget buildBanner2() {
+  //   // Build your second banner here
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  //     child: Container(
+  //       padding: EdgeInsets.symmetric(horizontal: 10 ),
+  //       decoration: BoxDecoration(
+  //         color: Color(0xFFF5D9F2), // Lighter pink background
+  //         borderRadius: BorderRadius.circular(10.0),
+  //       ),
+  //       child: Row(
+  //         children: [
+  //           Container(
+  //             padding: EdgeInsets.all(8.0),
+  //             decoration: BoxDecoration(
+  //               color: Color(0xFFFF914D), // Orange icon background
+  //               shape: BoxShape.circle,
+  //             ),
+  //             child: Icon(
+  //               Icons.warning_amber_rounded, // Notification bell icon
+  //               color: Colors.white,
+  //               size: 20.0,
+  //             ),
+  //           ),
+  //           SizedBox(width: 10.0),
+  //           Expanded(
+  //             child: Obx(() {
+  //               return RichText(
+  //                 text: TextSpan(
+  //                   children: [
+  //                     TextSpan(
+  //                       text: c.isGuestMode.value 
+  //                         ? 'Sign in to create your profile and be discovered by recruiters.\n'
+  //                         : 'Oops! Recruiters cannot see your profile right now.\n',
+  //                       style: TextStyle(
+  //                         color: Colors.black,
+  //                         fontSize: 14.0,
+  //                       ),
+  //                     ),
+  //                     TextSpan(
+  //                       text: c.isGuestMode.value ? 'Create an account ' : 'Update your profile ',
+  //                       style: TextStyle(
+  //                         color: Color(0xFF6F35A5), // Purple color for "Update your profile"
+  //                         fontWeight: FontWeight.bold,
+  //                       ),
+  //                     ),
+  //                     TextSpan(
+  //                       text: 'to be visible to recruiters.',
+  //                       style: TextStyle(
+  //                         color: Colors.black,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               );
+  //             }),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget buildBanner3() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10 ),
-        decoration: BoxDecoration(
-          color: Color(0xFFF5D9F2), // Lighter pink background
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: Color(0xFFFF914D), // Orange icon background
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.warning_amber_rounded, // Notification bell icon
-                color: Colors.white,
-                size: 20.0,
-              ),
-            ),
-            SizedBox(width: 10.0),
-            Expanded(
-              child: Obx(() {
-                return RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: c.isGuestMode.value 
-                          ? 'Try premium features and improve your chances of getting hired!\n'
-                          : 'Oops! Recruiters cannot see your profile right now.\n',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14.0,
-                        ),
-                      ),
-                      TextSpan(
-                        text: c.isGuestMode.value ? 'Sign in ' : 'Update your profile ',
-                        style: TextStyle(
-                          color: Color(0xFF6F35A5), // Purple color for "Update your profile"
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(
-                        text: c.isGuestMode.value ? 'to access all features.' : 'to be visible to recruiters.',
-                        style: TextStyle(
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Widget buildBanner3() {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  //     child: Container(
+  //       padding: EdgeInsets.symmetric(horizontal: 10 ),
+  //       decoration: BoxDecoration(
+  //         color: Color(0xFFF5D9F2), // Lighter pink background
+  //         borderRadius: BorderRadius.circular(10.0),
+  //       ),
+  //       child: Row(
+  //         children: [
+  //           Container(
+  //             padding: EdgeInsets.all(8.0),
+  //             decoration: BoxDecoration(
+  //               color: Color(0xFFFF914D), // Orange icon background
+  //               shape: BoxShape.circle,
+  //             ),
+  //             child: Icon(
+  //               Icons.warning_amber_rounded, // Notification bell icon
+  //               color: Colors.white,
+  //               size: 20.0,
+  //             ),
+  //           ),
+  //           SizedBox(width: 10.0),
+  //           Expanded(
+  //             child: Obx(() {
+  //               return RichText(
+  //                 text: TextSpan(
+  //                   children: [
+  //                     TextSpan(
+  //                       text: c.isGuestMode.value 
+  //                         ? 'Try premium features and improve your chances of getting hired!\n'
+  //                         : 'Oops! Recruiters cannot see your profile right now.\n',
+  //                       style: TextStyle(
+  //                         color: Colors.black,
+  //                         fontSize: 14.0,
+  //                       ),
+  //                     ),
+  //                     TextSpan(
+  //                       text: c.isGuestMode.value ? 'Sign in ' : 'Update your profile ',
+  //                       style: TextStyle(
+  //                         color: Color(0xFF6F35A5), // Purple color for "Update your profile"
+  //                         fontWeight: FontWeight.bold,
+  //                       ),
+  //                     ),
+  //                     TextSpan(
+  //                       text: c.isGuestMode.value ? 'to access all features.' : 'to be visible to recruiters.',
+  //                       style: TextStyle(
+  //                         color: Colors.black,
+  //                       ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               );
+  //             }),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }

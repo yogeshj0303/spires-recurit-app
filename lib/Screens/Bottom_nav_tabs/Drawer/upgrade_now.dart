@@ -112,9 +112,11 @@ class _UpgradeNowState extends State<UpgradeNow> {
         "merchantUserId": "USER${planId}",
         "amount": (amount * 100).toInt(),
         "callbackUrl": "https://spiresrecurit.com/callback",
-        "mobileNumber": "9999999999",
+        "mobileNumber": "9893333654",
         "paymentInstrument": {
-          "type": "UPI_QR"
+          "type": "UPI_INTENT",
+          "targetApp": "com.phonepe.app",
+          "appId": "com.atc.spires_app"
         }
       };
 

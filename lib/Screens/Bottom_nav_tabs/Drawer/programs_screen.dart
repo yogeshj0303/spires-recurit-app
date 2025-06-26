@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:spires_app/Data/programs_data.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/Drawer/program_Details.dart';
+import 'package:spires_app/Screens/Bottom_nav_tabs/Drawer/skillup_details_screen.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import 'package:spires_app/Screens/Main_Screens/main_screen.dart';
 
@@ -65,14 +66,20 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
               ],
             ),
             child: InkWell(
-              onTap: () => Get.to(() => ProgramDetailTest(
-                imageUrl: program.imageUrl,
-                title: program.title,
-                description: program.description,
-                benefits: program.benefits,
-                howItWorks: program.howItWorks,
-                faqs: program.faqs,
-              )),
+              onTap: () {
+                if (program.title == 'SkillUp 1.0') {
+                  Get.to(() => const SkillUpDetailsScreen());
+                } else {
+                  Get.to(() => ProgramDetailTest(
+                    imageUrl: program.imageUrl,
+                    title: program.title,
+                    description: program.description,
+                    benefits: program.benefits,
+                    howItWorks: program.howItWorks,
+                    faqs: program.faqs,
+                  ));
+                }
+              },
               borderRadius: BorderRadius.circular(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,14 +219,20 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: ElevatedButton(
-                                onPressed: () => Get.to(() => ProgramDetailTest(
-                                  imageUrl: program.imageUrl,
-                                  title: program.title,
-                                  description: program.description,
-                                  benefits: program.benefits,
-                                  howItWorks: program.howItWorks,
-                                  faqs: program.faqs,
-                                )),
+                                onPressed: () {
+                                  if (program.title == 'SkillUp 1.0') {
+                                    Get.to(() => const SkillUpDetailsScreen());
+                                  } else {
+                                    Get.to(() => ProgramDetailTest(
+                                      imageUrl: program.imageUrl,
+                                      title: program.title,
+                                      description: program.description,
+                                      benefits: program.benefits,
+                                      howItWorks: program.howItWorks,
+                                      faqs: program.faqs,
+                                    ));
+                                  }
+                                },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: primaryColor,
                                   foregroundColor: Colors.white,

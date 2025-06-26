@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../Constants/exports.dart';
 import '../../Controllers/my_controller.dart';
+import '../../Model/review_model.dart';
 
 class ProgramDetailTest extends StatefulWidget {
   final c = Get.put(MyController());
@@ -31,6 +32,11 @@ class ProgramDetailTest extends StatefulWidget {
 
 class _ProgramDetailTestState extends State<ProgramDetailTest>
     with SingleTickerProviderStateMixin {
+  // Add state variables for reviews
+  List<Data> testimonials = [];
+  bool isLoadingTestimonials = true;
+  String? testimonialsError;
+
   Future<void> inquire(String programName, String userId) async {
     // Check if user is in guest mode
     if (widget.c.isGuestMode.value) {
@@ -137,32 +143,53 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
     }
   }
 
-  final List<Testimonial> testimonials = [
-    Testimonial(
-      name: 'John Doe',
-      text:
-          "Nulla facilisi. Nullam laoreet odio a risus scelerisque, quis bibendum libero ultrices.",
-      imageUrl: "assets/images/logo.png",
-    ),
-    Testimonial(
-      name: 'Jane Doe',
-      text:
-          "Nulla facilisi. Nullam laoreet odio a risus scelerisque, quis bibendum libero ultrices.",
-      imageUrl: "assets/images/logo.png",
-    ),
-    Testimonial(
-      name: 'Alice Doe',
-      text:
-          "Nulla facilisi. Nullam laoreet odio a risus scelerisque, quis bibendum libero ultrices.",
-      imageUrl: "assets/images/logo.png",
-    ),
-    Testimonial(
-      name: 'Bob Doe',
-      text:
-          "Vestibulum pharetra enim non varius feugiat. Nunc et metus sed nulla fringilla mattis a quis orci.",
-      imageUrl: "assets/images/logo.png",
-    ),
-  ];
+  // Function to fetch testimonials from API
+  Future<void> fetchTestimonials() async {
+    try {
+      setState(() {
+        isLoadingTestimonials = true;
+        testimonialsError = null;
+      });
+
+      final ReviewModel reviewModel = await HomeUtils.getReviews();
+      
+      // Debug: Print the testimonials data
+      print('Fetched testimonials: ${reviewModel.data?.length} items');
+      for (var testimonial in reviewModel.data ?? []) {
+        print('Testimonial: ${testimonial.name}');
+        print('Description: ${testimonial.description}');
+        print('Description length: ${testimonial.description?.length}');
+      }
+      
+      setState(() {
+        testimonials = reviewModel.data ?? [];
+        isLoadingTestimonials = false;
+      });
+    } catch (e) {
+      setState(() {
+        testimonialsError = 'Failed to load testimonials: $e';
+        isLoadingTestimonials = false;
+      });
+      print('Error fetching testimonials: $e');
+    }
+  }
+
+  // Helper function to strip HTML tags and get plain text
+  String stripHtmlTags(String htmlString) {
+    // Remove HTML tags using regex
+    RegExp exp = RegExp(r"<[^>]*>", multiLine: true, caseSensitive: true);
+    String plainText = htmlString.replaceAll(exp, '');
+    // Decode HTML entities
+    plainText = plainText
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'");
+    return plainText.trim();
+  }
+
   late TabController _tabController;
   late Razorpay _razorpay;
 
@@ -246,6 +273,9 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
     amtController
       ..selection = TextSelection.fromPosition(
           TextPosition(offset: amtController.text.length));
+
+    // Fetch testimonials from API
+    fetchTestimonials();
   }
 
   @override
@@ -388,69 +418,159 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
                 // Testimonials Tab
                 Container(
                   padding: EdgeInsets.symmetric(vertical: 24.0),
-                  child: CarouselSlider(
-                    options: CarouselOptions(
-                      height: 320.0,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      enlargeFactor: 0.3,
-                      viewportFraction: 0.85,
-                      autoPlayInterval: Duration(seconds: 3),
-                    ),
-                    items: testimonials.map((testimonial) {
-                      return Builder(
-                        builder: (BuildContext context) {
-                          return Container(
-                            margin: EdgeInsets.symmetric(horizontal: 5.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage: AssetImage(testimonial.imageUrl),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  testimonial.name,
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                  child: isLoadingTestimonials
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            color: primaryColor,
+                          ),
+                        )
+                      : testimonialsError != null
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: Colors.grey[400],
                                   ),
-                                ),
-                                const SizedBox(height: 12),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 24),
-                                  child: Text(
-                                    testimonial.text,
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'Failed to load testimonials',
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
-                                      fontSize: 15,
-                                      height: 1.5,
-                                      color: Colors.black54,
+                                      fontSize: 16,
+                                      color: Colors.grey[600],
                                     ),
-                                    textAlign: TextAlign.center,
                                   ),
+                                  SizedBox(height: 8),
+                                  TextButton(
+                                    onPressed: fetchTestimonials,
+                                    child: Text(
+                                      'Retry',
+                                      style: TextStyle(
+                                        color: primaryColor,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : testimonials.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.rate_review_outlined,
+                                        size: 48,
+                                        color: Colors.grey[400],
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'No testimonials available',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 16,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : CarouselSlider(
+                                  options: CarouselOptions(
+                                    height: 320.0,
+                                    autoPlay: true,
+                                    enlargeCenterPage: true,
+                                    enlargeFactor: 0.3,
+                                    viewportFraction: 0.85,
+                                    autoPlayInterval: Duration(seconds: 3),
+                                  ),
+                                  items: testimonials.map((testimonial) {
+                                    return Builder(
+                                      builder: (BuildContext context) {
+                                        return Container(
+                                          margin: EdgeInsets.symmetric(horizontal: 5.0),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(16),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1),
+                                                blurRadius: 10,
+                                                offset: Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 50,
+                                                backgroundImage: testimonial.image != null
+                                                    ? NetworkImage('$imgPath/${testimonial.image}')
+                                                    : AssetImage('assets/images/logo.png') as ImageProvider,
+                                              ),
+                                              const SizedBox(height: 16),
+                                              Text(
+                                                testimonial.name ?? 'Anonymous',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                testimonial.date ?? '',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 12,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Padding(
+                                                padding: EdgeInsets.symmetric(horizontal: 24),
+                                                child: testimonial.description != null
+                                                    ? Container(
+                                                        constraints: BoxConstraints(
+                                                          maxHeight: 120, // Limit height to prevent overflow
+                                                        ),
+                                                        child: Text(
+                                                          stripHtmlTags(testimonial.description!),
+                                                          style: TextStyle(
+                                                            fontFamily: 'Poppins',
+                                                            fontSize: 15,
+                                                            height: 1.5,
+                                                            color: Colors.black54,
+                                                          ),
+                                                          textAlign: TextAlign.center,
+                                                          maxLines: 4,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      )
+                                                    : Text(
+                                                        'No description available',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Poppins',
+                                                          fontSize: 15,
+                                                          height: 1.5,
+                                                          color: Colors.black54,
+                                                        ),
+                                                        textAlign: TextAlign.center,
+                                                      ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  }).toList(),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    }).toList(),
-                  ),
                 ),
 
                 // How it Works Tab
@@ -540,19 +660,19 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
                             const SizedBox(height: 24),
                             _buildContactInfo(
                               Icons.email_outlined,
-                              'example@gmail.com',
+                              'support@spiresrecruit.com',
                             ),
                             _buildContactInfo(
                               Icons.phone_outlined,
-                              '+254 712 345 678',
+                              '+91 7753900944',
                             ),
                             _buildContactInfo(
                               Icons.language_outlined,
-                              'www.example.com',
+                              'www.spiresrecruit.com',
                             ),
                             _buildContactInfo(
                               Icons.location_on_outlined,
-                              '1234 Example Street, Nairobi',
+                              '93, Bajrang Colony, Jhansi, Uttar Pradesh 284128',
                             ),
                           ],
                         ),
@@ -684,15 +804,18 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: primaryColor, size: 24),
           SizedBox(width: 12),
-          Text(
-            text,
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 15,
-              color: Colors.black54,
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 15,
+                color: Colors.black54,
+              ),
             ),
           ),
         ],
@@ -700,19 +823,6 @@ class _ProgramDetailTestState extends State<ProgramDetailTest>
     );
   }
 }
-
-class Testimonial {
-  final String name;
-  final String text;
-  final String imageUrl;
-
-  Testimonial({
-    required this.text,
-    required this.imageUrl,
-    required this.name,
-  });
-}
-
 
 Widget _buildFAQ({required String question, required String answer}) {
   return Padding(
