@@ -203,7 +203,7 @@ class _ProgramsScreenState extends State<ProgramsScreen> {
                               ),
                               child: IconButton(
                                 onPressed: () {
-                                  Share.share('Check out this program: ${program.title}');
+                                  Share.share('Check out this program: ${program.title}\n\nDownload our app:https://play.google.com/store/apps/details?id=com.atc.spires_app');
                                 },
                                 icon: Icon(
                                   Icons.share_rounded,
@@ -416,7 +416,7 @@ class _ProgramCardState extends State<ProgramCard> {
                   TextButton(
                     onPressed: () {
                       widget.shareOnWhatsApp(
-                          "Check out this program: ${widget.title} - ${widget.description}");
+                          "Check out this program: ${widget.title} - ${widget.description}\n\nDownload our app: https://play.google.com/store/apps/details?id=com.atc.spires_app");
                     },
                     child: Row(
                       children: [

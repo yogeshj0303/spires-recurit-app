@@ -191,9 +191,10 @@ value: const SystemUiOverlayStyle(
       ),
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(65),
+          preferredSize: const Size.fromHeight(48),
           child: Container(
             child: AppBar(
+              automaticallyImplyLeading: false,
               backgroundColor: Colors.transparent,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -213,17 +214,17 @@ value: const SystemUiOverlayStyle(
                   const Text(
                     'SPIRES RECRUIT',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: Colors.white70,
                       letterSpacing: 2,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 2),
                   const Text(
                     'Membership Drive',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
@@ -237,7 +238,7 @@ value: const SystemUiOverlayStyle(
                   icon: const Icon(
                     Icons.info_outline,
                     color: Colors.white,
-                    size: 20,
+                    size: 18,
                   ),
                   onPressed: () {
                     showDialog(
@@ -252,7 +253,7 @@ value: const SystemUiOverlayStyle(
                               const Text(
                                 'Important Information',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -266,17 +267,17 @@ value: const SystemUiOverlayStyle(
                                 'Payment',
                                 'One-time registration fee of ₹199',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
                               _buildInfoItem(
                                 'Validity',
                                 'Membership valid for 1 year',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
                               _buildInfoItem(
                                 'Support',
                                 'Contact: +91 7753900602',
                               ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 10),
                               _buildInfoItem(
                                 'Note',
                                 'Profile picture is mandatory for ID card',
@@ -306,7 +307,7 @@ value: const SystemUiOverlayStyle(
                     );
                   },
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 2),
               ],
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(1),
@@ -338,25 +339,25 @@ value: const SystemUiOverlayStyle(
                     colors: [primaryColor, primaryColor.withOpacity(0.1)],
                   ),
                 ),
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'SPIRES RECRUIT',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 6),
                     Text(
                       'An organization dedicated to the career growth of students in internship and job searching, as well as skill improvement.',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 13,
                         color: Colors.white.withOpacity(0.9),
-                        height: 1.5,
+                        height: 1.4,
                       ),
                     ),
                   ],
@@ -505,51 +506,42 @@ value: const SystemUiOverlayStyle(
   Widget _buildPricingTable() {
     final plans = [
       {
-        'title': 'Free Plan',
-        'subtitle': 'Start your journey',
-        'price': '0',
-        'period': 'Forever free',
+        'title': 'Basic',
+        'subtitle': 'Essential features',
+        'price': '200',
+        'period': 'one-time',
         'features': {
-          'Search and Apply Jobs': true,
-          'Premium Job Access': false,
-          'Direct Company Calls': false,
-          'Premium ID Card': false,
-          'Workshop Access': false,
-          'Priority Support': false,
+          'Appear in general search results': true,
+          'Accept mobile applications': true,
+          'Manage candidates directly from your Indeed account': true,
         },
-        'buttonText': 'Current Plan',
+        'buttonText': 'Buy Now',
         'isPopular': false,
       },
       {
-        'title': 'Premium',
+        'title': 'Advanced',
         'subtitle': 'Most recommended',
         'price': '999',
-        'period': 'per year',
+        'period': 'one-time',
         'features': {
-          'Search and Apply Jobs': true,
-          'Premium Job Access': true,
-          'Direct Company Calls': true,
-          'Premium ID Card': true,
-          'Workshop Access': true,
-          'Priority Support': true,
+          'Appear in general search results': true,
+          'Accept mobile applications': true,
+          'Manage candidates directly from your Indeed account': true,
         },
-        'buttonText': 'Choose Premium',
+        'buttonText': 'Buy Now',
         'isPopular': true,
       },
       {
-        'title': 'Basic',
-        'subtitle': 'Essential features',
-        'price': '699',
-        'period': 'per year',
+        'title': 'Premium',
+        'subtitle': 'Complete solution',
+        'price': '1499',
+        'period': 'one-time',
         'features': {
-          'Search and Apply Jobs': true,
-          'Premium Job Access': true,
-          'Direct Company Calls': false,
-          'Premium ID Card': true,
-          'Workshop Access': false,
-          'Priority Support': true,
+          'Appear in general search results': true,
+          'Accept mobile applications': true,
+          'Manage candidates directly from your Indeed account': true,
         },
-        'buttonText': 'Choose Basic',
+        'buttonText': 'Buy Now',
         'isPopular': false,
       },
     ];
@@ -754,9 +746,7 @@ value: const SystemUiOverlayStyle(
                     height: 46,
                     margin: const EdgeInsets.only(top: 20),
                     child: ElevatedButton(
-                      onPressed: buttonText == 'Current Plan' 
-                          ? null 
-                          : () => startPhonePePayment(price, title),
+                      onPressed: () => startPhonePePayment(price, title),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isPopular ? primaryColor : Colors.white,
                         foregroundColor: isPopular ? Colors.white : primaryColor,
@@ -764,15 +754,11 @@ value: const SystemUiOverlayStyle(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
-                            color: buttonText == 'Current Plan' 
-                                ? Colors.grey.shade300
-                                : isPopular 
-                                    ? Colors.transparent 
-                                    : primaryColor,
+                            color: isPopular 
+                                ? Colors.transparent 
+                                : primaryColor,
                           ),
                         ),
-                        disabledBackgroundColor: Colors.grey.shade100,
-                        disabledForegroundColor: Colors.grey.shade500,
                       ),
                       child: Text(
                         buttonText,

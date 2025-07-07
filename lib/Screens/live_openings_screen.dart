@@ -91,9 +91,10 @@ class _LiveOpeningsScreenState extends State<LiveOpeningsScreen> {
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 80,
+          toolbarHeight: 56,
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -107,23 +108,24 @@ class _LiveOpeningsScreenState extends State<LiveOpeningsScreen> {
             ),
           ),
           title: Padding(
-            padding: const EdgeInsets.only(top: 8.0),
+            padding: const EdgeInsets.only(top: 2.0, bottom: 2.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'SPIRES RECRUIT',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: Colors.white.withOpacity(0.9),
-                    letterSpacing: 3,
+                    letterSpacing: 2,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 const Text(
                   'Live Openings',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
                   ),
@@ -135,7 +137,7 @@ class _LiveOpeningsScreenState extends State<LiveOpeningsScreen> {
           leading: widget.showLeading
               ? Container(
                   margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(100),
@@ -154,7 +156,7 @@ class _LiveOpeningsScreenState extends State<LiveOpeningsScreen> {
           actions: [
             // Refresh button to reshuffle jobs
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+              margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(100),

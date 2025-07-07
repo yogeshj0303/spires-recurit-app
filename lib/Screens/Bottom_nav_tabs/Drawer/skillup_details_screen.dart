@@ -3,6 +3,7 @@ import 'package:spires_app/Data/skillup_programs_data.dart';
 import 'package:spires_app/Screens/Bottom_nav_tabs/program_detail_test.dart';
 import '../../../Constants/exports.dart';
 import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 
 class SkillUpDetailsScreen extends StatefulWidget {
   const SkillUpDetailsScreen({super.key});
@@ -16,90 +17,31 @@ class _SkillUpDetailsScreenState extends State<SkillUpDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.white,
-        title: const Text(
-          "SkillUp 1.0 Programs",
-          style: TextStyle(
-            color: Colors.black87,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            letterSpacing: -0.5,
-          ),
-        ),
-        centerTitle: true,
-        leading: IconButton(
-          onPressed: () => Get.back(),
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.black87,
-            size: 18,
-          ),
-        ),
-      ),
       body: Column(
         children: [
-          // Header section
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // Custom back button
+          Padding(
+            padding: const EdgeInsets.only(top: 16, left: 8, right: 8, bottom: 0),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Image.asset(
-                        'assets/icons/1.png',
-                        width: 24,
-                        height: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "SkillUp 1.0",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Choose from 6 specialized programs",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                IconButton(
+                  onPressed: () => Get.back(),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.black87,
+                    size: 18,
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(width: 8),
+                const Text(
+                  "SkillUp 1.0 Programs",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.5,
+                  ),
+                ),
               ],
             ),
           ),

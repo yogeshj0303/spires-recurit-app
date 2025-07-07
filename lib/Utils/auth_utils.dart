@@ -54,7 +54,7 @@ class AuthUtils {
         MyController.veriPhone = '';
         MyController.veriEmail = '';
         MyController.subscribed = '';
-        Get.offAll(() => MainScreen());
+        Get.offAll(() => LoginScreen());
         c.isRegLoading.value = false;
       } else {
         Fluttertoast.showToast(msg: data['message']);

@@ -9,6 +9,7 @@ import '../Model/internship_model.dart';
 import '../Model/notification_model.dart';
 import '../Model/pref_model.dart';
 import '../Model/show_plan_model.dart';
+import '../Model/user_subscription_plans_model.dart';
 
 class HomeUtils {
   static final c = Get.put(MyController());
@@ -207,5 +208,18 @@ class HomeUtils {
           msg: '${response.statusCode} ${response.reasonPhrase}');
     }
     throw Exception('Unable to load data');
+  }
+
+  static Future<UserSubscriptionPlansModel> getUserSubscriptionPlans(int userId) async {
+    final url = '${apiUrl}user-plans-subscription?user_id=$userId';
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return UserSubscriptionPlansModel.fromJson(data);
+    } else {
+      Fluttertoast.showToast(
+          msg: '${response.statusCode} ${response.reasonPhrase}');
+    }
+    throw Exception('Unable to load user subscription plans');
   }
 }

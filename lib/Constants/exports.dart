@@ -82,6 +82,7 @@ export 'package:spires_app/Screens/Resumes/Widgets/education_cv.dart';
 export 'package:path_provider/path_provider.dart';
 export 'package:permission_handler/permission_handler.dart';
 export 'package:screenshot/screenshot.dart';
+export 'package:spires_app/Model/user_subscription_plans_model.dart';
 
 //external
 export 'package:flutter_svg/flutter_svg.dart';

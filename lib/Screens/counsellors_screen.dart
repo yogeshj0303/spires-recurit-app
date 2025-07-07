@@ -938,7 +938,7 @@ class _CounsellorsScreenState extends State<CounsellorsScreen> {
       height: 32, // Fixed compact height
       child: ElevatedButton.icon(
         onPressed: () async {
-          final url = "https://wa.me/+91$contactNumber";
+          final url = "https://wa.me/+917753900944";
           try {
             if (await canLaunch(url)) {
               await launch(url);

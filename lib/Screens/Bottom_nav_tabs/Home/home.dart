@@ -1321,7 +1321,7 @@ class _HomeState extends State<Home> {
                               color: Colors.transparent,
                               child: InkWell(
                                 onTap: () async {
-                                  final url = "https://wa.me/+91$contactNumber";
+                                  final url = "https://wa.me/+917753900944";
                                   try {
                                     if (await canLaunch(url)) {
                                       await launch(url);
