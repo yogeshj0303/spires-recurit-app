@@ -6,6 +6,7 @@ import 'package:spires_app/Models/question_model.dart';
 import 'package:spires_app/Models/quiz_model.dart';
 import 'package:spires_app/Models/quiz_result_model.dart';
 import 'package:spires_app/Models/quiz_submission_model.dart';
+import 'package:spires_app/Model/certificate_model.dart';
 
 class ApiService {
   static const int maxRetries = 3;
@@ -445,6 +446,27 @@ class ApiService {
       print('Olympiad session cleared successfully');
     } catch (e) {
       print('Error clearing olympiad session: $e');
+    }
+  }
+
+  static Future<CertificateModel> fetchUserCertificates(int userId) async {
+    try {
+      final response = await makeRequest(
+        'https://www.spiresrecruit.com/api/users-certificates?user_id=$userId',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return CertificateModel.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to load certificates: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch certificates: $e');
     }
   }
 }

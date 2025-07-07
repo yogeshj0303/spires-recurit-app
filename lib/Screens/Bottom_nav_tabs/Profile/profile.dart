@@ -2,6 +2,7 @@ import 'package:spires_app/Screens/quiz/quiz_results_screen.dart';
 
 import '../../../Constants/exports.dart';
 import 'Profile Card/subscription_plans_card.dart';
+import 'Certificates/certificates.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -151,6 +152,8 @@ class _ProfileScreenState extends State<ProfileScreen>
           Education(),
           Skills(),
           CvCard(),
+          const SizedBox(height: defaultPadding),
+          const Certificates(),
           const SizedBox(height: defaultPadding),
           const SubscriptionPlansCard(),
           const SizedBox(height: defaultPadding),
